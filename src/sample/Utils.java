@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Utils {
 
@@ -13,6 +15,7 @@ public class Utils {
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line;
         int index = 0;
+        int depotIndex = 0;
 
         int maxVehicles = 0; // m: maximum number of vehicles available in each depot
         int totalCustomers = 0; // n: total number of customers
@@ -21,14 +24,8 @@ public class Utils {
         int maxDistance = 0; // D: maximum duration of a route
         int maxLoad = 0; // Q: allowed maximum load of a vehicle
 
-        int customerNumber = 0; // i: customer number
-        int customerX = 0;
-        int customerY = 0;
-        int customerTime = 0; // d: necessary service duration required for this customer
-        int customerDemand = 0; // q: demand for this customer
-
-        int depotX = 0;
-        int depotY = 0;
+        List<Customer> customerList = new ArrayList<>();
+        List<Depot> depotList = new ArrayList<>();
 
         while ((line = br.readLine()) != null) {
             String[] stringLineArr = line.trim().split("\\s+");
@@ -41,24 +38,24 @@ public class Utils {
                 depotsCount = lineArr[2];
             } else if (index <= depotsCount) { // The next t lines contain, the following information: D Q
                 System.out.println("Depot info");
-                maxDistance = lineArr[0];
-                maxLoad = lineArr[1];
-            } else if (index <= (depotsCount + totalCustomers)) {
+                Depot depot = new Depot(lineArr[0], lineArr[1], maxVehicles);
+                depotList.add(depot);
+            } else if (index <= depotsCount + totalCustomers) { // id, x, y, d, q
                 System.out.println("Customer info");
-                customerNumber = lineArr[0];
-                customerX = lineArr[1];
-                customerY = lineArr[2];
-                customerTime = lineArr[3];
-                customerDemand = lineArr[4];
-            } else {
+                Customer customer = new Customer(lineArr[0], lineArr[1], lineArr[2], lineArr[3], lineArr[4]);
+                customerList.add(customer);
+            } else if (depotIndex <= depotsCount) { // id, x, y
                 System.out.println("Depot location");
-                depotX = lineArr[1];
-                depotY = lineArr[2];
+                depotList.get(depotIndex).setCoordinates(lineArr[1], lineArr[2]);
+                depotIndex++;
+            } else {
+                System.out.println("Oh no, I shouldn't be here!");
             }
 
             System.out.println(line);
             index++;
         }
 
+        // TODO: Return Object lists
     }
 }
