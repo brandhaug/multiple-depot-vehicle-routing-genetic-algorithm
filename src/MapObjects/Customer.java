@@ -1,17 +1,28 @@
-package sample;
+package MapObjects;
 
-public class Customer {
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+
+public class Customer extends MapObject {
     private int id; // i: customer number
-    private int x;
-    private int y;
     private int serviceDuration; // d: necessary service duration required for this customer
     private int loadDemand; // q: demand for this customer
 
     public Customer(int id, int x, int y, int serviceDuration, int loadDemand) {
+        super(x, y);
         this.id = id;
-        this.x = x;
-        this.y = y;
         this.serviceDuration = serviceDuration;
         this.loadDemand = loadDemand;
+    }
+
+    @Override
+    public void tick() {
+
+    }
+
+    @Override
+    public void render(GraphicsContext gc) {
+        gc.setFill(Color.GREEN);
+        gc.fillOval(getPixelX(), getPixelY(), 10, 10);
     }
 }
