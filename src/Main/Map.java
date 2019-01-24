@@ -34,7 +34,8 @@ public class Map {
 
 
     public void parseMapFile(String fileName) throws IOException {
-        File file = new File("./assets/maps/" + fileName);
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource("maps/" + fileName).getFile());
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line;
         int index = 0;
@@ -130,5 +131,17 @@ public class Map {
         for (Vehicle vehicle : vehicles) {
             vehicle.render(gc);
         }
+    }
+
+    public int getDepotsSize() {
+        return depots.size();
+    }
+
+    public int getVehiclesSize() {
+        return vehicles.size();
+    }
+
+    public int getCustomersSize() {
+        return customers.size();
     }
 }

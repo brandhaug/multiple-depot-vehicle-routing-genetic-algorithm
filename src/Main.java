@@ -8,7 +8,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("Main/View.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("View.fxml"));
         root.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
         primaryStage.setTitle("MDVRP - GA");
         primaryStage.setScene(new Scene(root));

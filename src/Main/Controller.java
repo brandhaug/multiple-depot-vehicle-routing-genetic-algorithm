@@ -16,7 +16,8 @@ public class Controller {
     public final static int CANVAS_WIDTH = 500;
     public final static int CANVAS_HEIGHT = 500;
     public final static int CANVAS_MARGIN = 10;
-    private String fileName = "p02";
+
+    private String fileName = "p16";
 
     @FXML
     private Canvas canvas;
@@ -25,10 +26,19 @@ public class Controller {
     private Button startButton;
 
     @FXML
-    private VBox vBox;
+    private Label mapLabel;
 
     @FXML
-    private Label mapLabel;
+    private Label timeLabel;
+
+    @FXML
+    public Label depotsLabel;
+
+    @FXML
+    public Label vehiclesLabel;
+
+    @FXML
+    public Label customersLabel;
 
     private Map map;
 
@@ -52,8 +62,8 @@ public class Controller {
      */
     private void tick(long startNanoTime, long currentNanoTime) {
         double time = (currentNanoTime - startNanoTime) / 1000000000.0;
+        timeLabel.setText("Time: " + (int) time);
         map.tick();
-        render();
     }
 
 
@@ -74,17 +84,22 @@ public class Controller {
         try {
             map = new Map(fileName);
             mapLabel.setText("Map: " + fileName);
+            depotsLabel.setText("Depots: " + map.getDepotsSize());
+            vehiclesLabel.setText("Vehicles: " + map.getVehiclesSize());
+            customersLabel.setText("Customers: " + map.getCustomersSize());
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         gc = canvas.getGraphicsContext2D();
+        render();
         final long startNanoTime = System.nanoTime();
 
         new AnimationTimer() {
             public void handle(long currentNanoTime) {
                 if (!paused) {
                     tick(startNanoTime, currentNanoTime);
+                    render();
                 }
             }
         }.start();
