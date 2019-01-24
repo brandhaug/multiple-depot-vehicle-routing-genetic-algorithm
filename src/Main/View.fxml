@@ -10,7 +10,7 @@
       <Canvas fx:id="canvas" height="500.0" width="500.0" />
       <VBox alignment="CENTER" layoutX="500.0" prefHeight="500.0" prefWidth="150.0" styleClass="vbox">
          <children>
-            <Button fx:id="startBitton" mnemonicParsing="false" onAction="#start" text="Start" />
+            <Button fx:id="startButton" mnemonicParsing="false" onAction="#start" text="Start" styleClass="button"/>
          </children>
       </VBox>
    </children>

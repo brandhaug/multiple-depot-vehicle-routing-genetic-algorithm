@@ -26,11 +26,11 @@ public abstract class MapObject {
     public abstract void render(GraphicsContext gc);
 
     public int getPixelX() {
-        return x * Map.scaleX;
+        return (int) ((x - Map.minimumX) * Map.scaleX);
     }
 
     public int getPixelY() {
-        return y * Map.scaleY;
+        return (int) ((y - Map.minimumY) * Map.scaleY);
     }
 
     public void setCoordinates(int x, int y) {

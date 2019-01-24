@@ -19,8 +19,10 @@ public class Map {
     private List<Vehicle> vehicles;
     private int maximumX;
     private int maximumY;
-    public static int scaleX;
-    public static int scaleY;
+    public static int minimumX;
+    public static int minimumY;
+    public static double scaleX;
+    public static double scaleY;
 
 
     public Map(String fileName) throws IOException {
@@ -63,14 +65,13 @@ public class Map {
                 System.out.println("Customer info");
                 Customer customer = new Customer(lineArr[0], lineArr[1], lineArr[2], lineArr[3], lineArr[4]);
                 customers.add(customer);
-                maximumX = Math.max(lineArr[1], maximumX);
-                maximumY = Math.max(lineArr[2], maximumY);
+                checkExtremeValues(lineArr[1], lineArr[2]);
+
             } else if (depotIndex <= depotsCount) { // id, x, y
                 System.out.println("Depot location");
                 Depot depot = depots.get(depotIndex);
                 depot.setCoordinates(lineArr[1], lineArr[2]);
-                maximumX = Math.max(lineArr[1], maximumX);
-                maximumY = Math.max(lineArr[2], maximumY);
+                checkExtremeValues(lineArr[1], lineArr[2]);
 
                 for (int i = 0; i < maxVehicles; i++) {
                     Vehicle vehicle = new Vehicle(depot);
@@ -86,8 +87,17 @@ public class Map {
             index++;
         }
 
-        scaleX = (Controller.CANVAS_WIDTH - Controller.CANVAS_MARGIN) / maximumX;
-        scaleY = (Controller.CANVAS_HEIGHT - Controller.CANVAS_MARGIN)  / maximumY;
+        // TODO: Margin on draw, so all points are shown on canvas
+        // Maybe sub from max and add to min
+        scaleX = (double) (Controller.CANVAS_WIDTH) / (maximumX - minimumX);
+        scaleY = (double) (Controller.CANVAS_HEIGHT)  / (maximumY - minimumY);
+    }
+
+    private void checkExtremeValues(int x, int y) {
+        maximumX = Math.max(x, maximumX);
+        maximumY = Math.max(y, maximumY);
+        minimumX = Math.min(x, minimumX);
+        minimumX = Math.min(y, minimumY);
     }
 
     public void tick() {
