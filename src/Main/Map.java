@@ -17,10 +17,10 @@ public class Map {
     private List<Depot> depots;
     private List<Customer> customers;
     private List<Vehicle> vehicles;
-    private int maximumX;
-    private int maximumY;
-    public static int minimumX;
-    public static int minimumY;
+    public static int maximumX = -Integer.MAX_VALUE;
+    private static int maximumY = -Integer.MAX_VALUE;
+    public static int minimumX = Integer.MAX_VALUE;
+    public static int minimumY = Integer.MAX_VALUE;
     public static double scaleX;
     public static double scaleY;
 
@@ -87,17 +87,21 @@ public class Map {
             index++;
         }
 
-        // TODO: Margin on draw, so all points are shown on canvas
-        // Maybe sub from max and add to min
-        scaleX = (double) (Controller.CANVAS_WIDTH) / (maximumX - minimumX);
-        scaleY = (double) (Controller.CANVAS_HEIGHT)  / (maximumY - minimumY);
+        scaleX = calculcateScaling(maximumX, minimumX, Controller.CANVAS_WIDTH);
+        scaleY = calculcateScaling(maximumY, minimumY, Controller.CANVAS_HEIGHT);
     }
 
     private void checkExtremeValues(int x, int y) {
         maximumX = Math.max(x, maximumX);
         maximumY = Math.max(y, maximumY);
         minimumX = Math.min(x, minimumX);
-        minimumX = Math.min(y, minimumY);
+        minimumY = Math.min(y, minimumY);
+    }
+
+    private double calculcateScaling(int maximum, int minimum, int canvasSize) {
+        int variance = maximum - minimum;
+        double scaleMargin = (double) Controller.CANVAS_MARGIN / variance;
+        return (double) (canvasSize / variance) - scaleMargin;
     }
 
     public void tick() {

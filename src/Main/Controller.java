@@ -13,7 +13,7 @@ public class Controller {
 
     public final static int CANVAS_WIDTH = 500;
     public final static int CANVAS_HEIGHT = 500;
-    public final static int CANVAS_MARGIN = 64;
+    public final static int CANVAS_MARGIN = 10;
 
     @FXML
     private Canvas canvas;
@@ -56,7 +56,7 @@ public class Controller {
     @FXML
     public void initialize() {
         try {
-            map = new Map("p10");
+            map = new Map("p16");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -72,4 +72,6 @@ public class Controller {
             }
         }.start();
     }
+
+
 }
