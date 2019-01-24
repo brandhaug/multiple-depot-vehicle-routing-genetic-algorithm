@@ -22,7 +22,7 @@ public class Customer extends MapObject {
 
     @Override
     public void render(GraphicsContext gc) {
-        gc.setFill(Color.GREEN);
-        gc.fillOval(getPixelX(), getPixelY(), 10, 10);
+        gc.setFill(Color.GRAY);
+        gc.fillOval(getPixelX(), getPixelY(), 5, 5);
     }
 }
