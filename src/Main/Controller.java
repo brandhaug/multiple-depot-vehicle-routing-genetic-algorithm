@@ -6,6 +6,8 @@ import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 
@@ -14,12 +16,19 @@ public class Controller {
     public final static int CANVAS_WIDTH = 500;
     public final static int CANVAS_HEIGHT = 500;
     public final static int CANVAS_MARGIN = 10;
+    private String fileName = "p02";
 
     @FXML
     private Canvas canvas;
 
     @FXML
     private Button startButton;
+
+    @FXML
+    private VBox vBox;
+
+    @FXML
+    private Label mapLabel;
 
     private Map map;
 
@@ -49,14 +58,22 @@ public class Controller {
 
 
     @FXML
-    public void start(ActionEvent actionEvent) {
-        paused = false;
+    public void togglePaused(ActionEvent actionEvent) {
+        paused = !paused;
+
+        if (paused) {
+            startButton.setText("Start");
+        } else {
+            startButton.setText("Pause");
+        }
+
     }
 
     @FXML
     public void initialize() {
         try {
-            map = new Map("p16");
+            map = new Map(fileName);
+            mapLabel.setText("Map: " + fileName);
         } catch (IOException e) {
             e.printStackTrace();
         }
