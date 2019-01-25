@@ -13,10 +13,6 @@ import java.io.IOException;
 
 public class Controller {
 
-    public final static int CANVAS_WIDTH = 500;
-    public final static int CANVAS_HEIGHT = 500;
-    public final static int CANVAS_MARGIN = 10;
-
     private String fileName = "p01";
 
     @FXML
@@ -32,18 +28,31 @@ public class Controller {
     private Label timeLabel;
 
     @FXML
-    public Label depotsLabel;
+    private Label depotsLabel;
 
     @FXML
-    public Label vehiclesLabel;
+    private Label vehiclesLabel;
 
     @FXML
-    public Label customersLabel;
+    private Label customersLabel;
+
+    @FXML
+    private Label generationLabel;
+
+    @FXML
+    private Label fitnessLabel;
 
     private Map map;
 
     // Canvas
+    public final static int CANVAS_WIDTH = 500;
+    public final static int CANVAS_HEIGHT = 500;
+    public final static int CANVAS_MARGIN = 10;
     private GraphicsContext gc;
+
+    //Genetic Algorithm
+    private int generation = 0;
+    private int fitness = 0;
 
     // States
     private boolean initialized = false;
@@ -62,6 +71,7 @@ public class Controller {
      */
     private void tick(long startNanoTime, long currentNanoTime) {
         double time = (currentNanoTime - startNanoTime) / 1000000000.0;
+        generationLabel.setText("Generation: " + ++generation);
         timeLabel.setText("Time: " + (int) time);
         map.tick();
     }
@@ -95,6 +105,7 @@ public class Controller {
         render();
         final long startNanoTime = System.nanoTime();
 
+        //TODO: Mulig det er bedre å kjøre tick i en egen loop, også ha render i en "Timer" med delay
         new AnimationTimer() {
             public void handle(long currentNanoTime) {
                 if (!paused) {

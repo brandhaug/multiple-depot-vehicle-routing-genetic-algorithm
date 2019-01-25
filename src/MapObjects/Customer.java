@@ -15,6 +15,16 @@ public class Customer extends MapObject {
         this.loadDemand = loadDemand;
     }
 
+    /**
+     * Calculates euclidean distance between two Customers
+     * TODO: We may need this function for both Customers and Depots
+     * @param otherCustomer
+     * @return
+     */
+    double distance(Customer otherCustomer) {
+        return Math.sqrt(Math.pow(getX() - otherCustomer.getX(), 2) + Math.pow(getY() - otherCustomer.getY(), 2));
+    }
+
     @Override
     public void tick() {
 

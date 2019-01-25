@@ -17,6 +17,8 @@
             <Label fx:id="depotsLabel" text="Depots: 0" textAlignment="CENTER" styleClass="label" />
             <Label fx:id="vehiclesLabel" text="Vehicles: 0" textAlignment="CENTER" styleClass="label" />
             <Label fx:id="customersLabel" text="Customers: 0" textAlignment="CENTER" styleClass="label" />
+            <Label fx:id="generationLabel" text="Generation: 0" textAlignment="CENTER" styleClass="label" />
+            <Label fx:id="fitnessLabel" text="Fitness: 0" textAlignment="CENTER" styleClass="label" />
             <Button fx:id="startButton" mnemonicParsing="false" onAction="#togglePaused" styleClass="button" text="Start" />
          </children>
       </VBox>
