@@ -35,7 +35,7 @@ public class Map {
 
     public void parseMapFile(String fileName) throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource("maps/" + fileName).getFile());
+        File file = new File(classLoader.getResource("resources/maps/" + fileName).getFile());
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line;
         int index = 0;

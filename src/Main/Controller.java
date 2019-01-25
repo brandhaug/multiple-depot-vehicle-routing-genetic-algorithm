@@ -17,7 +17,7 @@ public class Controller {
     public final static int CANVAS_HEIGHT = 500;
     public final static int CANVAS_MARGIN = 10;
 
-    private String fileName = "p16";
+    private String fileName = "p01";
 
     @FXML
     private Canvas canvas;
