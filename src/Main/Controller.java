@@ -58,6 +58,9 @@ public class Controller {
     private boolean initialized = false;
     private boolean paused = true;
 
+    // Settings
+    public static boolean verbose = true;
+
     private void render() {
         gc.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         map.render(gc);

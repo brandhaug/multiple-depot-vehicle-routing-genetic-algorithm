@@ -54,28 +54,36 @@ public class Map {
             int[] lineArr = Arrays.stream(stringLineArr).mapToInt(Integer::parseInt).toArray();
 
             if (index == 0) { // First line contains the following information: m n t
-                System.out.println("Map info");
+                if (Controller.verbose) {
+                    System.out.println("Map info: " + line);
+                }
                 maxVehicles = lineArr[0];
                 totalCustomers = lineArr[1];
                 depotsCount = lineArr[2];
             } else if (index <= depotsCount) { // The next t lines contain, the following information: D Q
-                System.out.println("Depot info");
+                if (Controller.verbose) {
+                    System.out.println("Depot info: " + line);
+                }
                 Depot depot = new Depot(lineArr[0], lineArr[1], maxVehicles);
                 depots.add(depot);
             } else if (index <= depotsCount + totalCustomers) { // id, x, y, d, q
-                System.out.println("Customer info");
+                if (Controller.verbose) {
+                    System.out.println("Customer info: " + line);
+                }
                 Customer customer = new Customer(lineArr[0], lineArr[1], lineArr[2], lineArr[3], lineArr[4]);
                 customers.add(customer);
                 checkExtremeValues(lineArr[1], lineArr[2]);
 
             } else if (depotIndex <= depotsCount) { // id, x, y
-                System.out.println("Depot location");
+                if (Controller.verbose) {
+                    System.out.println("Depot location: " + line);
+                }
                 Depot depot = depots.get(depotIndex);
                 depot.setCoordinates(lineArr[1], lineArr[2]);
                 checkExtremeValues(lineArr[1], lineArr[2]);
 
                 for (int i = 0; i < maxVehicles; i++) {
-                    Vehicle vehicle = new Vehicle(depot);
+                    Vehicle vehicle = new Vehicle(depot, customers);
                     vehicles.add(vehicle); // TODO: Add maxDistance and maxLoad
                 }
 
@@ -83,8 +91,6 @@ public class Map {
             } else {
                 System.out.println("Oh no, I shouldn't be here!");
             }
-
-            System.out.println(line);
             index++;
         }
 
