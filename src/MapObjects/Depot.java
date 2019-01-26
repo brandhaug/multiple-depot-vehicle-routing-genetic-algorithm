@@ -2,6 +2,7 @@ package MapObjects;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
 public class Depot extends MapObject {
     private int maxDistance; // D: maximum duration of a route
@@ -59,5 +60,9 @@ public class Depot extends MapObject {
 
     public void setMaxCars(int maxCars) {
         this.maxCars = maxCars;
+    }
+
+    public Paint getColor() {
+        return color;
     }
 }

@@ -1,5 +1,6 @@
 package Main;
 
+import GeneticAlgorithm.GeneticAlgorithm;
 import MapObjects.Customer;
 import MapObjects.Depot;
 import MapObjects.Vehicle;
@@ -24,12 +25,15 @@ public class Map {
     public static double scaleX;
     public static double scaleY;
 
+    private GeneticAlgorithm ga;
 
     public Map(String fileName) throws IOException {
         depots = new ArrayList<>();
         customers = new ArrayList<>();
         vehicles = new ArrayList<>();
         parseMapFile(fileName);
+        ga = new GeneticAlgorithm(this.vehicles);
+        ga.generateInitialPopulation();
     }
 
 
@@ -112,7 +116,7 @@ public class Map {
     }
 
     public void tick() {
-
+        ga.tick(vehicles);
     }
 
     public void render(GraphicsContext gc) {
