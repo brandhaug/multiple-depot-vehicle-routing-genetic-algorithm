@@ -1,10 +1,10 @@
-package Main;
+package Map;
 
-import GeneticAlgorithm.GeneticAlgorithm;
+import Main.Controller;
+import Utils.Utils;
 import MapObjects.Customer;
 import MapObjects.Depot;
 import MapObjects.Vehicle;
-import javafx.scene.canvas.GraphicsContext;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,30 +14,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Map {
-    private List<Depot> depots;
-    private List<Customer> customers;
-    private List<Vehicle> vehicles;
-    public static int maximumX = -Integer.MAX_VALUE;
-    private static int maximumY = -Integer.MAX_VALUE;
-    public static int minimumX = Integer.MAX_VALUE;
-    public static int minimumY = Integer.MAX_VALUE;
-    public static double scaleX;
-    public static double scaleY;
+/**
+ * Parses map file
+ */
+public class MapParser {
+    private List<Depot> depots = new ArrayList<>();
+    private List<Customer> customers = new ArrayList<>();
+    private List<Vehicle> vehicles = new ArrayList<>();
 
-    private GeneticAlgorithm ga;
-
-    public Map(String fileName) throws IOException {
-        depots = new ArrayList<>();
-        customers = new ArrayList<>();
-        vehicles = new ArrayList<>();
+    public MapParser(String fileName) throws IOException {
         parseMapFile(fileName);
-        ga = new GeneticAlgorithm(this.vehicles);
-        ga.generateInitialPopulation();
+        assignDepotToCustomers();
     }
 
 
-    public void parseMapFile(String fileName) throws IOException {
+    private void parseMapFile(String fileName) throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource("resources/maps/" + fileName).getFile());
         BufferedReader br = new BufferedReader(new FileReader(file));
@@ -52,7 +43,9 @@ public class Map {
         int maxDistance = 0; // D: maximum duration of a route
         int maxLoad = 0; // Q: allowed maximum load of a vehicle
 
-
+        if (Controller.verbose) {
+            System.out.println("========= Parsing map file =========");
+        }
         while ((line = br.readLine()) != null) {
             String[] stringLineArr = line.trim().split("\\s+");
             int[] lineArr = Arrays.stream(stringLineArr).mapToInt(Integer::parseInt).toArray();
@@ -76,7 +69,7 @@ public class Map {
                 }
                 Customer customer = new Customer(lineArr[0], lineArr[1], lineArr[2], lineArr[3], lineArr[4]);
                 customers.add(customer);
-                checkExtremeValues(lineArr[1], lineArr[2]);
+                setExtremeValues(lineArr[1], lineArr[2]);
 
             } else if (depotIndex <= depotsCount) { // id, x, y
                 if (Controller.verbose) {
@@ -84,11 +77,12 @@ public class Map {
                 }
                 Depot depot = depots.get(depotIndex);
                 depot.setCoordinates(lineArr[1], lineArr[2]);
-                checkExtremeValues(lineArr[1], lineArr[2]);
+                setExtremeValues(lineArr[1], lineArr[2]);
 
                 for (int i = 0; i < maxVehicles; i++) {
-                    Vehicle vehicle = new Vehicle(depot, customers);
+                    Vehicle vehicle = new Vehicle(depot, null);
                     vehicles.add(vehicle); // TODO: Add maxDistance and maxLoad
+                    depot.addVehicle(vehicle);
                 }
 
                 depotIndex++;
@@ -98,15 +92,41 @@ public class Map {
             index++;
         }
 
-        scaleX = calculcateScaling(maximumX, minimumX, Controller.CANVAS_WIDTH);
-        scaleY = calculcateScaling(maximumY, minimumY, Controller.CANVAS_HEIGHT);
+        Map.scaleX = calculcateScaling(Map.maximumX, Map.minimumX, Controller.CANVAS_WIDTH);
+        Map.scaleY = calculcateScaling(Map.maximumY, Map.minimumY, Controller.CANVAS_HEIGHT);
+
+        if (Controller.verbose) {
+            System.out.println("minimumX: " + Map.minimumX);
+            System.out.println("maximumX: " + Map.maximumX);
+            System.out.println("scaleX: " + Map.scaleX);
+            System.out.println("minimumY: " + Map.minimumY);
+            System.out.println("maximumY: " + Map.maximumY);
+            System.out.println("scaleY: " + Map.scaleY);
+            System.out.println("========= END Parsing map file =========");
+        }
     }
 
-    private void checkExtremeValues(int x, int y) {
-        maximumX = Math.max(x, maximumX);
-        maximumY = Math.max(y, maximumY);
-        minimumX = Math.min(x, minimumX);
-        minimumY = Math.min(y, minimumY);
+    private void setExtremeValues(int x, int y) {
+        Map.maximumX = Math.max(x, Map.maximumX);
+        Map.maximumY = Math.max(y, Map.maximumY);
+        Map.minimumX = Math.min(x, Map.minimumX);
+        Map.minimumY = Math.min(y, Map.minimumY);
+    }
+
+    private void assignDepotToCustomers() {
+        Depot nearestDepot = null;
+        for (Customer customer : customers) {
+            double minimumDistance = Double.MAX_VALUE;
+            for (Depot depot : depots) {
+                double distance = Utils.euclideanDistance(customer.getX(), depot.getX(), customer.getY(), depot.getY());
+
+                if (distance < minimumDistance) {
+                    minimumDistance = distance;
+                    nearestDepot = depot;
+                }
+            }
+            nearestDepot.addCustomer(customer);
+        }
     }
 
     private double calculcateScaling(int maximum, int minimum, int canvasSize) {
@@ -115,43 +135,15 @@ public class Map {
         return (double) (canvasSize / variance) - scaleMargin;
     }
 
-    public void tick() {
-        ga.tick(vehicles);
+    public List<Depot> getDepots() {
+        return depots;
     }
 
-    public void render(GraphicsContext gc) {
-        renderDepots(gc);
-        renderCustomers(gc);
-        renderVehicles(gc);
+    public List<Customer> getCustomers() {
+        return customers;
     }
 
-    private void renderDepots(GraphicsContext gc) {
-        for (Depot depot : depots) {
-            depot.render(gc);
-        }
-    }
-
-    private void renderCustomers(GraphicsContext gc) {
-        for (Customer customer : customers) {
-            customer.render(gc);
-        }
-    }
-
-    private void renderVehicles(GraphicsContext gc) {
-        for (Vehicle vehicle : vehicles) {
-            vehicle.render(gc);
-        }
-    }
-
-    public int getDepotsSize() {
-        return depots.size();
-    }
-
-    public int getVehiclesSize() {
-        return vehicles.size();
-    }
-
-    public int getCustomersSize() {
-        return customers.size();
+    public List<Vehicle> getVehicles() {
+        return vehicles;
     }
 }

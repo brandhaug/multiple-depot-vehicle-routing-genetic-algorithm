@@ -1,10 +1,10 @@
 package MapObjects;
 
-import Main.Utils;
+import Main.Controller;
+import Utils.Utils;
 import javafx.scene.canvas.GraphicsContext;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -13,16 +13,18 @@ import java.util.stream.IntStream;
 public class Vehicle extends MapObject {
     private Depot depot;
     private boolean checkedIn;
-    private List<Customer> chromosome;
+    private List<Customer> route = new ArrayList<>();
 
     // TODO: 1. Implement
     // TODO: 2. Evolve over generations
     private int numberOfSplits;
 
-    public Vehicle(Depot depot, List<Customer> chromosome) {
+    public Vehicle(Depot depot, List<Customer> route) {
         super(depot.getX(), depot.getY());
         this.depot = depot;
-        this.chromosome = chromosome;
+        if (route != null) {
+            this.route = route;
+        }
     }
 
     @Override
@@ -31,32 +33,38 @@ public class Vehicle extends MapObject {
     }
 
     /**
-     * Renders the chromosome path
+     * Renders the route path
+     *
      * @param gc
      */
     @Override
     public void render(GraphicsContext gc) {
-        gc.setStroke(this.depot.getColor());
+        if (this.route.size() > 0) {
+            gc.setStroke(this.depot.getColor());
+            gc.strokeLine(depot.getPixelX(), depot.getPixelY(), this.route.get(0).getPixelX(), this.route.get(0).getPixelY());
 
-        for (int i = 0; i < this.chromosome.size() - 1; i++) {
-            Customer gene = this.chromosome.get(i);
-            Customer nextGene = this.chromosome.get(i+1);
+            for (int i = 0; i < this.route.size() - 1; i++) {
+                Customer gene = this.route.get(i);
+                Customer nextGene = this.route.get(i + 1);
 
-            gc.strokeLine(gene.getPixelX(), gene.getPixelY(), nextGene.getPixelX(), nextGene.getPixelY());
+                gc.strokeLine(gene.getPixelX(), gene.getPixelY(), nextGene.getPixelX(), nextGene.getPixelY());
+            }
+
+            gc.strokeLine(this.route.get(this.route.size() - 1).getPixelX(), this.route.get(this.route.size() - 1).getPixelY(), this.depot.getPixelX(), this.depot.getPixelY());
         }
     }
 
-    public List<Customer> getChromosome() {
-        return chromosome;
+    public List<Customer> getRoute() {
+        return route;
     }
 
     /**
-     * Shuffles chromosome randomly
+     * Shuffles route randomly
      *
-     * @param chromosome
+     * @param route
      */
-    private void setChromosome(List<Customer> chromosome) {
-        this.chromosome = chromosome;
+    private void setRoute(List<Customer> route) {
+        this.route = route;
     }
 
     public Depot getDepot() {
@@ -68,49 +76,50 @@ public class Vehicle extends MapObject {
     }
 
     /**
-     * Shuffles customer list to a random chromosome
-     */
-    public void generateInitialChromosome() {
-        Collections.shuffle(this.chromosome);
-    }
-
-    /**
-     * Calculates total distance for this.chromosome
-     * @return
-     */
-    public double calculateChoromosomeDistance() {
-        double totalDistance = 0.0;
-
-        for (int i = 0; i < this.chromosome.size(); i++) {
-            totalDistance += this.chromosome.get(i).distance(this.chromosome.get(i + 1));
-        }
-        return totalDistance;
-    }
-
-    /**
-     * Mixes n new chromosomes by using this.chromosome with a different chromosome
+     * Calculates total distance for this.route
      *
-     * @param otherChromosome TODO: @param numberOfCrossOvers
      * @return
      */
-    public List<Customer> crossOver(List<Customer> otherChromosome, int numberOfCrossOvers) {
-        final List<Customer>[] DNA = split(this.chromosome, numberOfSplits);
-        final List<Customer>[] otherDNA = split(otherChromosome, numberOfSplits);
-        List<Customer> firstCrossOver = merge(DNA, otherDNA, 0, numberOfSplits);
-        List<Customer> secondCrossOver = merge(otherDNA, DNA, 1, numberOfSplits);
+    public double calculateRouteDistance() {
+        double routeDistance = 0.0;
 
-        if (firstCrossOver.size() > this.chromosome.size()) {
-            throw new RuntimeException("First crossover is too big!");
+        for (int i = 0; i < this.route.size() - 1; i++) {
+            routeDistance += this.route.get(i).distance(this.route.get(i + 1));
         }
-        if (secondCrossOver.size() > this.chromosome.size()) {
-            throw new RuntimeException("Second crossover is too big!");
+        return routeDistance;
+    }
+
+    /**
+     * Mixes n new routes by using this.route with a different route
+     *
+     * @param otherRoute TODO: @param numberOfCrossOvers
+     * @return
+     */
+    public List<Customer> crossOver(List<Customer> otherRoute, int numberOfCrossOvers) {
+        final List<Customer>[] subRoute = split(this.route, numberOfSplits);
+        final List<Customer>[] otherSubRoute = split(otherRoute, numberOfSplits);
+        List<Customer> firstCrossOver = merge(subRoute, otherSubRoute, 0, numberOfSplits);
+        List<Customer> secondCrossOver = merge(otherSubRoute, subRoute, 1, numberOfSplits);
+
+        if (Controller.verbose) {
+            System.out.println("Route: " + this.route.toString());
+            System.out.println("Other route: " + otherRoute.toString());
+            System.out.println("First crossover: " + firstCrossOver.toString());
+            System.out.println("Second crossover: " + secondCrossOver.toString());
         }
-        if (firstCrossOver.size() < this.chromosome.size()) {
-            throw new RuntimeException("First crossover is too small!");
-        }
-        if (secondCrossOver.size() < this.chromosome.size()) {
-            throw new RuntimeException("Second crossover is too small!");
-        }
+
+//        if (firstCrossOver.size() > this.route.size()) {
+//            throw new RuntimeException("First crossover is too big!");
+//        }
+//        if (secondCrossOver.size() > this.route.size()) {
+//            throw new RuntimeException("Second crossover is too big!");
+//        }
+//        if (firstCrossOver.size() < this.route.size()) {
+//            throw new RuntimeException("First crossover is too small!");
+//        }
+//        if (secondCrossOver.size() < this.route.size()) {
+//            throw new RuntimeException("Second crossover is too small!");
+//        }
 
         List<Customer> mergedCrossOvers = new ArrayList<>();
         mergedCrossOvers.addAll(firstCrossOver);
@@ -120,65 +129,124 @@ public class Vehicle extends MapObject {
     }
 
     /**
-     * Splits chromosome in n parts
+     * Splits route in n parts
      *
-     * @param chromosome TODO: @param numberOfSplits
+     * @param route TODO: @param numberOfSplits
      * @return
      */
-    private List<Customer>[] split(List<Customer> chromosome, int numberOfSplits) {
+    private List<Customer>[] split(List<Customer> route, int numberOfSplits) {
+        System.out.println("========= Splitting route to subRoutes =========");
         List<Customer> first = new ArrayList<>();
         List<Customer> second = new ArrayList<>();
-        int size = chromosome.size();
-        int partitionIndex = Utils.randomIndex(chromosome.size());
+        int size = route.size();
+        int partitionIndex = Utils.randomIndex(size) + 1;
+        System.out.println("Partition Index: " + partitionIndex);
 
         IntStream.range(0, size).forEach(i -> {
             if (i < (size + 1) / partitionIndex) {
-                first.add(chromosome.get(i));
+                first.add(route.get(i));
             } else {
-                second.add(chromosome.get(i));
+                second.add(route.get(i));
             }
         });
 
-        return (List<Customer>[]) new List[]{first, second};
+        System.out.println("First subRoute: " + first.toString());
+        System.out.println("Second subRoute: " + second.toString());
+
+        List<Customer>[] splittedRoute = new List[]{first, second};
+        System.out.println("========= END Splitting route to subRoutes =========");
+
+        return splittedRoute;
     }
 
     /**
-     * Merges the DNA from two chromosomes to a new chromosome
+     * Merges the subRoute from two routes to a new route
      *
-     * @param DNA
-     * @param otherDNA TODO: @param numberOfSplits
+     * @param subRoute
+     * @param otherSubRoute TODO: @param numberOfSplits
      * @return
      */
-    private List<Customer> merge(List<Customer>[] DNA, List<Customer>[] otherDNA, int keepIndex, int numberOfSplits) {
-        List<Customer> crossOver = new ArrayList<>(DNA[keepIndex]);
+    private List<Customer> merge(List<Customer>[] subRoute, List<Customer>[] otherSubRoute, int keepIndex, int numberOfSplits) {
+        System.out.println("========= Merging two subRoutes to a route  =========");
+        List<Customer> crossOver = new ArrayList<>(subRoute[keepIndex]);
 
-        for (int i = 0; i < numberOfSplits; i++) {
-            for (Customer gene : otherDNA[i]) {
+        System.out.println("Initial subRoute: " + crossOver);
+
+        for (int i = 0; i < otherSubRoute.length; i++) {
+            for (Customer gene : otherSubRoute[i]) {
                 if (!crossOver.contains(gene)) {
                     crossOver.add(gene);
                 }
             }
         }
 
+        System.out.println("Merged subRoutes: " + crossOver);
+        System.out.println("========= Merging two subRoutes to a route  =========");
         return crossOver;
     }
 
     /**
-     * Swaps two random genes from chromosome
+     * Swaps two random genes from route
+     *
      * @return
      */
     public List<Customer> mutate() {
-        List<Customer> newChromosome = new ArrayList<>(this.chromosome);
+        List<Customer> newRoute = new ArrayList<>(this.route);
         int indexA = 0;
         int indexB = 0;
 
         while (indexA == indexB) {
-            indexA = Utils.randomIndex(newChromosome.size());
-            indexB = Utils.randomIndex(newChromosome.size());
+            indexA = Utils.randomIndex(newRoute.size());
+            indexB = Utils.randomIndex(newRoute.size());
         }
 
-        Collections.swap(newChromosome, indexA, indexB);
+        System.out.println(newRoute);
+        Collections.swap(newRoute, indexA, indexB);
+        System.out.println(newRoute);
 
-        return newChromosome;
+        return newRoute;
+    }
+
+    @Override
+    public String toString() {
+        return Double.toString(calculateRouteDistance());
+    }
+
+    public void addCustomer(Customer customer) {
+        this.route.add(customer);
+    }
+
+    public void shuffleRoute() {
+        Collections.shuffle(this.route);
+        if (Controller.verbose) {
+            System.out.println("Shuffled route: " + this.route.toString());
+        }
+    }
+
+    /**
+     * Finds the nearest point for each
+     */
+    public void optimizeRoute() {
+        MapObject lastPoint = this.depot;
+        List<Customer> newRoute = new ArrayList<>();
+        Customer nearestGene = null;
+
+        while (newRoute.size() != this.route.size()) {
+            double minimumDistance = Double.MAX_VALUE;
+            for (int i = 0; i < this.route.size(); i++) {
+                Customer gene = this.route.get(i);
+                double distance = Utils.euclideanDistance(lastPoint.getX(), gene.getX(), lastPoint.getY(), gene.getY());
+
+                if (!newRoute.contains(gene) && distance < minimumDistance) {
+                    minimumDistance = distance;
+                    nearestGene = gene;
+                }
+            }
+
+            newRoute.add(nearestGene);
+            lastPoint = nearestGene;
+        }
+
+        this.route = newRoute;
     }
 }

@@ -4,6 +4,9 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Depot extends MapObject {
     private int maxDistance; // D: maximum duration of a route
     private int maxLoad; // Q: allowed maximum load of a vehicle
@@ -11,6 +14,8 @@ public class Depot extends MapObject {
     private static int depotIndex;
     private Color[] colors = {Color.RED, Color.ORANGE, Color.GOLD, Color.GREEN, Color.BLUE, Color.INDIGO, Color.VIOLET};
     private Color color;
+    private List<Customer> customers = new ArrayList<>();
+    private List<Vehicle> vehicles = new ArrayList<>();
 
 
     public Depot(int maxDistance, int maxLoad, int maxCars) {
@@ -35,7 +40,7 @@ public class Depot extends MapObject {
     @Override
     public void render(GraphicsContext gc) {
         gc.setFill(color);
-        gc.fillOval(getPixelX(), getPixelY(), 10, 10);
+        gc.fillOval(getPixelX() - 5, getPixelY() - 5, 10, 10);
     }
 
     public int getMaxDistance() {
@@ -64,5 +69,22 @@ public class Depot extends MapObject {
 
     public Paint getColor() {
         return color;
+    }
+
+    public void addVehicle(Vehicle vehicle) {
+        this.vehicles.add(vehicle);
+    }
+
+    public List<Vehicle> getVehicles() {
+        return vehicles;
+    }
+
+
+    public void addCustomer(Customer customer) {
+        this.customers.add(customer);
+    }
+
+    public List<Customer> getCustomers() {
+        return customers;
     }
 }

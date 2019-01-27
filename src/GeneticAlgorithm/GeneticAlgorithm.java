@@ -1,112 +1,96 @@
 package GeneticAlgorithm;
 
-import Main.Utils;
-import MapObjects.Customer;
+import MapObjects.Depot;
 import MapObjects.Vehicle;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
-//TODO: Spawn method?
 public class GeneticAlgorithm {
 
-    private double mutationRate = 0.1;
-    private List<Vehicle> population;
-    private List<Vehicle> newPopulation;
+    // Parameters
+    private int populationSize = 50; // 20-100 dependent on problem
+    private double crossOverRate = 0.8; // 80%-95%
+    private double mutationRate = 0.05; // 0.5%-1%.
+    private int generation = 0;
 
+    // Lists
+    private List<Depot> depots;
+    private List<Vehicle> vehicles;
 
-    public GeneticAlgorithm(List<Vehicle> population) {
-        this.population = population;
-        tick(population);
+    private Population population;
+
+    public GeneticAlgorithm(List<Depot> depots, List<Vehicle> vehicles) {
+        this.depots = depots;
+        this.vehicles = vehicles;
+        population = new Population(depots, populationSize, crossOverRate, mutationRate);
     }
 
-    public void tick(List<Vehicle> population) {
-        List<Vehicle> newPopulation = new ArrayList<>();
-        population = crossOver(population);
-        population = mutation(population);
-        population = selection(population, 0);
-        this.newPopulation = population;
+    public void tick() {
+        population.tick();
+        generation++;
     }
 
-    /**
-     * Selects the chromosome with the lowest distance
-     *
-     * @param sortedPopulation
-     * @return
-     */
-    public List<Customer> getAlphaChromosome(List<Vehicle> sortedPopulation) {
-        return sortedPopulation.get(0).getChromosome();
-
+    public int getPopulationSize() {
+        return populationSize;
     }
 
-    /**
-     * Performs crossOver on the population
-     * TODO: Test crossOver only between Vehicles from same Depot
-     * @param population
-     */
-    public List<Vehicle> crossOver(List<Vehicle> population) {
-        List<Vehicle> newPopulation = new ArrayList<>();
-
-        for (Vehicle vehicle : this.population) {
-            Vehicle otherVehicle = getCrossOverPartner(vehicle, this.population);
-
-
-            List<Customer> newChromosome = vehicle.crossOver(otherVehicle.getChromosome(), 1);
-            Vehicle newVehicle = new Vehicle(vehicle.getDepot(), newChromosome);
-            newPopulation.add(newVehicle);
-        }
-
-        return newPopulation;
+    public void setPopulationSize(int populationSize) {
+        this.populationSize = populationSize;
     }
 
-    /**
-     * Performs n random mutations on the population based on the mutationRate
-     *
-     * @param population
-     */
-    public List<Vehicle> mutation(List<Vehicle> population) {
-        List<Vehicle> newPopulation = new ArrayList<>();
-
-        //TODO: One or more mutations can happen on the same chromosome, is this good or should it be max one mutation per chromosome?
-        for (int i = 0; i < this.population.size() * mutationRate; i++) {
-            Vehicle vehicle = this.population.get(Utils.randomIndex(this.population.size()));
-            List<Customer> newChromosome = vehicle.mutate();
-            Vehicle newVehicle = new Vehicle(vehicle.getDepot(), newChromosome);
-            newPopulation.add(newVehicle);
-        }
-
-        return newPopulation;
+    public double getCrossOverRate() {
+        return crossOverRate;
     }
 
-    /**
-     * Sorts the population based on chromosome distances and selects n best chromosomes
-     *
-     * @param population
-     */
-    public List<Vehicle> selection(List<Vehicle> population, int limit) {
-        population.sort(Comparator.comparingDouble(Vehicle::calculateChoromosomeDistance));
-        population = population.stream().limit(this.population.size()).collect(Collectors.toList()); //      TODO: Change limit
+    public void setCrossOverRate(double crossOverRate) {
+        this.crossOverRate = crossOverRate;
+    }
+
+    public double getMutationRate() {
+        return mutationRate;
+    }
+
+    public void setMutationRate(double mutationRate) {
+        this.mutationRate = mutationRate;
+    }
+
+    public int getGeneration() {
+        return generation;
+    }
+
+    public void setGeneration(int generation) {
+        this.generation = generation;
+    }
+
+    public List<Depot> getDepots() {
+        return depots;
+    }
+
+    public void setDepots(List<Depot> depots) {
+        this.depots = depots;
+    }
+
+    public List<Vehicle> getVehicles() {
+        return vehicles;
+    }
+
+    public void setVehicles(List<Vehicle> vehicles) {
+        this.vehicles = vehicles;
+    }
+
+    public Population getPopulation() {
         return population;
     }
 
-    private Vehicle getCrossOverPartner(Vehicle vehicle, List<Vehicle> population) {
-        Vehicle partner = vehicle;
-
-        while (vehicle == partner) {
-            partner = population.get(Utils.randomIndex(population.size()));
-        }
-
-        return partner;
+    public void setPopulation(Population population) {
+        this.population = population;
     }
 
-    /**
-     * Shuffles the genes in each chromosome of the population
-     */
-    public void generateInitialPopulation() {
-        for (Vehicle vehicle: this.population) {
-            vehicle.generateInitialChromosome();
-        }
+    public int getAlphaFitness() {
+        return population.getAlphaFitness();
+    }
+    
+    public Solution getAlphaSolution() {
+        return population.getAlphaSolution();
     }
 }
