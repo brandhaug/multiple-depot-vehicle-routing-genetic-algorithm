@@ -8,20 +8,32 @@ import javafx.scene.canvas.GraphicsContext;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Map is a visual representation of the map file
+ * Draws Depots and Customers on Canvas
+ */
 public class Map {
     // Lists
-    private List<Depot> depots;
-    private List<Customer> customers;
-    private List<Vehicle> vehicles;
+    private List<Depot> depots; // All depots in map
+    private List<Customer> customers; // All customers in map
+    private List<Vehicle> vehicles; // All vehicles in map
 
-    // Map values
-    public static int maximumX = -Integer.MAX_VALUE;
-    public static int maximumY = -Integer.MAX_VALUE;
-    public static int minimumX = Integer.MAX_VALUE;
-    public static int minimumY = Integer.MAX_VALUE;
-    public static double scaleX;
-    public static double scaleY;
+    // Map extreme values: used to calculate scales
+    public static int maximumX = -Integer.MAX_VALUE; // Largest x-value in map
+    public static int maximumY = -Integer.MAX_VALUE; // Largest y-value in map
+    public static int minimumX = Integer.MAX_VALUE; // Smallest x-value in map
+    public static int minimumY = Integer.MAX_VALUE; // Smallest y-value in map
 
+    // Scales
+    public static double scaleX; // Scales map to correct width in canvas
+    public static double scaleY; // Scales map to correct height in canvas
+
+    /**
+     * Creates mapParser which creates Objects (Depots, Customers, Vehicles) from file
+     * Retrieves Objects back to class
+     * @param fileName
+     * @throws IOException
+     */
     public Map(String fileName) throws IOException {
         MapParser mapParser = new MapParser(fileName);
         this.depots = mapParser.getDepots();
@@ -29,20 +41,35 @@ public class Map {
         this.vehicles = mapParser.getVehicles();
     }
 
+    /**
+     * Functionality loop
+     */
     public void tick() {
     }
 
+    /**
+     * Draws depots and customers in canvas
+     * @param gc
+     */
     public void render(GraphicsContext gc) {
         renderDepots(gc);
         renderCustomers(gc);
     }
 
+    /**
+     * Draws depots in canvas
+     * @param gc
+     */
     private void renderDepots(GraphicsContext gc) {
         for (Depot depot : depots) {
             depot.render(gc);
         }
     }
 
+    /**
+     * Draws customers in canvas
+     * @param gc
+     */
     private void renderCustomers(GraphicsContext gc) {
         for (Customer customer : customers) {
             customer.render(gc);

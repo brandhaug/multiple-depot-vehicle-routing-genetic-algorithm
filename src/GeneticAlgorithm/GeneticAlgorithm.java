@@ -6,14 +6,20 @@ import javafx.scene.canvas.GraphicsContext;
 
 import java.util.List;
 
+/**
+ * Main method for GeneticAlgorithm
+ * GeneticAlgorithm contains one Population.
+ * Population contains n Solutions. n = populationSize
+ * Sends all necessary data about GA/population to Controller
+ */
 public class GeneticAlgorithm {
 
     // Parameters
     private int populationSize = 50; // 20-100 dependent on problem
     private double crossOverRate = 0.8; // 80%-95%
     private double mutationRate = 0.05; // 0.5%-1%.
-    private double selectionRate = 0.2; // 0.5%-1%.
-    private int generation = 0;
+    private double selectionRate = 0.2;
+
 
     // Lists
     private List<Depot> depots;
@@ -21,26 +27,62 @@ public class GeneticAlgorithm {
 
     private Population population;
 
+    /**
+     * Creates initial population
+     *
+     * @param depots
+     * @param vehicles
+     */
     public GeneticAlgorithm(List<Depot> depots, List<Vehicle> vehicles) {
         this.depots = depots;
         this.vehicles = vehicles;
         population = new Population(depots, populationSize, crossOverRate, mutationRate, selectionRate);
     }
 
+    /**
+     * Functionality loop
+     * One loop = one generation
+     * population.tick() loops through all solutions
+     */
     public void tick() {
         population.tick();
-        generation++;
     }
 
+    /**
+     * Draws solution in canvas
+     * @param gc
+     */
     public void render(GraphicsContext gc) {
         renderAlphaSolution(gc);
     }
 
+    /**
+     * Draws best solution in canvas
+     * @param gc
+     */
     private void renderAlphaSolution(GraphicsContext gc) {
         Solution solution = getAlphaSolution();
         for (Vehicle vehicle : solution.getVehicles()) {
             vehicle.render(gc);
         }
+    }
+
+    /**
+     * Get best fitness of Population
+     */
+    public int getAlphaFitness() {
+        return population.getAlphaFitness();
+    }
+
+    /**
+     * Get best Solution (Solution with best fitness) of Population
+     */
+    public Solution getAlphaSolution() {
+        return population.getAlphaSolution();
+    }
+
+    public int getGeneration() {
+        return population.getGeneration();
     }
 
     public int getPopulationSize() {
@@ -67,14 +109,6 @@ public class GeneticAlgorithm {
         this.mutationRate = mutationRate;
     }
 
-    public int getGeneration() {
-        return generation;
-    }
-
-    public void setGeneration(int generation) {
-        this.generation = generation;
-    }
-
     public List<Depot> getDepots() {
         return depots;
     }
@@ -97,13 +131,5 @@ public class GeneticAlgorithm {
 
     public void setPopulation(Population population) {
         this.population = population;
-    }
-
-    public int getAlphaFitness() {
-        return population.getAlphaFitness();
-    }
-
-    public Solution getAlphaSolution() {
-        return population.getAlphaSolution();
     }
 }

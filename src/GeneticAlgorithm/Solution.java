@@ -1,5 +1,6 @@
 package GeneticAlgorithm;
 
+import Main.Controller;
 import MapObjects.Vehicle;
 import Utils.Utils;
 import MapObjects.Customer;
@@ -8,15 +9,26 @@ import MapObjects.Depot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * One Solution in Population
+ * Contains Routes from all Vehicles
+ */
 public class Solution {
     private List<Depot> depots;
     private List<Vehicle> vehicles = new ArrayList<>();
 
-    private int fitness;
-    private double totalDistance;
+    private int fitness; // Same as totalDistance for now
+    private double totalDistance; // Total distance of all Vehicle routes
     private double crossOverRate;
     private double mutationRate;
 
+    /**
+     * Generates initialSolution and calculates distances
+     *
+     * @param depots
+     * @param crossOverRate
+     * @param mutationRate
+     */
     public Solution(List<Depot> depots, double crossOverRate, double mutationRate) {
         this.depots = depots;
         this.crossOverRate = crossOverRate;
@@ -26,44 +38,71 @@ public class Solution {
         calculateFitness();
     }
 
+    /**
+     * One generation of solution
+     * 1. Crossover
+     * 2. Mutation
+     * 3. Calculate distance and fitness
+     */
     public void tick() {
-        System.out.println("Vehicles size before crossover: " + vehicles.size());
-        vehicles = crossOver(vehicles);
-        System.out.println("Vehicles size before mutation: " + vehicles.size());
-        vehicles = mutation(vehicles);
-        System.out.println("Vehicles size before selection: " + vehicles.size());
+        if (Controller.verbose) {
+            System.out.println("Vehicles size before crossover: " + vehicles.size());
+        }
+
+        vehicles = crossOver(vehicles); // 1. Crossover
+
+        if (Controller.verbose) {
+            System.out.println("Vehicles size before mutation: " + vehicles.size());
+        }
+
+        vehicles = mutation(vehicles); // 2. Mutation
+
+        if (Controller.verbose) {
+            System.out.println("Vehicles size before selection: " + vehicles.size());
+        }
+
+        // 3. Calculate distance and fitness
         calculateTotalDistance();
         calculateFitness();
     }
 
     /**
-     * Spreads the customers of a depot to random vehicles. Shuffles the genes in each chromosome of the vehicles.
+     * Each Depot has n Vehicles and m Customers
+     * Loops through all Depots, and assigns the Depot's Customers to a random Depot's vehicle.
      */
     public void generateInitialSolution() {
-        System.out.println("========= Creating random initial vehicles =========");
-        for (Depot depot : this.depots) {
-            List<Vehicle> depotVehicles = depot.getVehicles();
-            List<Customer> depotCustomers = depot.getCustomers();
+        if (Controller.verbose) {
+            System.out.println("========= Creating random initial vehicles =========");
+        }
 
-            for (Customer customer : depotCustomers) {
+        for (Depot depot : this.depots) {
+            List<Vehicle> depotVehicles = depot.getVehicles(); // Current depot's vehicles
+            List<Customer> depotCustomers = depot.getCustomers(); // Current depot's customers
+
+
+            for (Customer customer : depotCustomers) { // Assign customer to random vehicle
                 int randomIndex = Utils.randomIndex(depotVehicles.size() - 1);
                 depotVehicles.get(randomIndex).addCustomer(customer);
             }
 
+            // Optimize route for each vehicle
+            // TODO: Try vehicle.shuffle() to see difference
             for (Vehicle vehicle : vehicles) {
                 vehicle.optimizeRoute();
             }
 
+
             this.vehicles.addAll(depotVehicles);
 
-            System.out.println("========= END Creating random initial vehicles =========");
+            if (Controller.verbose) {
+                System.out.println("========= END Creating random initial vehicles =========");
+            }
         }
     }
 
     /**
-     * Performs crossOver on the vehicles
-     * TODO: Test crossOver only between Vehicles from same Depot
-     *
+     * Performs crossOver on Vehicles in Solution
+     * Crossover is only executed if random < crossOverRate
      * @param vehicles
      */
     public List<Vehicle> crossOver(List<Vehicle> vehicles) {
@@ -73,7 +112,7 @@ public class Solution {
 
         for (Vehicle vehicle : vehicles) {
             double random = Utils.randomDouble();
-            if (random > crossOverRate) {
+            if (random < crossOverRate) {
                 Vehicle otherVehicle = getCrossOverPartner(vehicle);
 
                 List<Customer> newRoute = vehicle.crossOver(otherVehicle.getRoute(), 1);
@@ -88,8 +127,26 @@ public class Solution {
     }
 
     /**
+     * Finds another Vehicle as partner for crossOver
+     * Potential crossOverPartner can only be a Vehicle from same Depot
+     * TODO: Try potential crossOverPartner with all vehicles
+     * @param vehicle
+     * @return
+     */
+    private Vehicle getCrossOverPartner(Vehicle vehicle) {
+        Vehicle partner = vehicle;
+        List<Vehicle> possiblePartners = vehicle.getDepot().getVehicles();
+
+        while (vehicle == partner) {
+            partner = possiblePartners.get(Utils.randomIndex(possiblePartners.size() - 1));
+        }
+
+        return partner;
+    }
+
+    /**
      * Performs n random mutations on the vehicles based on the mutationRate
-     *
+     * Mutation is only executed if random < crossOverRate
      * @param vehicles
      */
     public List<Vehicle> mutation(List<Vehicle> vehicles) {
@@ -99,7 +156,7 @@ public class Solution {
         //TODO: One or more mutations can happen on the same route, is this good or should it be max one mutation per route?
         for (Vehicle vehicle : vehicles) {
             double random = Utils.randomDouble();
-            if (random > mutationRate) {
+            if (random < mutationRate) {
                 List<Customer> newRoute = vehicle.mutate();
                 Vehicle newVehicle = new Vehicle(vehicle.getDepot(), newRoute);
                 newVehicles.add(newVehicle);
@@ -112,15 +169,31 @@ public class Solution {
         return vehicles;
     }
 
-    private Vehicle getCrossOverPartner(Vehicle vehicle) {
-        Vehicle partner = vehicle;
-        List<Vehicle> possiblePartners = vehicle.getDepot().getVehicles();
+    /**
+     * Calculates fitness for all routes in solution
+     * TODO: Same as totalDistance: Either find a new fitness rating, or delete
+     */
+    public void calculateFitness() {
+        int fitness = 0;
 
-        while (vehicle == partner) {
-            partner = possiblePartners.get(Utils.randomIndex(possiblePartners.size() - 1));
+        for (Vehicle vehicle : vehicles) {
+            fitness += (int) vehicle.calculateRouteDistance();
         }
 
-        return partner;
+        this.fitness = fitness;
+    }
+
+    /**
+     * Calculates total distance for all routes in Solution.
+     */
+    public void calculateTotalDistance() {
+        int totalDistance = 0;
+
+        for (Vehicle vehicle : vehicles) {
+            totalDistance += (int) vehicle.calculateRouteDistance();
+        }
+
+        this.totalDistance = totalDistance;
     }
 
 
@@ -137,26 +210,6 @@ public class Solution {
     }
 
     public void setTotalDistance(double totalDistance) {
-        this.totalDistance = totalDistance;
-    }
-
-    public void calculateFitness() {
-        int fitness = 0;
-
-        for (Vehicle vehicle : vehicles) {
-            fitness -= (int) vehicle.calculateRouteDistance();
-        }
-
-        this.fitness = fitness;
-    }
-
-    public void calculateTotalDistance() {
-        int totalDistance = 0;
-
-        for (Vehicle vehicle : vehicles) {
-            totalDistance += (int) vehicle.calculateRouteDistance();
-        }
-
         this.totalDistance = totalDistance;
     }
 
