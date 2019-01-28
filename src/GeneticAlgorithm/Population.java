@@ -41,12 +41,11 @@ public class Population {
      * Loops through one generation of each Solution
      */
     public void tick() {
-        selection();
-
         for (Solution solution : solutions) {
             solution.tick();
         }
 
+        selection();
         generation++;
 
     }
