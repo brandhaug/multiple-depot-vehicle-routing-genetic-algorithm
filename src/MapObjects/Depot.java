@@ -7,13 +7,17 @@ import javafx.scene.paint.Paint;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Customer's are assigned to closest Depot
+ * Each depot is given m Vehicles
+ */
 public class Depot extends MapObject {
     private int maxDistance; // D: maximum duration of a route
     private int maxLoad; // Q: allowed maximum load of a vehicle
     private int maxCars; // m: maximum number of vehicles available in each depot
     private static int depotIndex;
-    private Color[] colors = {Color.RED, Color.ORANGE, Color.GOLD, Color.GREEN, Color.BLUE, Color.INDIGO, Color.VIOLET};
-    private Color color;
+    private Color[] colors = {Color.RED, Color.ORANGE, Color.GOLD, Color.GREEN, Color.BLUE, Color.INDIGO, Color.VIOLET}; // Possible depot colors
+    private Color color; // Depot color on canvas
     private List<Customer> customers = new ArrayList<>();
     private List<Vehicle> vehicles = new ArrayList<>();
 
@@ -23,20 +27,20 @@ public class Depot extends MapObject {
         this.maxDistance = maxDistance;
         this.maxLoad = maxLoad;
         this.maxCars = maxCars;
-        this.color = colors[depotIndex];
+        this.color = colors[depotIndex]; // Sets color based on static counter
 
+        // Updates static counter
         if (depotIndex == colors.length - 1) {
             depotIndex = 0;
         } else {
             depotIndex++;
         }
     }
-
-    @Override
-    public void tick() {
-
-    }
-
+    /**
+     * Draws Depot on canvas
+     * Represented as a colored dot
+     * @param gc
+     */
     @Override
     public void render(GraphicsContext gc) {
         gc.setFill(color);
@@ -78,7 +82,6 @@ public class Depot extends MapObject {
     public List<Vehicle> getVehicles() {
         return vehicles;
     }
-
 
     public void addCustomer(Customer customer) {
         this.customers.add(customer);

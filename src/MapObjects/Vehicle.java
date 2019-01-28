@@ -25,11 +25,6 @@ public class Vehicle extends MapObject {
         }
     }
 
-    @Override
-    public void tick() {
-
-    }
-
     /**
      * Renders the route path
      *

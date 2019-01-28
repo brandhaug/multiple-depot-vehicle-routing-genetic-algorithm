@@ -11,7 +11,6 @@ public abstract class MapObject {
 
     /**
      * Sets the x and y position of the game object
-     *
      * @param x the x position
      * @param y the y position
      */
@@ -20,10 +19,16 @@ public abstract class MapObject {
         this.y = y;
     }
 
-    public abstract void tick();
-
+    /**
+     * Draws object on canvas
+     * @param gc
+     */
     public abstract void render(GraphicsContext gc);
 
+    /**
+     * Translate x to pixel on canvas
+     * @return
+     */
     public int getPixelX() {
         int pixelX = (int) ((x - Map.minimumX + (Controller.CANVAS_MARGIN / 2)) * Map.scaleX);
         if (pixelX >= Controller.CANVAS_WIDTH) {
@@ -34,6 +39,10 @@ public abstract class MapObject {
         return pixelX;
     }
 
+    /**
+     * Translate y to pixel on canvas
+     * @return
+     */
     public int getPixelY() {
         int pixelY = (int) ((y - Map.minimumY + (Controller.CANVAS_MARGIN / 2)) * Map.scaleY);
         if (pixelY >= Controller.CANVAS_HEIGHT) {
