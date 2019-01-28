@@ -33,13 +33,8 @@ Survival of the fittest through natural selection
 * **Gene**: Customer or TODO: Depot
 * **DNA**: List of genes/Sublist of Chromosome/Part of a route
 * **Chromosome**: Full DNA/List of merged DNAs/Full Route for one Vehicle
-* **Population**: List of all Vehicles
-
-* **Gene**: Customer or TODO: Depot
-* **DNA**: List of genes/Sublist of Chromosome/Part of a route
-* **Chromosome**: Full DNA/List of merged DNAs/Full Route for one Vehicle
-* **Solution**: Full route for all Vehicles
-* **Population**: List of all solutions
+* **Solution**: Full route for all Vehicles/Individual
+* **Population**: List of all solutions/individuals
 
 ##### Operators
 * **Initial Chromosome**: Randomly shuffled gene list

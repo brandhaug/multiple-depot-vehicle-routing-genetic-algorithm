@@ -22,11 +22,8 @@ public class Map {
     public static double scaleX;
     public static double scaleY;
 
-    // Objects
-    private MapParser mapParser;
-
     public Map(String fileName) throws IOException {
-        mapParser = new MapParser(fileName);
+        MapParser mapParser = new MapParser(fileName);
         this.depots = mapParser.getDepots();
         this.customers = mapParser.getCustomers();
         this.vehicles = mapParser.getVehicles();
@@ -36,10 +33,8 @@ public class Map {
     }
 
     public void render(GraphicsContext gc) {
-
         renderDepots(gc);
         renderCustomers(gc);
-        renderVehicles(gc);
     }
 
     private void renderDepots(GraphicsContext gc) {
@@ -51,12 +46,6 @@ public class Map {
     private void renderCustomers(GraphicsContext gc) {
         for (Customer customer : customers) {
             customer.render(gc);
-        }
-    }
-
-    private void renderVehicles(GraphicsContext gc) {
-        for (Vehicle vehicle : vehicles) {
-            vehicle.render(gc);
         }
     }
 

@@ -5,23 +5,29 @@ import MapObjects.Depot;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Population {
     private List<Depot> depots;
     private List<Solution> solutions = new ArrayList<>();
     private Solution alphaSolution;
+    private int populationSize;
+    private double selectionRate;
 
-    public Population(List<Depot> depots, int populationSize, double crossOverRate, double mutationRate) {
+    public Population(List<Depot> depots, int populationSize, double crossOverRate, double mutationRate, double selectionRate) {
         this.depots = depots;
+        this.populationSize = populationSize;
+        this.selectionRate = selectionRate;
         generateInitialPopulation(populationSize, crossOverRate, mutationRate);
     }
 
     public void tick() {
+        selection();
+
         for (Solution solution : solutions) {
             solution.tick();
         }
 
-        selection();
     }
 
     private void generateInitialPopulation(int populationSize, double crossOverRate, double mutationRate) {
@@ -37,10 +43,16 @@ public class Population {
     public void selection() {
         System.out.println("========= Performing selection on vehicles =========");
         System.out.println("Vehicles size before selection: " + solutions.size());
+
         solutions.sort(Comparator.comparingDouble(Solution::getFitness));
         this.alphaSolution = solutions.get(0);
+
+        for (int i = 0; i < solutions.size() * selectionRate; i++) {
+            Solution solution = solutions.get(i);
+        }
+
         System.out.println("Sorted solutions distances: " + solutions.toString());
-//        solutions = solutions.stream().limit(this.solutions.size()).collect(Collectors.toList()); //      TODO: Change limit
+        solutions = solutions.stream().limit(populationSize).collect(Collectors.toList());
         System.out.println("Solutions size before selection: " + solutions.size());
         System.out.println("========= END Performing selection on solutions =========");
     }

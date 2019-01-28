@@ -87,6 +87,7 @@ public class Controller {
     private void render() {
         gc.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         map.render(gc);
+        ga.render(gc);
     }
 
     private void updateGUI(long startNanoTime, long currentNanoTime) {

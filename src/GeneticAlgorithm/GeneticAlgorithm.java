@@ -2,6 +2,7 @@ package GeneticAlgorithm;
 
 import MapObjects.Depot;
 import MapObjects.Vehicle;
+import javafx.scene.canvas.GraphicsContext;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ public class GeneticAlgorithm {
     private int populationSize = 50; // 20-100 dependent on problem
     private double crossOverRate = 0.8; // 80%-95%
     private double mutationRate = 0.05; // 0.5%-1%.
+    private double selectionRate = 0.2; // 0.5%-1%.
     private int generation = 0;
 
     // Lists
@@ -22,12 +24,23 @@ public class GeneticAlgorithm {
     public GeneticAlgorithm(List<Depot> depots, List<Vehicle> vehicles) {
         this.depots = depots;
         this.vehicles = vehicles;
-        population = new Population(depots, populationSize, crossOverRate, mutationRate);
+        population = new Population(depots, populationSize, crossOverRate, mutationRate, selectionRate);
     }
 
     public void tick() {
         population.tick();
         generation++;
+    }
+
+    public void render(GraphicsContext gc) {
+        renderAlphaSolution(gc);
+    }
+
+    private void renderAlphaSolution(GraphicsContext gc) {
+        Solution solution = getAlphaSolution();
+        for (Vehicle vehicle : solution.getVehicles()) {
+            vehicle.render(gc);
+        }
     }
 
     public int getPopulationSize() {
@@ -89,7 +102,7 @@ public class GeneticAlgorithm {
     public int getAlphaFitness() {
         return population.getAlphaFitness();
     }
-    
+
     public Solution getAlphaSolution() {
         return population.getAlphaSolution();
     }

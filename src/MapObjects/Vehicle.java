@@ -9,10 +9,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
-// TODO: Move GA to separate class
 public class Vehicle extends MapObject {
     private Depot depot;
-    private boolean checkedIn;
     private List<Customer> route = new ArrayList<>();
 
     // TODO: 1. Implement
@@ -96,10 +94,10 @@ public class Vehicle extends MapObject {
      * @return
      */
     public List<Customer> crossOver(List<Customer> otherRoute, int numberOfCrossOvers) {
-        final List<Customer>[] subRoute = split(this.route, numberOfSplits);
-        final List<Customer>[] otherSubRoute = split(otherRoute, numberOfSplits);
-        List<Customer> firstCrossOver = merge(subRoute, otherSubRoute, 0, numberOfSplits);
-        List<Customer> secondCrossOver = merge(otherSubRoute, subRoute, 1, numberOfSplits);
+        final List<Customer>[] subRoutes = split(this.route, numberOfSplits);
+        final List<Customer>[] otherSubRoutes = split(otherRoute, numberOfSplits);
+        List<Customer> firstCrossOver = merge(subRoutes, otherSubRoutes, 0, numberOfSplits);
+        List<Customer> secondCrossOver = merge(otherSubRoutes, subRoutes, 1, numberOfSplits);
 
         if (Controller.verbose) {
             System.out.println("Route: " + this.route.toString());

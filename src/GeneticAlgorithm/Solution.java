@@ -32,6 +32,7 @@ public class Solution {
         System.out.println("Vehicles size before mutation: " + vehicles.size());
         vehicles = mutation(vehicles);
         System.out.println("Vehicles size before selection: " + vehicles.size());
+        calculateTotalDistance();
         calculateFitness();
     }
 
@@ -157,5 +158,9 @@ public class Solution {
         }
 
         this.totalDistance = totalDistance;
+    }
+
+    public List<Vehicle> getVehicles() {
+        return vehicles;
     }
 }
