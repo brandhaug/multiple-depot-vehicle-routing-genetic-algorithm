@@ -152,7 +152,7 @@ public class Solution {
     public List<Vehicle> mutation(List<Vehicle> vehicles) {
         System.out.println("========= Performing mutation on vehicles =========");
         List<Vehicle> newVehicles = new ArrayList<>();
-
+P
         //TODO: One or more mutations can happen on the same route, is this good or should it be max one mutation per route?
         for (Vehicle vehicle : vehicles) {
             double random = Utils.randomDouble();

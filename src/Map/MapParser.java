@@ -22,12 +22,23 @@ public class MapParser {
     private List<Customer> customers = new ArrayList<>();
     private List<Vehicle> vehicles = new ArrayList<>();
 
+    /**
+     * Parser map file
+     * Assigns customers to nearest depot
+     * @param fileName
+     * @throws IOException
+     */
     public MapParser(String fileName) throws IOException {
         parseMapFile(fileName);
-        assignDepotToCustomers();
+        assignCustomersToNearestDepot();
     }
 
 
+    /**
+     * Parses map file
+     * @param fileName
+     * @throws IOException
+     */
     private void parseMapFile(String fileName) throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource("resources/maps/" + fileName).getFile());
@@ -50,20 +61,20 @@ public class MapParser {
             String[] stringLineArr = line.trim().split("\\s+");
             int[] lineArr = Arrays.stream(stringLineArr).mapToInt(Integer::parseInt).toArray();
 
-            if (index == 0) { // First line contains the following information: m n t
+            if (index == 0) { // Map info: m n t
                 if (Controller.verbose) {
                     System.out.println("Map info: " + line);
                 }
                 maxVehicles = lineArr[0];
                 totalCustomers = lineArr[1];
                 depotsCount = lineArr[2];
-            } else if (index <= depotsCount) { // The next t lines contain, the following information: D Q
+            } else if (index <= depotsCount) { // Depot info: The next t lines contain, the following information: D Q
                 if (Controller.verbose) {
                     System.out.println("Depot info: " + line);
                 }
                 Depot depot = new Depot(lineArr[0], lineArr[1], maxVehicles);
                 depots.add(depot);
-            } else if (index <= depotsCount + totalCustomers) { // id, x, y, d, q
+            } else if (index <= depotsCount + totalCustomers) { // Customer: id, x, y, d, q
                 if (Controller.verbose) {
                     System.out.println("Customer info: " + line);
                 }
@@ -71,7 +82,7 @@ public class MapParser {
                 customers.add(customer);
                 setExtremeValues(lineArr[1], lineArr[2]);
 
-            } else if (depotIndex <= depotsCount) { // id, x, y
+            } else if (depotIndex <= depotsCount) { // Depot coordinates: id, x, y
                 if (Controller.verbose) {
                     System.out.println("Depot location: " + line);
                 }
@@ -106,6 +117,11 @@ public class MapParser {
         }
     }
 
+    /**
+     * Sets extreme values, if more extreme than the current extreme value.
+     * @param x
+     * @param y
+     */
     private void setExtremeValues(int x, int y) {
         Map.maximumX = Math.max(x, Map.maximumX);
         Map.maximumY = Math.max(y, Map.maximumY);
@@ -113,7 +129,11 @@ public class MapParser {
         Map.minimumY = Math.min(y, Map.minimumY);
     }
 
-    private void assignDepotToCustomers() {
+    /**
+     * Assigns customers to nearest depot
+     * Based on euclidean distance
+     */
+    private void assignCustomersToNearestDepot() {
         Depot nearestDepot = null;
         for (Customer customer : customers) {
             double minimumDistance = Double.MAX_VALUE;
@@ -129,6 +149,13 @@ public class MapParser {
         }
     }
 
+    /**
+     * Calculates scaling used to scale map to canvas
+     * @param maximum
+     * @param minimum
+     * @param canvasSize
+     * @return
+     */
     private double calculcateScaling(int maximum, int minimum, int canvasSize) {
         int variance = maximum - minimum;
         double scaleMargin = (double) Controller.CANVAS_MARGIN / variance;
