@@ -1,10 +1,20 @@
 import MapObjects.Depot;
+import Utils.Utils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Test {
     public static void main(String[] args) {
-        Depot depot = new Depot(10, 5, 4);
-        Depot depot2 = new Depot(depot.getMaxDistance(), depot.getMaxLoad(), depot.getMaxCars());
-        depot2.setMaxDistance(15);
-        System.out.println(depot.getMaxDistance());
+        List<Integer> numbers = new ArrayList<>();
+        numbers.add(1);
+        numbers.add(2);
+        numbers.add(3);
+        List<Integer> yolo = new ArrayList<>();
+        yolo.add(4);
+        yolo.add(5);
+        numbers.addAll(1, yolo);
+        System.out.println(Arrays.toString(numbers.toArray()));
     }
 }

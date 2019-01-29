@@ -23,7 +23,6 @@ public class GeneticAlgorithm {
 
     // Lists
     private List<Depot> depots;
-    private List<Vehicle> vehicles;
 
     private Population population;
 
@@ -31,11 +30,9 @@ public class GeneticAlgorithm {
      * Creates initial population
      *
      * @param depots
-     * @param vehicles
      */
-    public GeneticAlgorithm(List<Depot> depots, List<Vehicle> vehicles) {
+    public GeneticAlgorithm(List<Depot> depots) {
         this.depots = depots;
-        this.vehicles = vehicles;
         population = new Population(depots, populationSize, crossOverRate, mutationRate, selectionRate);
     }
 
@@ -115,14 +112,6 @@ public class GeneticAlgorithm {
 
     public void setDepots(List<Depot> depots) {
         this.depots = depots;
-    }
-
-    public List<Vehicle> getVehicles() {
-        return vehicles;
-    }
-
-    public void setVehicles(List<Vehicle> vehicles) {
-        this.vehicles = vehicles;
     }
 
     public Population getPopulation() {

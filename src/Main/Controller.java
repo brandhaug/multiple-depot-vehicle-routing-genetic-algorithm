@@ -61,7 +61,7 @@ public class Controller {
     private void initialize() {
         try {
             map = new Map(fileName); // Parse file
-            ga = new GeneticAlgorithm(map.getDepots(), map.getVehicles()); // Creates initial population
+            ga = new GeneticAlgorithm(map.getDepots()); // Creates initial population
             mapLabel.setText("Map: " + fileName); // Current map
             depotsLabel.setText("Depots: " + map.getDepotsSize()); // Number of depots
             vehiclesLabel.setText("Vehicles: " + map.getVehiclesSize()); // Number of vehicles

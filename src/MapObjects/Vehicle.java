@@ -88,11 +88,11 @@ public class Vehicle extends MapObject {
      * @param otherRoute TODO: @param numberOfCrossOvers
      * @return
      */
-    public List<Customer> crossOver(List<Customer> otherRoute, int numberOfCrossOvers) {
+    public List<Customer>[] crossOver(List<Customer> otherRoute, int numberOfCrossOvers) {
         final List<Customer>[] subRoutes = split(this.route, numberOfSplits);
         final List<Customer>[] otherSubRoutes = split(otherRoute, numberOfSplits);
-        List<Customer> firstCrossOver = merge(subRoutes, otherSubRoutes, 0, numberOfSplits);
-        List<Customer> secondCrossOver = merge(otherSubRoutes, subRoutes, 1, numberOfSplits);
+        List<Customer> firstCrossOver = merge(subRoutes[0], otherSubRoutes[1], numberOfSplits);
+        List<Customer> secondCrossOver = merge(otherSubRoutes[0], subRoutes[1], numberOfSplits);
 
         if (Controller.verbose) {
             System.out.println("Route: " + this.route.toString());
@@ -101,24 +101,9 @@ public class Vehicle extends MapObject {
             System.out.println("Second crossover: " + secondCrossOver.toString());
         }
 
-//        if (firstCrossOver.size() > this.route.size()) {
-//            throw new RuntimeException("First crossover is too big!");
-//        }
-//        if (secondCrossOver.size() > this.route.size()) {
-//            throw new RuntimeException("Second crossover is too big!");
-//        }
-//        if (firstCrossOver.size() < this.route.size()) {
-//            throw new RuntimeException("First crossover is too small!");
-//        }
-//        if (secondCrossOver.size() < this.route.size()) {
-//            throw new RuntimeException("Second crossover is too small!");
-//        }
+        List<Customer>[] crossOvers = new List[]{firstCrossOver, secondCrossOver};
 
-        List<Customer> mergedCrossOvers = new ArrayList<>();
-        mergedCrossOvers.addAll(firstCrossOver);
-        mergedCrossOvers.addAll(secondCrossOver);
-
-        return mergedCrossOvers;
+        return crossOvers;
     }
 
     /**
@@ -132,16 +117,20 @@ public class Vehicle extends MapObject {
         List<Customer> first = new ArrayList<>();
         List<Customer> second = new ArrayList<>();
         int size = route.size();
-        int partitionIndex = Utils.randomIndex(size) + 1;
-        System.out.println("Partition Index: " + partitionIndex);
 
-        IntStream.range(0, size).forEach(i -> {
-            if (i < (size + 1) / partitionIndex) {
-                first.add(route.get(i));
-            } else {
-                second.add(route.get(i));
+        if (size != 0) {
+            int partitionIndex = Utils.randomIndex(size) + 1;
+
+            System.out.println("Partition Index: " + partitionIndex);
+
+            for (int i = 0; i < route.size(); i++) {
+                if (partitionIndex > i) {
+                    first.add(route.get(i));
+                } else {
+                    second.add(route.get(i));
+                }
             }
-        });
+        }
 
         System.out.println("First subRoute: " + first.toString());
         System.out.println("Second subRoute: " + second.toString());
@@ -159,19 +148,20 @@ public class Vehicle extends MapObject {
      * @param otherSubRoute TODO: @param numberOfSplits
      * @return
      */
-    private List<Customer> merge(List<Customer>[] subRoute, List<Customer>[] otherSubRoute, int keepIndex, int numberOfSplits) {
+    private List<Customer> merge(List<Customer> subRoute, List<Customer> otherSubRoute, int numberOfSplits) {
         System.out.println("========= Merging two subRoutes to a route  =========");
-        List<Customer> crossOver = new ArrayList<>(subRoute[keepIndex]);
+        List<Customer> crossOver = new ArrayList<>(subRoute);
 
         System.out.println("Initial subRoute: " + crossOver);
 
-        for (int i = 0; i < otherSubRoute.length; i++) {
+       /* for (int i = 0; i < otherSubRoute.length; i++) {
             for (Customer gene : otherSubRoute[i]) {
                 if (!crossOver.contains(gene)) {
                     crossOver.add(gene);
                 }
             }
-        }
+        }*/
+       crossOver.addAll(otherSubRoute);
 
         System.out.println("Merged subRoutes: " + crossOver);
         System.out.println("========= Merging two subRoutes to a route  =========");

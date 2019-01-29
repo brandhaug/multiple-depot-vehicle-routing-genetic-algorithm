@@ -19,23 +19,19 @@ public class Solution {
 
     private int fitness; // Same as totalDistance for now
     private double totalDistance; // Total distance of all Vehicle routes
-    private double crossOverRate;
-    private double mutationRate;
-
     /**
      * Generates initialSolution and calculates distances
      *
      * @param depots
-     * @param crossOverRate
-     * @param mutationRate
      */
-    public Solution(List<Depot> depots, double crossOverRate, double mutationRate) {
+    public Solution(List<Depot> depots) {
         this.depots = depots;
-        this.crossOverRate = crossOverRate;
-        this.mutationRate = mutationRate;
         generateInitialSolution();
-        calculateTotalDistance();
-        calculateFitness();
+    }
+
+    public Solution(List<Depot> depots, List<Vehicle> vehicles) {
+        this.depots = depots;
+        this.vehicles = vehicles;
     }
 
     /**
@@ -45,25 +41,6 @@ public class Solution {
      * 3. Calculate distance and fitness
      */
     public void tick() {
-        if (Controller.verbose) {
-            System.out.println("Vehicles size before crossover: " + vehicles.size());
-        }
-
-        vehicles = crossOver(vehicles); // 1. Crossover
-
-        if (Controller.verbose) {
-            System.out.println("Vehicles size before mutation: " + vehicles.size());
-        }
-
-        vehicles = mutation(vehicles); // 2. Mutation
-
-        if (Controller.verbose) {
-            System.out.println("Vehicles size before selection: " + vehicles.size());
-        }
-
-        // 3. Calculate distance and fitness
-        calculateTotalDistance();
-        calculateFitness();
     }
 
     /**
@@ -76,50 +53,54 @@ public class Solution {
         }
 
         for (Depot depot : this.depots) {
-            List<Vehicle> depotVehicles = depot.getVehicles(); // Current depot's vehicles
+            List<Vehicle> depotVehicles = new ArrayList<>();
+
+            // Vehicle v is not used here, should it be a traditional for loop instead?
+            for (Vehicle v : depot.getVehicles()) {
+                Vehicle vCopy = new Vehicle(depot, null);
+                depotVehicles.add(vCopy);
+            }
+
             List<Customer> depotCustomers = depot.getCustomers(); // Current depot's customers
 
-
+            // TODO: Ta høyde for vehicle sin max distance og max load
             for (Customer customer : depotCustomers) { // Assign customer to random vehicle
                 int randomIndex = Utils.randomIndex(depotVehicles.size() - 1);
                 depotVehicles.get(randomIndex).addCustomer(customer);
             }
 
-            // Optimize route for each vehicle
-            // TODO: Try vehicle.shuffle() to see difference
-            for (Vehicle vehicle : vehicles) {
-                vehicle.optimizeRoute();
-            }
-
-
+            // Problem her med referanse - bør lage nye referanser
             this.vehicles.addAll(depotVehicles);
 
             if (Controller.verbose) {
                 System.out.println("========= END Creating random initial vehicles =========");
             }
         }
+        // Optimize route for each vehicle
+        // TODO: Try vehicle.shuffle() to see difference
+        for (Vehicle vehicle : vehicles) {
+            vehicle.optimizeRoute();
+        }
     }
 
-    /**
-     * Performs crossOver on Vehicles in Solution
-     * Crossover is only executed if random < crossOverRate
-     * @param vehicles
-     */
-    public List<Vehicle> crossOver(List<Vehicle> vehicles) {
+    public List<Vehicle> mutation2(List<Vehicle> vehicles) {
         System.out.println("========= Performing crossover on vehicles =========");
 
-        List<Vehicle> newVehicles = new ArrayList<>();
+        List<Vehicle> newVehicles = new ArrayList<>(vehicles);
 
-        for (Vehicle vehicle : vehicles) {
-            double random = Utils.randomDouble();
-            if (random < crossOverRate) {
-                Vehicle otherVehicle = getCrossOverPartner(vehicle);
+        int randomIndex = Utils.randomIndex(vehicles.size());
+        Vehicle vehicle = vehicles.get(randomIndex);
+        Vehicle otherVehicle = getMutationPartner(vehicle);
 
-                List<Customer> newRoute = vehicle.crossOver(otherVehicle.getRoute(), 1);
-                Vehicle newVehicle = new Vehicle(vehicle.getDepot(), newRoute);
-                newVehicles.add(newVehicle);
-            }
-        }
+        List<Customer>[] newRoutes = vehicle.crossOver(otherVehicle.getRoute(), 1);
+        Vehicle newVehicle = new Vehicle(vehicle.getDepot(), newRoutes[0]);
+        Vehicle newVehicle2 = new Vehicle(vehicle.getDepot(), newRoutes[1]);
+
+        newVehicles.remove(vehicle);
+        newVehicles.remove(otherVehicle);
+        newVehicles.add(newVehicle);
+        newVehicles.add(newVehicle2);
+
 
         System.out.println("========= END Performing crossover on vehicles =========");
 
@@ -127,15 +108,21 @@ public class Solution {
     }
 
     /**
-     * Finds another Vehicle as partner for crossOver
-     * Potential crossOverPartner can only be a Vehicle from same Depot
+     * Finds another Vehicle as partner for mutation
+     * Potential mutationPartner can only be a Vehicle from same Depot
      * TODO: Try potential crossOverPartner with all vehicles
      * @param vehicle
      * @return
      */
-    private Vehicle getCrossOverPartner(Vehicle vehicle) {
+    private Vehicle getMutationPartner(Vehicle vehicle) {
         Vehicle partner = vehicle;
-        List<Vehicle> possiblePartners = vehicle.getDepot().getVehicles();
+        List<Vehicle> possiblePartners = new ArrayList<>();
+
+        for (Vehicle v : vehicles) {
+            if (v.getDepot() == vehicle.getDepot()) {
+                possiblePartners.add(v);
+            }
+        }
 
         while (vehicle == partner) {
             partner = possiblePartners.get(Utils.randomIndex(possiblePartners.size() - 1));
@@ -147,40 +134,35 @@ public class Solution {
     /**
      * Performs n random mutations on the vehicles based on the mutationRate
      * Mutation is only executed if random < crossOverRate
-     * @param vehicles
      */
-    public List<Vehicle> mutation(List<Vehicle> vehicles) {
+    public List<Vehicle> mutation() {
         System.out.println("========= Performing mutation on vehicles =========");
-        List<Vehicle> newVehicles = new ArrayList<>();
+        List<Vehicle> newVehicles = new ArrayList<>(vehicles);
 
-        //TODO: One or more mutations can happen on the same route, is this good or should it be max one mutation per route?
-        for (Vehicle vehicle : vehicles) {
-            double random = Utils.randomDouble();
-            if (random < mutationRate) {
-                List<Customer> newRoute = vehicle.mutate();
-                Vehicle newVehicle = new Vehicle(vehicle.getDepot(), newRoute);
-                newVehicles.add(newVehicle);
-            }
-        }
+        int randomIndex = Utils.randomIndex(vehicles.size());
+        Vehicle vehicle = vehicles.get(randomIndex);
+        List<Customer> newRoute = vehicle.mutate();
+        Vehicle newVehicle = new Vehicle(vehicle.getDepot(), newRoute);
 
-        vehicles.addAll(newVehicles);
+        newVehicles.remove(vehicle);
+        newVehicles.add(newVehicle);
 
         System.out.println("========= END Performing mutation on vehicles =========");
-        return vehicles;
+        return newVehicles;
     }
 
     /**
      * Calculates fitness for all routes in solution
      * TODO: Same as totalDistance: Either find a new fitness rating, or delete
      */
-    public void calculateFitness() {
+    public int getFitness() {
         int fitness = 0;
 
         for (Vehicle vehicle : vehicles) {
             fitness += (int) vehicle.calculateRouteDistance();
         }
 
-        this.fitness = fitness;
+        return fitness;
     }
 
     /**
@@ -197,11 +179,6 @@ public class Solution {
         this.totalDistance = totalDistance;
     }
 
-
-    public int getFitness() {
-        return fitness;
-    }
-
     public void setFitness(int fitness) {
         this.fitness = fitness;
     }
@@ -216,5 +193,54 @@ public class Solution {
 
     public List<Vehicle> getVehicles() {
         return vehicles;
+    }
+
+    public List<Vehicle> crossOver(List<Customer> routeFromPartner) {
+        List<Vehicle> newVehicles = new ArrayList<>(vehicles);
+        // Remove route from routeFromPartner
+        for (Vehicle vehicle : newVehicles) {
+            for (Customer customer : vehicle.getRoute()) {
+                if (routeFromPartner.contains(customer)) {
+                    newVehicles.remove(customer);
+                }
+            }
+        }
+        // Rull gjennom alle ruter og regn ut diff i fitness på alle mulige steder
+
+        double minDistance = Double.MAX_VALUE;
+        Vehicle minVehicle = null;
+        int minIndex = 0;
+
+        for (Vehicle vehicle : newVehicles) {
+            for (int i = 0; i < vehicle.getRoute().size(); i++) {
+                Customer customer = vehicle.getRoute().get(i);
+
+                double distance = 0.0;
+
+                if (i == 0) { // Check depot
+                    distance += Utils.euclideanDistance(routeFromPartner.get(0).getX(), vehicle.getDepot().getX(), routeFromPartner.get(0).getY(), vehicle.getDepot().getY());
+                    distance += Utils.euclideanDistance(routeFromPartner.get(routeFromPartner.size() - 1).getX(), customer.getX(), routeFromPartner.get(routeFromPartner.size() - 1).getY(), customer.getY());
+                }
+                else if (i == newVehicles.size() - 1) { // Check depot
+                    distance += Utils.euclideanDistance(customer.getX(), routeFromPartner.get(0).getX(), customer.getY(), routeFromPartner.get(0).getY());
+                    distance += Utils.euclideanDistance(vehicle.getDepot().getX(), routeFromPartner.get(routeFromPartner.size() - 1).getX(), vehicle.getDepot().getY(), routeFromPartner.get(routeFromPartner.size() - 1).getY());
+                }
+                else {
+                    Customer lastCustomer = vehicle.getRoute().get(i - 1);
+                    distance += Utils.euclideanDistance(routeFromPartner.get(0).getX(), lastCustomer.getX(), routeFromPartner.get(0).getY(), lastCustomer.getY());;
+                    distance += Utils.euclideanDistance(routeFromPartner.get(routeFromPartner.size() - 1).getX(), customer.getX(), routeFromPartner.get(routeFromPartner.size() - 1).getY(), customer.getY());;
+                }
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    minVehicle = vehicle;
+                    minIndex = i;
+                }
+
+            }
+        }
+        // Legg inn routeFromOtherSolution der fitness er best
+        minVehicle.getRoute().addAll(minIndex, routeFromPartner);
+        return newVehicles;
     }
 }

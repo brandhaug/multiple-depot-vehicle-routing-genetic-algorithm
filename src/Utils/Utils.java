@@ -10,7 +10,7 @@ public class Utils {
      */
     public static int randomIndex(int limit) {
         Random random = new Random();
-        return random.nextInt(limit);
+        return limit == 0 ? 0 : random.nextInt(limit);
     }
 
     /**
