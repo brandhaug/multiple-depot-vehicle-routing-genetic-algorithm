@@ -41,7 +41,7 @@ public class Population {
         this.crossOverRate = crossOverRate;
         this.mutationRate = mutationRate;
         this.selectionRate = selectionRate;
-        generateInitialPopulation(populationSize, crossOverRate, mutationRate);
+        generateInitialPopulation();
 
     }
 
@@ -55,24 +55,13 @@ public class Population {
      * 3. Calculate distance and fitness
      */
     public void tick() {
-        //selection();
-
         List<Solution> children = new ArrayList<>();
         for (Solution solution : solutions) {
             double random = Utils.randomDouble();
             if (random < crossOverRate) {
-                //solutions.add(new Solution(depots, solution.crossOver())); // parents need to be removed, otherwise two new cars is always added to a solution
                 Solution partner = findCrossOverPartner(solution);
-
-                // TODO: Unngå at ruter med size 0 ikke får bli med i crossover
-                List<Customer> routeFromS1 = solution.getVehicles().get(Utils.randomIndex(solution.getVehicles().size())).getRoute();
-                while (routeFromS1.size() == 0) {
-                    routeFromS1 = solution.getVehicles().get(Utils.randomIndex(solution.getVehicles().size())).getRoute();
-                }
-                List<Customer> routeFromS2 = partner.getVehicles().get(Utils.randomIndex(partner.getVehicles().size())).getRoute();
-                while (routeFromS2.size() == 0) {
-                    routeFromS2 = partner.getVehicles().get(Utils.randomIndex(partner.getVehicles().size())).getRoute();
-                }
+                List<Customer> routeFromS1 = new ArrayList<>(solution.getVehicles().get(Utils.randomIndex(solution.getVehicles().size())).getRoute());
+                List<Customer> routeFromS2 = new ArrayList<>(partner.getVehicles().get(Utils.randomIndex(partner.getVehicles().size())).getRoute());
                 children.add(new Solution(depots, solution.crossOver(routeFromS2)));
                 children.add(new Solution(depots, partner.crossOver(routeFromS1)));
             }
@@ -92,19 +81,15 @@ public class Population {
     Solution findCrossOverPartner(Solution self) {
         Solution partner = self;
         while (self == partner) {
-            partner = solutions.get(Utils.randomIndex(solutions.size() - 1));
+            partner = solutions.get(Utils.randomIndex(solutions.size()));
         }
         return partner;
     }
 
     /**
      * Generates initial population which generates n random Solutions. n = populationSize
-     *
-     * @param populationSize
-     * @param crossOverRate
-     * @param mutationRate
      */
-    private void generateInitialPopulation(int populationSize, double crossOverRate, double mutationRate) {
+    private void generateInitialPopulation() {
         for (int i = 0; i < populationSize; i++) {
             Solution solution = new Solution(this.depots);
             solutions.add(solution);

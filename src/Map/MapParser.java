@@ -91,7 +91,7 @@ public class MapParser {
                 setExtremeValues(lineArr[1], lineArr[2]);
 
                 for (int i = 0; i < maxVehicles; i++) {
-                    Vehicle vehicle = new Vehicle(depot, null);
+                    Vehicle vehicle = new Vehicle(depot);
                     vehicles.add(vehicle); // TODO: Add maxDistance and maxLoad
                     depot.addVehicle(vehicle);
                 }

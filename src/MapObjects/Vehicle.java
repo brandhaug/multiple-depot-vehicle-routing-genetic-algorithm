@@ -17,12 +17,15 @@ public class Vehicle extends MapObject {
     // TODO: 2. Evolve over generations
     private int numberOfSplits;
 
+    public Vehicle(Depot depot) {
+        super(depot.getX(), depot.getY());
+        this.depot = depot;
+    }
+
     public Vehicle(Depot depot, List<Customer> route) {
         super(depot.getX(), depot.getY());
         this.depot = depot;
-        if (route != null) {
-            this.route = route;
-        }
+        this.route = route;
     }
 
     /**
@@ -154,13 +157,6 @@ public class Vehicle extends MapObject {
 
         System.out.println("Initial subRoute: " + crossOver);
 
-       /* for (int i = 0; i < otherSubRoute.length; i++) {
-            for (Customer gene : otherSubRoute[i]) {
-                if (!crossOver.contains(gene)) {
-                    crossOver.add(gene);
-                }
-            }
-        }*/
        crossOver.addAll(otherSubRoute);
 
         System.out.println("Merged subRoutes: " + crossOver);
@@ -174,7 +170,14 @@ public class Vehicle extends MapObject {
      * @return
      */
     public List<Customer> mutate() {
+        System.out.println("Performing mutation on vehicle");
         List<Customer> newRoute = new ArrayList<>(this.route);
+
+        if (newRoute.size() <= 1) {
+            System.out.println("Route size is zero or one, returning same route");
+            return newRoute;
+        }
+
         int indexA = 0;
         int indexB = 0;
 
@@ -187,6 +190,7 @@ public class Vehicle extends MapObject {
         Collections.swap(newRoute, indexA, indexB);
         System.out.println(newRoute);
 
+        System.out.println("Mutation on Vehicle finished, returning new Route");
         return newRoute;
     }
 
