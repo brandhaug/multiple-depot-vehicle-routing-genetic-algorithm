@@ -209,7 +209,11 @@ public class Solution {
             System.out.println("Performing crossOver");
         }
 
-        List<Vehicle> newVehicles = new ArrayList<>(vehicles);
+        // Creating a deep copy of vehicles
+        List<Vehicle> newVehicles = new ArrayList<>();
+        for (Vehicle vehicle : vehicles) {
+            newVehicles.add(vehicle.clone());
+        }
 
         if (otherRoute.size() == 0) {
             System.out.println("Other Route is 0");
@@ -237,14 +241,13 @@ public class Solution {
 
                 double distance = 0.0;
 
-                if (i == 0) { // Check depot
-                    System.out.println(otherRoute.get(0).getX());
-                    System.out.println(otherRoute.get(0).getY());
-                    System.out.println(vehicle.getDepot().getX());
-                    System.out.println(vehicle.getDepot().getY());
+                // Check between depot and first customer
+                if (i == 0) {
                     distance += Utils.euclideanDistance(otherRoute.get(0).getX(), vehicle.getDepot().getX(), otherRoute.get(0).getY(), vehicle.getDepot().getY());
                     distance += Utils.euclideanDistance(otherRoute.get(otherRoute.size() - 1).getX(), customer.getX(), otherRoute.get(otherRoute.size() - 1).getY(), customer.getY());
-                } else if (i == newVehicles.size() - 1) { // Check depot
+                }
+                // Check between last customer and depot
+                else if (i == newVehicles.size() - 1) {
                     distance += Utils.euclideanDistance(customer.getX(), otherRoute.get(0).getX(), customer.getY(), otherRoute.get(0).getY());
                     distance += Utils.euclideanDistance(vehicle.getDepot().getX(), otherRoute.get(otherRoute.size() - 1).getX(), vehicle.getDepot().getY(), otherRoute.get(otherRoute.size() - 1).getY());
                 } else {
@@ -272,5 +275,14 @@ public class Solution {
         System.out.println("CrossOver finished, returning new list of Vehicles");
 
         return newVehicles;
+    }
+
+    @Override
+    public Solution clone() {
+        List<Vehicle> copyOfVehicles = new ArrayList<>();
+        for (Vehicle vehicle : vehicles) {
+            copyOfVehicles.add(vehicle.clone());
+        }
+        return new Solution(depots, vehicles);
     }
 }

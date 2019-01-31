@@ -236,4 +236,13 @@ public class Vehicle extends MapObject {
 
         this.route = newRoute;
     }
+
+    @Override
+    public Vehicle clone() {
+        List<Customer> copyOfRoute = new ArrayList<>();
+        for (Customer customer : route) {
+            copyOfRoute.add(customer);
+        }
+        return new Vehicle(depot, copyOfRoute);
+    }
 }
