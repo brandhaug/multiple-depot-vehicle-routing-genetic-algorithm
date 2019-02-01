@@ -7,10 +7,10 @@ import javafx.scene.canvas.GraphicsContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.IntStream;
 
 public class Vehicle extends MapObject {
-    private Depot depot;
+    private Depot startDepot;
+    private Depot endDepot;
     private List<Customer> route = new ArrayList<>();
 
     // TODO: 1. Implement
@@ -19,12 +19,14 @@ public class Vehicle extends MapObject {
 
     public Vehicle(Depot depot) {
         super(depot.getX(), depot.getY());
-        this.depot = depot;
+        this.startDepot = depot;
+        this.endDepot = depot;
     }
 
     public Vehicle(Depot depot, List<Customer> route) {
         super(depot.getX(), depot.getY());
-        this.depot = depot;
+        this.startDepot = depot;
+        this.endDepot = depot;
         this.route = route;
     }
 
@@ -36,8 +38,8 @@ public class Vehicle extends MapObject {
     @Override
     public void render(GraphicsContext gc) {
         if (this.route.size() > 0) {
-            gc.setStroke(this.depot.getColor());
-            gc.strokeLine(depot.getPixelX(), depot.getPixelY(), this.route.get(0).getPixelX(), this.route.get(0).getPixelY());
+            gc.setStroke(this.startDepot.getColor());
+            gc.strokeLine(startDepot.getPixelX(), startDepot.getPixelY(), this.route.get(0).getPixelX(), this.route.get(0).getPixelY());
 
             for (int i = 0; i < this.route.size() - 1; i++) {
                 Customer gene = this.route.get(i);
@@ -46,7 +48,7 @@ public class Vehicle extends MapObject {
                 gc.strokeLine(gene.getPixelX(), gene.getPixelY(), nextGene.getPixelX(), nextGene.getPixelY());
             }
 
-            gc.strokeLine(this.route.get(this.route.size() - 1).getPixelX(), this.route.get(this.route.size() - 1).getPixelY(), this.depot.getPixelX(), this.depot.getPixelY());
+            gc.strokeLine(this.route.get(this.route.size() - 1).getPixelX(), this.route.get(this.route.size() - 1).getPixelY(), this.startDepot.getPixelX(), this.startDepot.getPixelY());
         }
     }
 
@@ -63,12 +65,16 @@ public class Vehicle extends MapObject {
         this.route = route;
     }
 
-    public Depot getDepot() {
-        return depot;
+    public Depot getStartDepot() {
+        return startDepot;
     }
 
-    public void setDepot(Depot depot) {
-        this.depot = depot;
+    public void setStartDepot(Depot depot) {
+        this.startDepot = depot;
+    }
+
+    public void setEndDepot(Depot depot) {
+        this.endDepot = depot;
     }
 
     /**
@@ -214,7 +220,7 @@ public class Vehicle extends MapObject {
      * Finds the nearest point for each
      */
     public void optimizeRoute() {
-        MapObject lastPoint = this.depot;
+        MapObject lastPoint = this.startDepot;
         List<Customer> newRoute = new ArrayList<>();
         Customer nearestGene = null;
 
@@ -243,6 +249,6 @@ public class Vehicle extends MapObject {
         for (Customer customer : route) {
             copyOfRoute.add(customer);
         }
-        return new Vehicle(depot, copyOfRoute);
+        return new Vehicle(startDepot, copyOfRoute);
     }
 }

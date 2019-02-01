@@ -5,7 +5,6 @@ import MapObjects.Vehicle;
 import Utils.Utils;
 import MapObjects.Customer;
 import MapObjects.Depot;
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,10 +56,9 @@ public class Solution {
         for (Depot depot : this.depots) {
             List<Vehicle> depotVehicles = new ArrayList<>();
 
-            // Vehicle v is not used here, should it be a traditional for loop instead?
-            for (Vehicle v : depot.getVehicles()) {
-                Vehicle vCopy = new Vehicle(depot);
-                depotVehicles.add(vCopy);
+            for (int i = 0; i < depot.getVehicles().size(); i++) {
+                Vehicle v = new Vehicle(depot);
+                depotVehicles.add(v);
             }
 
             // TODO: Referanse??
@@ -70,6 +68,25 @@ public class Solution {
             for (Customer customer : depotCustomers) { // Assign customer to random vehicle
                 int randomIndex = Utils.randomIndex(depotVehicles.size());
                 depotVehicles.get(randomIndex).addCustomer(customer);
+            }
+
+
+            // Set end depot for each vehicle
+            double currentMinDistance = Double.MAX_VALUE;
+            for (Vehicle v : depotVehicles) {
+                if (v.getRoute().size() > 0)
+                {
+                    for (Depot d : depots)
+                    {
+                        double distance = Utils.euclideanDistance(d.getX(), v.getRoute().get(v.getRoute().size() - 1).getX(),
+                                d.getY(), v.getRoute().get(v.getRoute().size() - 1).getY());
+                        if (distance < currentMinDistance)
+                        {
+                            currentMinDistance = distance;
+                            v.setEndDepot(d);
+                        }
+                    }
+                }
             }
 
             // Problem her med referanse - bør lage nye referanser
@@ -97,8 +114,8 @@ public class Solution {
 
         // TODO: Referanse??
         List<Customer>[] newRoutes = vehicle.crossOver(otherVehicle.getRoute(), 1);
-        Vehicle newVehicle = new Vehicle(vehicle.getDepot(), newRoutes[0]);
-        Vehicle newVehicle2 = new Vehicle(vehicle.getDepot(), newRoutes[1]);
+        Vehicle newVehicle = new Vehicle(vehicle.getStartDepot(), newRoutes[0]);
+        Vehicle newVehicle2 = new Vehicle(vehicle.getStartDepot(), newRoutes[1]);
 
         // Remove parents
         newVehicles.remove(vehicle);
@@ -127,7 +144,7 @@ public class Solution {
         List<Vehicle> possiblePartners = new ArrayList<>();
 
         for (Vehicle v : vehicles) {
-            if (v.getDepot() == vehicle.getDepot()) {
+            if (v.getStartDepot() == vehicle.getStartDepot()) {
                 possiblePartners.add(v);
             }
         }
@@ -151,7 +168,7 @@ public class Solution {
         Vehicle vehicle = vehicles.get(randomIndex);
         // TODO: Referanse??
         List<Customer> newRoute = vehicle.mutate();
-        Vehicle newVehicle = new Vehicle(vehicle.getDepot(), newRoute);
+        Vehicle newVehicle = new Vehicle(vehicle.getStartDepot(), newRoute);
 
         newVehicles.remove(vehicle);
         newVehicles.add(newVehicle);
@@ -243,13 +260,13 @@ public class Solution {
 
                 // Check between depot and first customer
                 if (i == 0) {
-                    distance += Utils.euclideanDistance(otherRoute.get(0).getX(), vehicle.getDepot().getX(), otherRoute.get(0).getY(), vehicle.getDepot().getY());
+                    distance += Utils.euclideanDistance(otherRoute.get(0).getX(), vehicle.getStartDepot().getX(), otherRoute.get(0).getY(), vehicle.getStartDepot().getY());
                     distance += Utils.euclideanDistance(otherRoute.get(otherRoute.size() - 1).getX(), customer.getX(), otherRoute.get(otherRoute.size() - 1).getY(), customer.getY());
                 }
                 // Check between last customer and depot
                 else if (i == newVehicles.size() - 1) {
                     distance += Utils.euclideanDistance(customer.getX(), otherRoute.get(0).getX(), customer.getY(), otherRoute.get(0).getY());
-                    distance += Utils.euclideanDistance(vehicle.getDepot().getX(), otherRoute.get(otherRoute.size() - 1).getX(), vehicle.getDepot().getY(), otherRoute.get(otherRoute.size() - 1).getY());
+                    distance += Utils.euclideanDistance(vehicle.getStartDepot().getX(), otherRoute.get(otherRoute.size() - 1).getX(), vehicle.getStartDepot().getY(), otherRoute.get(otherRoute.size() - 1).getY());
                 } else {
                     Customer lastCustomer = vehicle.getRoute().get(i - 1);
                     distance += Utils.euclideanDistance(otherRoute.get(0).getX(), lastCustomer.getX(), otherRoute.get(0).getY(), lastCustomer.getY());
@@ -261,7 +278,20 @@ public class Solution {
                     minVehicle = vehicle;
                     minIndex = i;
                 }
+            }
 
+            // Find best ending point for route
+            if (vehicle.getRoute().size() > 0) {
+                double currentMinDistance = Double.MAX_VALUE;
+                Depot currentBestEnd = vehicle.getStartDepot();
+                for (Depot d : depots) {
+                    double distance = Utils.euclideanDistance(vehicle.getRoute().get(vehicle.getRoute().size() - 1).getX(), d.getX(),
+                            vehicle.getRoute().get(vehicle.getRoute().size() - 1).getY(), d.getY());
+                    if (distance < currentMinDistance) {
+                        currentMinDistance = distance;
+                    }
+                }
+                vehicle.setEndDepot(currentBestEnd);
             }
         }
 
@@ -269,6 +299,7 @@ public class Solution {
             System.out.println("WTF?"); // TODO: Error
         } else {
             // Legg inn routeFromOtherSolution der fitness er best
+            // Legge inn end depot her?
             minVehicle.getRoute().addAll(minIndex, otherRoute);
         }
 

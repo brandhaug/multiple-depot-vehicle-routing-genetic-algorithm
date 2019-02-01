@@ -15,9 +15,9 @@ import java.util.List;
 public class GeneticAlgorithm {
 
     // Parameters
-    private int populationSize = 50; // 20-100 dependent on problem
+    private int populationSize = 200; // 20-100 dependent on problem
     private double crossOverRate = 0.8; // 80%-95%
-    private double mutationRate = 0.05; // 0.5%-1%.
+    private double mutationRate = 0.1; // 0.5%-1%.
     private double selectionRate = 0.2;
 
 
