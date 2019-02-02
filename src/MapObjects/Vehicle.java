@@ -83,11 +83,13 @@ public class Vehicle extends MapObject {
      * @return
      */
     public double calculateRouteDistance() {
-        double routeDistance = 0.0;
+        if (this.route.size() == 0) return 0.0;
+        double routeDistance = Utils.euclideanDistance(startDepot.getX(), route.get(0).getX(), startDepot.getY(), route.get(0).getY());
 
         for (int i = 0; i < this.route.size() - 1; i++) {
             routeDistance += this.route.get(i).distance(this.route.get(i + 1));
         }
+        routeDistance += Utils.euclideanDistance(route.get(route.size() - 1).getX(), endDepot.getX(), route.get(route.size() - 1).getY(), endDepot.getY());
         return routeDistance;
     }
 

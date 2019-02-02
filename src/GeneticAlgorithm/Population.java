@@ -125,7 +125,7 @@ public class Population {
         }
     }
 
-    public int getAlphaFitness() {
+    public double getAlphaFitness() {
         return alphaSolution.getFitness();
     }
 

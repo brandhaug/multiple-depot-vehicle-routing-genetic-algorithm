@@ -78,10 +78,17 @@ public class Controller {
 
         new AnimationTimer() { // Game loop
             public void handle(long currentNanoTime) {
+                if (ga.getAlphaFitness() <= map.getBenchmark()) {
+                    paused = true;
+                    fitnessLabel.setText("Fitness: " + ga.getAlphaFitness());
+                    startButton.setText("Start");
+                }
+
                 if (!paused) {
                     tick(startNanoTime, currentNanoTime);
                     render();
                 }
+
             }
         }.start();
     }

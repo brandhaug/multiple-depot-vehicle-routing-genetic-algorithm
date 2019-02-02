@@ -67,7 +67,7 @@ public class GeneticAlgorithm {
     /**
      * Get best fitness of Population
      */
-    public int getAlphaFitness() {
+    public double getAlphaFitness() {
         return population.getAlphaFitness();
     }
 

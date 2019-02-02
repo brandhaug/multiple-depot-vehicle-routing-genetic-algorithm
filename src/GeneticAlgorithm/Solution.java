@@ -185,7 +185,7 @@ public class Solution {
         int fitness = 0;
 
         for (Vehicle vehicle : vehicles) {
-            fitness += (int) vehicle.calculateRouteDistance();
+            fitness += vehicle.calculateRouteDistance();
         }
 
         return fitness;

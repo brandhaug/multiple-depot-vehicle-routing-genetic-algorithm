@@ -102,8 +102,8 @@ public class Map {
         return vehicles;
     }
 
-    public String getBenchmark()
+    public double getBenchmark()
     {
-        return String.valueOf(benchmarkFitness);
+        return benchmarkFitness;
     }
 }
