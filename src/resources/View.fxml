@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -12,13 +11,14 @@
       <Canvas fx:id="canvas" height="500.0" width="500.0" />
       <VBox alignment="CENTER" layoutX="500.0" prefHeight="500.0" prefWidth="150.0" styleClass="vbox">
          <children>
-            <Label fx:id="mapLabel" text="Map: null" textAlignment="CENTER" styleClass="label" />
-            <Label fx:id="timeLabel" text="Time: 0" textAlignment="CENTER" styleClass="label" />
-            <Label fx:id="depotsLabel" text="Depots: 0" textAlignment="CENTER" styleClass="label" />
-            <Label fx:id="vehiclesLabel" text="Vehicles: 0" textAlignment="CENTER" styleClass="label" />
-            <Label fx:id="customersLabel" text="Customers: 0" textAlignment="CENTER" styleClass="label" />
-            <Label fx:id="generationLabel" text="Generation: 0" textAlignment="CENTER" styleClass="label" />
-            <Label fx:id="fitnessLabel" text="Fitness: 0" textAlignment="CENTER" styleClass="label" />
+            <Label fx:id="mapLabel" styleClass="label" text="Map: null" textAlignment="CENTER" />
+            <Label fx:id="timeLabel" styleClass="label" text="Time: 0" textAlignment="CENTER" />
+            <Label fx:id="depotsLabel" styleClass="label" text="Depots: 0" textAlignment="CENTER" />
+            <Label fx:id="vehiclesLabel" styleClass="label" text="Vehicles: 0" textAlignment="CENTER" />
+            <Label fx:id="customersLabel" styleClass="label" text="Customers: 0" textAlignment="CENTER" />
+            <Label fx:id="generationLabel" styleClass="label" text="Generation: 0" textAlignment="CENTER" />
+            <Label fx:id="fitnessLabel" styleClass="label" text="Fitness: 0" textAlignment="CENTER" />
+            <Label fx:id="benchmarkLabel" text="Benchmark: 0" />
             <Button fx:id="startButton" mnemonicParsing="false" onAction="#togglePaused" styleClass="button" text="Start" />
          </children>
       </VBox>

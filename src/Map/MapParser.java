@@ -21,6 +21,7 @@ public class MapParser {
     private List<Depot> depots = new ArrayList<>();
     private List<Customer> customers = new ArrayList<>();
     private List<Vehicle> vehicles = new ArrayList<>();
+    private double benchmarkFitness;
 
     /**
      * Parser map file
@@ -31,6 +32,7 @@ public class MapParser {
     public MapParser(String fileName) throws IOException {
         parseMapFile(fileName);
         assignCustomersToNearestDepot();
+        parseResult(fileName);
     }
 
 
@@ -117,6 +119,27 @@ public class MapParser {
         }
     }
 
+    private void parseResult(String fileName) throws IOException {
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource("resources/solutions/" + fileName + ".res").getFile());
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String line;
+
+        if (Controller.verbose) {
+            System.out.println("========= Parsing result file =========");
+        }
+
+        line = br.readLine();
+        // TODO: Burde vi parse mer fra resultatfilen enn benchmark score?
+        if (line  != null) {
+            benchmarkFitness = Double.parseDouble(line);
+        }
+
+        if (Controller.verbose) {
+            System.out.println("========= END Parsing result file =========");
+        }
+    }
+
     /**
      * Sets extreme values, if more extreme than the current extreme value.
      * @param x
@@ -172,5 +195,10 @@ public class MapParser {
 
     public List<Vehicle> getVehicles() {
         return vehicles;
+    }
+
+    public double getBenchmark()
+    {
+        return benchmarkFitness;
     }
 }

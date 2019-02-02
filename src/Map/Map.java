@@ -17,6 +17,7 @@ public class Map {
     private List<Depot> depots; // All depots in map
     private List<Customer> customers; // All customers in map
     private List<Vehicle> vehicles; // All vehicles in map
+    private double benchmarkFitness;
 
     // Map extreme values: used to calculate scales
     public static int maximumX = -Integer.MAX_VALUE; // Largest x-value in map
@@ -39,6 +40,7 @@ public class Map {
         this.depots = mapParser.getDepots();
         this.customers = mapParser.getCustomers();
         this.vehicles = mapParser.getVehicles();
+        this.benchmarkFitness = mapParser.getBenchmark();
     }
 
     /**
@@ -98,5 +100,10 @@ public class Map {
 
     public List<Vehicle> getVehicles() {
         return vehicles;
+    }
+
+    public String getBenchmark()
+    {
+        return String.valueOf(benchmarkFitness);
     }
 }

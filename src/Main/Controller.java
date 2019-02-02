@@ -31,6 +31,7 @@ public class Controller {
     @FXML private Label customersLabel; // Shows number of customers in Map
     @FXML private Label generationLabel; // Shows generation in GeneticAlgorithm
     @FXML private Label fitnessLabel;  // Shows alphaFitness (best Solution) of Population in GeneticAlgorithm
+    @FXML private Label benchmarkLabel; // Shows benchmark fitness for current map
     // TODO: Label and slider for GeneticAlgorithm's mutationRate, crossOverRate, populationSize etc.
 
     // Map
@@ -66,6 +67,7 @@ public class Controller {
             depotsLabel.setText("Depots: " + map.getDepotsSize()); // Number of depots
             vehiclesLabel.setText("Vehicles: " + map.getVehiclesSize()); // Number of vehicles
             customersLabel.setText("Customers: " + map.getCustomersSize()); // Number of customers
+            benchmarkLabel.setText("Benchmark: " + map.getBenchmark());
         } catch (IOException e) {
             e.printStackTrace();
         }
