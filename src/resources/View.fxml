@@ -2,6 +2,7 @@
 
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
@@ -11,6 +12,7 @@
       <Canvas fx:id="canvas" height="500.0" width="500.0" />
       <VBox alignment="CENTER" layoutX="500.0" prefHeight="500.0" prefWidth="150.0" styleClass="vbox">
          <children>
+            <ComboBox fx:id="mapSelector" onAction="#selectMap" styleClass="combo-box" />
             <Label fx:id="mapLabel" styleClass="label" text="Map: null" textAlignment="CENTER" />
             <Label fx:id="timeLabel" styleClass="label" text="Time: 0" textAlignment="CENTER" />
             <Label fx:id="depotsLabel" styleClass="label" text="Depots: 0" textAlignment="CENTER" />
@@ -18,7 +20,7 @@
             <Label fx:id="customersLabel" styleClass="label" text="Customers: 0" textAlignment="CENTER" />
             <Label fx:id="generationLabel" styleClass="label" text="Generation: 0" textAlignment="CENTER" />
             <Label fx:id="fitnessLabel" styleClass="label" text="Fitness: 0" textAlignment="CENTER" />
-            <Label fx:id="benchmarkLabel" text="Benchmark: 0" />
+            <Label fx:id="benchmarkLabel" styleClass="label" text="Benchmark: 0" textAlignment="CENTER" />
             <Button fx:id="startButton" mnemonicParsing="false" onAction="#togglePaused" styleClass="button" text="Start" />
          </children>
       </VBox>

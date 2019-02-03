@@ -24,3 +24,7 @@
 
 .label {
 }
+
+.combo-box {
+    -fx-padding: .35em 1em;
+}

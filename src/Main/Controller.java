@@ -3,13 +3,19 @@ package Main;
 import GeneticAlgorithm.GeneticAlgorithm;
 import Map.Map;
 import javafx.animation.AnimationTimer;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Controls GUI (View.fxml)
@@ -23,19 +29,31 @@ import java.io.IOException;
 public class Controller {
 
     // GUI
-    @FXML private Button startButton; // Toggles between "Start" and "Pause", depending on state
-    @FXML private Label mapLabel; // Shows current Map
-    @FXML private Label timeLabel; // Shows current time TODO: Pause time when state is paused
-    @FXML private Label depotsLabel; // Shows number of depots in Map
-    @FXML private Label vehiclesLabel; // Shows number of vehicles in Map
-    @FXML private Label customersLabel; // Shows number of customers in Map
-    @FXML private Label generationLabel; // Shows generation in GeneticAlgorithm
-    @FXML private Label fitnessLabel;  // Shows alphaFitness (best Solution) of Population in GeneticAlgorithm
-    @FXML private Label benchmarkLabel; // Shows benchmark fitness for current map
+    @FXML
+    private Button startButton; // Toggles between "Start" and "Pause", depending on state
+    @FXML
+    private Label mapLabel; // Shows current Map
+    @FXML
+    private Label timeLabel; // Shows current time TODO: Pause time when state is paused
+    @FXML
+    private Label depotsLabel; // Shows number of depots in Map
+    @FXML
+    private Label vehiclesLabel; // Shows number of vehicles in Map
+    @FXML
+    private Label customersLabel; // Shows number of customers in Map
+    @FXML
+    private Label generationLabel; // Shows generation in GeneticAlgorithm
+    @FXML
+    private Label fitnessLabel;  // Shows alphaFitness (best Solution) of Population in GeneticAlgorithm
+    @FXML
+    private Label benchmarkLabel; // Shows benchmark fitness for current map
+    @FXML
+    private ComboBox mapSelector; // Shows benchmark fitness for current map
     // TODO: Label and slider for GeneticAlgorithm's mutationRate, crossOverRate, populationSize etc.
 
     // Map
-    @FXML private Canvas canvas;
+    @FXML
+    private Canvas canvas;
     private Map map;
     private String fileName = "p01"; // Current map TODO: Select map in GUI
 
@@ -49,6 +67,7 @@ public class Controller {
 
     // States
     private boolean paused = true; // Used to start/pause game loop
+    private boolean initialized = false; // Used to start/pause game loop
 
     // Settings
     public static boolean verbose = true; // Used to enable logging with System.out.println()
@@ -63,11 +82,8 @@ public class Controller {
         try {
             map = new Map(fileName); // Parse file
             ga = new GeneticAlgorithm(map.getDepots()); // Creates initial population
-            mapLabel.setText("Map: " + fileName); // Current map
-            depotsLabel.setText("Depots: " + map.getDepotsSize()); // Number of depots
-            vehiclesLabel.setText("Vehicles: " + map.getVehiclesSize()); // Number of vehicles
-            customersLabel.setText("Customers: " + map.getCustomersSize()); // Number of customers
-            benchmarkLabel.setText("Benchmark: " + map.getBenchmark());
+            initializeGUI();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -75,6 +91,8 @@ public class Controller {
         gc = canvas.getGraphicsContext2D(); // Used to draw in canvas
         render(); // Render Map (Depots and Customers) and alphaSolution (best Solution in population) on canvas
         final long startNanoTime = System.nanoTime(); // Time when system starts
+
+        initialized = true;
 
         new AnimationTimer() { // Game loop
             public void handle(long currentNanoTime) {
@@ -118,8 +136,43 @@ public class Controller {
         ga.render(gc); // Renders alphaSolution of Population in GeneticAlgorithm
     }
 
+    private void initializeGUI() {
+        mapLabel.setText("Map: " + fileName); // Current map
+        depotsLabel.setText("Depots: " + map.getDepotsSize()); // Number of depots
+        vehiclesLabel.setText("Vehicles: " + map.getVehiclesSize()); // Number of vehicles
+        customersLabel.setText("Customers: " + map.getCustomersSize()); // Number of customers
+        benchmarkLabel.setText("Benchmark: " + map.getBenchmark());
+
+        if (!initialized) {
+            initializeMapSelector();
+        }
+    }
+
+    private void initializeMapSelector() {
+        ClassLoader classLoader = getClass().getClassLoader();
+        File folder = new File(classLoader.getResource("resources/maps").getFile());
+        File[] mapFiles = folder.listFiles();
+        Arrays.sort(mapFiles);
+
+        if (mapFiles.length == 0) {
+            throw new IllegalStateException("Map folder is empty");
+        }
+
+        List<String> mapNames = new ArrayList<>();
+
+        for (File file : mapFiles) {
+            if (file.isFile()) {
+                mapNames.add(file.getName());
+            }
+        }
+
+        mapSelector.setItems(FXCollections.observableArrayList(mapNames));
+        mapSelector.getSelectionModel().selectFirst();
+    }
+
     /**
      * Updates labels in GUI
+     *
      * @param startNanoTime   the nano time of when the game was initialized.
      * @param currentNanoTime the nano time of the current game loop.
      */
@@ -143,6 +196,13 @@ public class Controller {
         } else {
             startButton.setText("Pause");
         }
+
+    }
+
+    @FXML
+    private void selectMap() {
+        fileName = mapSelector.getValue().toString();
+        initialize();
 
     }
 }

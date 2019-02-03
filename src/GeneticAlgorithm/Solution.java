@@ -74,14 +74,11 @@ public class Solution {
             // Set end depot for each vehicle
             double currentMinDistance = Double.MAX_VALUE;
             for (Vehicle v : depotVehicles) {
-                if (v.getRoute().size() > 0)
-                {
-                    for (Depot d : depots)
-                    {
+                if (v.getRoute().size() > 0) {
+                    for (Depot d : depots) {
                         double distance = Utils.euclideanDistance(d.getX(), v.getRoute().get(v.getRoute().size() - 1).getX(),
                                 d.getY(), v.getRoute().get(v.getRoute().size() - 1).getY());
-                        if (distance < currentMinDistance)
-                        {
+                        if (distance < currentMinDistance) {
                             currentMinDistance = distance;
                             v.setEndDepot(d);
                         }
@@ -226,6 +223,10 @@ public class Solution {
             System.out.println("Performing crossOver");
         }
 
+        if (vehicles == null) {
+            throw new NullPointerException("No vehicles in solution");
+        }
+
         // Creating a deep copy of vehicles
         List<Vehicle> newVehicles = new ArrayList<>();
         for (Vehicle vehicle : vehicles) {
@@ -295,13 +296,10 @@ public class Solution {
             }
         }
 
-        if (minVehicle == null) {
-            System.out.println("WTF?"); // TODO: Error
-        } else {
-            // Legg inn routeFromOtherSolution der fitness er best
-            // Legge inn end depot her?
-            minVehicle.getRoute().addAll(minIndex, otherRoute);
-        }
+        // Legg inn routeFromOtherSolution der fitness er best
+        // Legge inn end depot her?
+        // TODO: Error skjer når alle routes sizes i newVehicles er 0 (line 257)
+        minVehicle.getRoute().addAll(minIndex, otherRoute);
 
         System.out.println("CrossOver finished, returning new list of Vehicles");
 
