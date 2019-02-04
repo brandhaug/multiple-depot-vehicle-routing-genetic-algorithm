@@ -3,6 +3,7 @@ package GeneticAlgorithm;
 import Main.Controller;
 import MapObjects.Customer;
 import MapObjects.Depot;
+import MapObjects.Vehicle;
 import Utils.Utils;
 
 import java.util.ArrayList;
@@ -59,11 +60,7 @@ public class Population {
         for (Solution solution : solutions) {
             double random = Utils.randomDouble();
             if (random < crossOverRate) {
-                Solution partner = findCrossOverPartner(solution);
-                List<Customer> routeFromS1 = new ArrayList<>(solution.getVehicles().get(Utils.randomIndex(solution.getVehicles().size())).getRoute());
-                List<Customer> routeFromS2 = new ArrayList<>(partner.getVehicles().get(Utils.randomIndex(partner.getVehicles().size())).getRoute());
-                children.add(new Solution(depots, solution.crossOver(routeFromS2)));
-                children.add(new Solution(depots, partner.crossOver(routeFromS1)));
+                crossOver(solution, children);
             }
             if (random < mutationRate) {
                 children.add(new Solution(depots, solution.mutation()));
@@ -78,6 +75,38 @@ public class Population {
         generation++;
     }
 
+    private void crossOver(Solution solution, List<Solution> children) {
+        boolean routeAdded = false;
+        int triesLeft = 1000;
+
+        while (!routeAdded && triesLeft > 0) {
+            Solution partner = findCrossOverPartner(solution);
+            List<Vehicle> solutionRoutes = solution.getVehicles();
+            Vehicle solutionRandomVehicle = solutionRoutes.get(Utils.randomIndex(solution.getVehicles().size()));
+            List<Vehicle> partnerRoutes = partner.getVehicles();
+            Vehicle partnerRandomVehicle = partnerRoutes.get(Utils.randomIndex(partner.getVehicles().size()));
+            List<Customer> routeFromS1 = new ArrayList<>(solutionRandomVehicle.getRoute());
+            List<Customer> routeFromS2 = new ArrayList<>(partnerRandomVehicle.getRoute());
+
+            List<Vehicle> child1Vehicles = solution.crossOver(routeFromS2);
+            List<Vehicle> child2Vehicles = partner.crossOver(routeFromS1);
+            if (child1Vehicles != null || child2Vehicles != null) {
+                Solution child1 = new Solution(depots, child1Vehicles);
+                Solution child2 = new Solution(depots, child2Vehicles);
+
+                children.add(child1);
+                children.add(child2);
+                routeAdded = true;
+            }
+            else {
+                triesLeft--;
+            }
+
+
+
+        }
+    }
+
     Solution findCrossOverPartner(Solution self) {
         Solution partner = self;
         while (self == partner) {
@@ -90,9 +119,10 @@ public class Population {
      * Generates initial population which generates n random Solutions. n = populationSize
      */
     private void generateInitialPopulation() {
-        for (int i = 0; i < populationSize; i++) {
+        while (solutions.size() != populationSize) {
             Solution solution = new Solution(this.depots);
-            solutions.add(solution);
+            boolean successful = solution.generateInitialSolution();
+            if (successful) solutions.add(solution);
         }
     }
 

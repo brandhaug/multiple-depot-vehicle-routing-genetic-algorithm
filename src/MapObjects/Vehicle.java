@@ -11,16 +11,16 @@ import java.util.List;
 public class Vehicle extends MapObject {
     private Depot startDepot;
     private Depot endDepot;
+    private int load;
     private List<Customer> route = new ArrayList<>();
 
-    // TODO: 1. Implement
-    // TODO: 2. Evolve over generations
     private int numberOfSplits;
 
     public Vehicle(Depot depot) {
         super(depot.getX(), depot.getY());
         this.startDepot = depot;
         this.endDepot = depot;
+        this.load = 0;
     }
 
     public Vehicle(Depot depot, List<Customer> route) {
@@ -28,6 +28,7 @@ public class Vehicle extends MapObject {
         this.startDepot = depot;
         this.endDepot = depot;
         this.route = route;
+        this.load = 0;
     }
 
     /**
@@ -77,6 +78,10 @@ public class Vehicle extends MapObject {
         this.endDepot = depot;
     }
 
+    public int getLoad() {
+        return load;
+    }
+
     /**
      * Calculates total distance for this.route
      *
@@ -99,7 +104,7 @@ public class Vehicle extends MapObject {
      * @param otherRoute TODO: @param numberOfCrossOvers
      * @return
      */
-    public List<Customer>[] crossOver(List<Customer> otherRoute, int numberOfCrossOvers) {
+    public List<Customer>[] mutation2(List<Customer> otherRoute, int numberOfCrossOvers) {
         final List<Customer>[] subRoutes = split(this.route, numberOfSplits);
         final List<Customer>[] otherSubRoutes = split(otherRoute, numberOfSplits);
         List<Customer> firstCrossOver = merge(subRoutes[0], otherSubRoutes[1], numberOfSplits);
@@ -207,8 +212,14 @@ public class Vehicle extends MapObject {
         return Double.toString(calculateRouteDistance());
     }
 
-    public void addCustomer(Customer customer) {
+    public void addCustomerToRoute(Customer customer) {
         this.route.add(customer);
+        this.load += customer.getLoadDemand();
+    }
+
+    public void removeCustomerFromRoute(Customer customer) {
+        this.route.remove(customer);
+        this.load -= customer.getLoadDemand();
     }
 
     public void shuffleRoute() {

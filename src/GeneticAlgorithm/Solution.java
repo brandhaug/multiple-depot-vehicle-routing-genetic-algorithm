@@ -27,7 +27,6 @@ public class Solution {
      */
     public Solution(List<Depot> depots) {
         this.depots = depots;
-        generateInitialSolution();
     }
 
     public Solution(List<Depot> depots, List<Vehicle> vehicles) {
@@ -36,19 +35,10 @@ public class Solution {
     }
 
     /**
-     * One generation of solution
-     * 1. Crossover
-     * 2. Mutation
-     * 3. Calculate distance and fitness
-     */
-    public void tick() {
-    }
-
-    /**
      * Each Depot has n Vehicles and m Customers
      * Loops through all Depots, and assigns the Depot's Customers to a random Depot's vehicle.
      */
-    public void generateInitialSolution() {
+    public boolean generateInitialSolution() {
         if (Controller.verbose) {
             System.out.println("========= Creating random initial vehicles =========");
         }
@@ -61,24 +51,40 @@ public class Solution {
                 depotVehicles.add(v);
             }
 
-            // TODO: Referanse??
             List<Customer> depotCustomers = depot.getCustomers(); // Current depot's customers
 
             // TODO: Ta høyde for vehicle sin max distance og max load
+
             for (Customer customer : depotCustomers) { // Assign customer to random vehicle
-                int randomIndex = Utils.randomIndex(depotVehicles.size());
-                depotVehicles.get(randomIndex).addCustomer(customer);
+                boolean customerAdded = false;
+                int customerTriesLeft = 1000;
+                while (!customerAdded && customerTriesLeft > 0) {
+                    int randomIndex = Utils.randomIndex(depotVehicles.size());
+
+                    // Add customer to route if it does not overstep max load
+                    if (depotVehicles.get(randomIndex).getLoad() + customer.getLoadDemand() <= depot.getMaxLoad()) {
+                        depotVehicles.get(randomIndex).addCustomerToRoute(customer);
+                        customerAdded = true;
+                    }
+
+                    customerTriesLeft--;
+                }
+                if (customerTriesLeft == 0) return false;
             }
+
 
 
             // Set end depot for each vehicle
             double currentMinDistance = Double.MAX_VALUE;
             for (Vehicle v : depotVehicles) {
-                if (v.getRoute().size() > 0) {
-                    for (Depot d : depots) {
+                if (v.getRoute().size() > 0)
+                {
+                    for (Depot d : depots)
+                    {
                         double distance = Utils.euclideanDistance(d.getX(), v.getRoute().get(v.getRoute().size() - 1).getX(),
                                 d.getY(), v.getRoute().get(v.getRoute().size() - 1).getY());
-                        if (distance < currentMinDistance) {
+                        if (distance < currentMinDistance)
+                        {
                             currentMinDistance = distance;
                             v.setEndDepot(d);
                         }
@@ -86,7 +92,6 @@ public class Solution {
                 }
             }
 
-            // Problem her med referanse - bør lage nye referanser
             this.vehicles.addAll(depotVehicles);
 
             if (Controller.verbose) {
@@ -98,6 +103,7 @@ public class Solution {
         for (Vehicle vehicle : vehicles) {
             vehicle.optimizeRoute();
         }
+        return true;
     }
 
     public List<Vehicle> mutation2(List<Vehicle> vehicles) {
@@ -109,8 +115,7 @@ public class Solution {
         Vehicle vehicle = vehicles.get(randomIndex);
         Vehicle otherVehicle = getMutationPartner(vehicle);
 
-        // TODO: Referanse??
-        List<Customer>[] newRoutes = vehicle.crossOver(otherVehicle.getRoute(), 1);
+        List<Customer>[] newRoutes = vehicle.mutation2(otherVehicle.getRoute(), 1);
         Vehicle newVehicle = new Vehicle(vehicle.getStartDepot(), newRoutes[0]);
         Vehicle newVehicle2 = new Vehicle(vehicle.getStartDepot(), newRoutes[1]);
 
@@ -220,7 +225,7 @@ public class Solution {
 
     public List<Vehicle> crossOver(List<Customer> otherRoute) {
         if (Controller.verbose) {
-            System.out.println("Performing crossOver");
+            System.out.println("Performing mutation2");
         }
 
         if (vehicles == null) {
@@ -243,7 +248,7 @@ public class Solution {
             List<Customer> routeCopy = new ArrayList<>(vehicle.getRoute()); // Copy to avoid error when removing while looping
             for (Customer customer : routeCopy) {
                 if (otherRoute.contains(customer)) {
-                    vehicle.getRoute().remove(customer);
+                    vehicle.removeCustomerFromRoute(customer);
                 }
             }
         }
@@ -274,7 +279,12 @@ public class Solution {
                     distance += Utils.euclideanDistance(otherRoute.get(otherRoute.size() - 1).getX(), customer.getX(), otherRoute.get(otherRoute.size() - 1).getY(), customer.getY());
                 }
 
-                if (distance < minDistance) {
+                int load = vehicle.getLoad();
+                for (Customer c : otherRoute) {
+                    load += c.getLoadDemand();
+                }
+
+                if (distance < minDistance && load <= vehicle.getStartDepot().getMaxLoad()) {
                     minDistance = distance;
                     minVehicle = vehicle;
                     minIndex = i;
@@ -295,6 +305,8 @@ public class Solution {
                 vehicle.setEndDepot(currentBestEnd);
             }
         }
+
+        if (minDistance == Double.MAX_VALUE) return null;
 
         // Legg inn routeFromOtherSolution der fitness er best
         // Legge inn end depot her?

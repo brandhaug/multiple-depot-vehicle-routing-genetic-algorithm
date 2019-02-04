@@ -41,6 +41,10 @@ public class Customer extends MapObject {
         return Utils.euclideanDistance(getX(), otherCustomer.getX(), getY(), otherCustomer.getY());
     }
 
+    public int getLoadDemand() {
+        return loadDemand;
+    }
+
     /**
      * Prints CustomerId
      * Used to print Customers in a Vehicle's route
