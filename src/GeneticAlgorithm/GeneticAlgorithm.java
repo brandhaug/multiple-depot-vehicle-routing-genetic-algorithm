@@ -19,6 +19,8 @@ public class GeneticAlgorithm {
     private double crossOverRate = 0.8; // 80%-95%
     private double mutationRate = 0.1; // 0.5%-1%.
     private double selectionRate = 0.2;
+    private int tournamentSize = 5;
+    private int numberOfChildren = populationSize/3;
 
     private List<Depot> depots;
     private Population population;
@@ -29,7 +31,7 @@ public class GeneticAlgorithm {
      */
     public GeneticAlgorithm(List<Depot> depots) {
         this.depots = depots;
-        population = new Population(depots, populationSize, crossOverRate, mutationRate, selectionRate);
+        population = new Population(depots, populationSize, crossOverRate, mutationRate, selectionRate, tournamentSize, numberOfChildren);
     }
 
     /**
