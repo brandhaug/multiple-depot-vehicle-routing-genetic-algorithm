@@ -95,7 +95,7 @@ public class MapParser {
                 for (int i = 0; i < maxVehicles; i++) {
                     Vehicle vehicle = new Vehicle(depot);
                     vehicles.add(vehicle);
-                    depot.getVehicles().add(vehicle);
+                    depot.addVehicle(vehicle);
                 }
 
                 depotIndex++;
@@ -167,7 +167,12 @@ public class MapParser {
                     nearestDepot = depot;
                 }
             }
-            nearestDepot.getCustomers().add(customer);
+
+            if (nearestDepot == null) {
+                throw new NullPointerException("Nearest Depot is not set");
+            }
+
+            nearestDepot.addCustomer(customer);
         }
     }
 

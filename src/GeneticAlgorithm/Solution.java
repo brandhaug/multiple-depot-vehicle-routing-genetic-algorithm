@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class Solution {
     private List<Depot> depots;
-    private List<Vehicle> vehicles = new ArrayList<>();
+    private List<Vehicle> vehicles;
 
     /**
      * Generates initialSolution and calculates distances
@@ -24,11 +24,12 @@ public class Solution {
      */
     public Solution(List<Depot> depots) {
         this.depots = depots;
+        vehicles = new ArrayList<>();
     }
 
     public Solution(List<Depot> depots, List<Vehicle> vehicles) {
         this.depots = depots;
-        this.vehicles = vehicles;
+        this.vehicles = new ArrayList<>(vehicles);
     }
 
     /**
@@ -43,7 +44,7 @@ public class Solution {
         for (Depot depot : depots) {
             List<Vehicle> depotVehicles = new ArrayList<>();
 
-            for (int i = 0; i < depot.getVehicles().size(); i++) {
+            for (int i = 0; i < depot.getMaxCars(); i++) {
                 Vehicle v = new Vehicle(depot);
                 depotVehicles.add(v);
             }
@@ -54,9 +55,9 @@ public class Solution {
                 boolean customerAdded = false;
                 int customerTriesLeft = 1000;
                 while (!customerAdded && customerTriesLeft > 0) {
-                    int randomIndex = Utils.randomIndex(depotVehicles.size());
+                    int randomIndex = Utils.randomIndex(depotVehicles.size()); // Random vehicle index
 
-                    // Add customer to route if it does not overstep max load
+                    // Add customer to random vehicle's route if it does not overstep max load
                     if (depotVehicles.get(randomIndex).getCurrentLoad() + customer.getLoadDemand() <= depot.getMaxLoad()) {
                         depotVehicles.get(randomIndex).addCustomerToRoute(customer);
                         customerAdded = true;
@@ -64,7 +65,7 @@ public class Solution {
 
                     customerTriesLeft--;
                 }
-                if (customerTriesLeft == 0) {
+                if (customerTriesLeft == 0) { // Giving up generating this initial solution
                     return false;
                 }
             }
@@ -160,7 +161,7 @@ public class Solution {
         int randomIndex = Utils.randomIndex(vehicles.size());
         Vehicle vehicle = vehicles.get(randomIndex);
         List<Customer> newRoute = vehicle.mutate();
-        // TODO: vehicle.clone() mest sannsynlig ikke nødvendig
+        // TODO: vehicle.clone() - mest sannsynlig ikke nødvendig
         Vehicle newVehicle = new Vehicle(vehicle.getStartDepot(), newRoute);
 
         newVehicles.remove(vehicle);
@@ -194,17 +195,15 @@ public class Solution {
 
         if (vehicles == null) {
             throw new NullPointerException("No vehicles in solution");
+        } else if (otherRoute.size() == 0) {
+            System.out.println("Other Route is 0");
+            return vehicles;
         }
 
         // Creating a deep copy of vehicles
         List<Vehicle> newVehicles = new ArrayList<>();
         for (Vehicle vehicle : vehicles) {
             newVehicles.add(vehicle.clone());
-        }
-
-        if (otherRoute.size() == 0) {
-            System.out.println("Other Route is 0");
-            return newVehicles;
         }
 
         // Remove route from routeFromPartner
@@ -219,7 +218,7 @@ public class Solution {
 
         // Rull gjennom alle ruter og regn ut diff i fitness på alle mulige steder
         double minDistance = Double.MAX_VALUE;
-        Vehicle minVehicle = null;
+        Vehicle minVehicle = newVehicles.get(0);
         int minIndex = 0;
 
         for (Vehicle vehicle : newVehicles) {
@@ -228,30 +227,30 @@ public class Solution {
 
                 double distance = 0.0;
 
-                // Check between depot and first customer
-                if (i == 0) {
+                if (i == 0) { // Check between depot and first customer
                     distance += Utils.euclideanDistance(otherRoute.get(0).getX(), vehicle.getStartDepot().getX(), otherRoute.get(0).getY(), vehicle.getStartDepot().getY());
                     distance += Utils.euclideanDistance(otherRoute.get(otherRoute.size() - 1).getX(), customer.getX(), otherRoute.get(otherRoute.size() - 1).getY(), customer.getY());
-                }
-                // Check between last customer and depot
-                else if (i == newVehicles.size() - 1) {
+                } else if (i == newVehicles.size() - 1) { // Check between last customer and depot
                     distance += Utils.euclideanDistance(customer.getX(), otherRoute.get(0).getX(), customer.getY(), otherRoute.get(0).getY());
                     distance += Utils.euclideanDistance(vehicle.getStartDepot().getX(), otherRoute.get(otherRoute.size() - 1).getX(), vehicle.getStartDepot().getY(), otherRoute.get(otherRoute.size() - 1).getY());
-                } else {
+                } else { // Check between customers
                     Customer lastCustomer = vehicle.getRoute().get(i - 1);
                     distance += Utils.euclideanDistance(otherRoute.get(0).getX(), lastCustomer.getX(), otherRoute.get(0).getY(), lastCustomer.getY());
                     distance += Utils.euclideanDistance(otherRoute.get(otherRoute.size() - 1).getX(), customer.getX(), otherRoute.get(otherRoute.size() - 1).getY(), customer.getY());
                 }
 
-                int load = vehicle.getCurrentLoad();
-                for (Customer c : otherRoute) {
-                    load += c.getLoadDemand();
-                }
+                if (distance < minDistance) {
+                    int loadIfAdded = vehicle.getCurrentLoad();
+                    for (Customer c : otherRoute) {
+                        loadIfAdded += c.getLoadDemand();
+                    }
 
-                if (distance < minDistance && load <= vehicle.getStartDepot().getMaxLoad()) {
-                    minDistance = distance;
-                    minVehicle = vehicle;
-                    minIndex = i;
+                    // Checking constraints
+                    if (loadIfAdded <= vehicle.getStartDepot().getMaxLoad()) {
+                        minDistance = distance;
+                        minVehicle = vehicle;
+                        minIndex = i;
+                    }
                 }
             }
 
@@ -270,12 +269,12 @@ public class Solution {
             }
         }
 
-        if (minDistance == Double.MAX_VALUE) return null;
+//        if (minDistance == Double.MAX_VALUE) return null;
 
         // Legg inn routeFromOtherSolution der fitness er best
         // Legge inn end depot her?
         // TODO: Error skjer når alle routes sizes i newVehicles er 0 (line 257)
-        minVehicle.getRoute().addAll(minIndex, otherRoute);
+        minVehicle.addOtherRouteToRoute(minIndex, otherRoute);
 
         System.out.println("CrossOver finished, returning new list of Vehicles");
 

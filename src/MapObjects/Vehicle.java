@@ -47,7 +47,7 @@ public class Vehicle extends MapObject {
                 gc.strokeLine(gene.getPixelX(), gene.getPixelY(), nextGene.getPixelX(), nextGene.getPixelY());
             }
 
-            gc.strokeLine(route.get(route.size() - 1).getPixelX(), route.get(route.size() - 1).getPixelY(), startDepot.getPixelX(), startDepot.getPixelY());
+            gc.strokeLine(route.get(route.size() - 1).getPixelX(), route.get(route.size() - 1).getPixelY(), endDepot.getPixelX(), endDepot.getPixelY());
         }
     }
 
@@ -244,5 +244,9 @@ public class Vehicle extends MapObject {
     public Vehicle clone() {
         List<Customer> copyOfRoute = new ArrayList<>(route);
         return new Vehicle(startDepot, copyOfRoute);
+    }
+
+    public void addOtherRouteToRoute(int index, List<Customer> otherRoute) {
+        route.addAll(index, otherRoute);
     }
 }

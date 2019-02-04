@@ -76,15 +76,22 @@ public class Population {
 
         while (!routeAdded && triesLeft > 0) {
             Solution partner = findCrossOverPartner(solution);
-            List<Vehicle> solutionRoutes = solution.getVehicles();
-            Vehicle solutionRandomVehicle = solutionRoutes.get(Utils.randomIndex(solution.getVehicles().size()));
-            List<Vehicle> partnerRoutes = partner.getVehicles();
-            Vehicle partnerRandomVehicle = partnerRoutes.get(Utils.randomIndex(partner.getVehicles().size()));
-            List<Customer> routeFromS1 = new ArrayList<>(solutionRandomVehicle.getRoute());
-            List<Customer> routeFromS2 = new ArrayList<>(partnerRandomVehicle.getRoute());
+            List<Vehicle> solutionVehicles = solution.getVehicles();
+            if (solutionVehicles == null) throw new NullPointerException("SolutionRoutes is null, you suck");
+            int randIndex = Utils.randomIndex(solutionVehicles.size());
+            Vehicle solutionVehicle = solutionVehicles.get(randIndex);
+
+            List<Vehicle> partnerVehicles = partner.getVehicles();
+            if (partnerVehicles == null) throw new NullPointerException("PartnerRoutes is null, you suck");
+            int randIndex2 = Utils.randomIndex(partner.getVehicles().size());
+
+            Vehicle partnerVehicle = partnerVehicles.get(randIndex2);
+            List<Customer> routeFromS1 = new ArrayList<>(solutionVehicle.getRoute());
+            List<Customer> routeFromS2 = new ArrayList<>(partnerVehicle.getRoute());
 
             List<Vehicle> child1Vehicles = solution.crossOver(routeFromS2);
             List<Vehicle> child2Vehicles = partner.crossOver(routeFromS1);
+
             if (child1Vehicles != null || child2Vehicles != null) {
                 Solution child1 = new Solution(depots, child1Vehicles);
                 Solution child2 = new Solution(depots, child2Vehicles);
@@ -117,7 +124,6 @@ public class Population {
                 System.out.println("Generating initial solution failed");
             } else {
                 solutions.add(solution);
-
             }
         }
     }

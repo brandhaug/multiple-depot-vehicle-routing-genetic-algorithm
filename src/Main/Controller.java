@@ -30,30 +30,19 @@ import java.util.List;
 public class Controller {
 
     // GUI
-    @FXML
-    private Button startButton; // Toggles between "Start" and "Pause", depending on state
-    @FXML
-    private Label mapLabel; // Shows current Map
-    @FXML
-    private Label timeLabel; // Shows current time
-    @FXML
-    private Label depotsLabel; // Shows number of depots in Map
-    @FXML
-    private Label vehiclesLabel; // Shows number of vehicles in Map
-    @FXML
-    private Label customersLabel; // Shows number of customers in Map
-    @FXML
-    private Label generationLabel; // Shows generation in GeneticAlgorithm
-    @FXML
-    private Label fitnessLabel;  // Shows alphaFitness (best Solution) of Population in GeneticAlgorithm
-    @FXML
-    private Label benchmarkLabel; // Shows benchmark fitness for current map
-    @FXML
-    private ComboBox mapSelector; // Shows benchmark fitness for current map
+    @FXML private Button startButton; // Toggles between "Start" and "Pause", depending on state
+    @FXML private Label mapLabel; // Shows current Map
+    @FXML private Label timeLabel; // Shows current time
+    @FXML private Label depotsLabel; // Shows number of depots in Map
+    @FXML private Label vehiclesLabel; // Shows number of vehicles in Map
+    @FXML private Label customersLabel; // Shows number of customers in Map
+    @FXML private Label generationLabel; // Shows generation in GeneticAlgorithm
+    @FXML private Label fitnessLabel;  // Shows alphaFitness (best Solution) of Population in GeneticAlgorithm
+    @FXML private Label benchmarkLabel; // Shows benchmark fitness for current map
+    @FXML private ComboBox mapSelector; // Shows benchmark fitness for current map
 
     // Map
-    @FXML
-    private Canvas canvas;
+    @FXML private Canvas canvas;
     private Map map;
     private String fileName = "p01"; // Current map
 

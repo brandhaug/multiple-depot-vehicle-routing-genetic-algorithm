@@ -18,12 +18,14 @@ public class Depot extends MapObject {
     private static int depotIndex;
     private Color[] colors = {Color.RED, Color.ORANGE, Color.GOLD, Color.GREEN, Color.BLUE, Color.INDIGO, Color.VIOLET}; // Possible depot colors
     private Color color; // Depot color on canvas
-    private List<Customer> customers = new ArrayList<>();
-    private List<Vehicle> vehicles = new ArrayList<>();
+    private List<Customer> customers;
+    private List<Vehicle> vehicles;
 
 
     public Depot(int maxDuration, int maxLoad, int maxCars) {
         super(0, 0);
+        this.customers = new ArrayList<>();
+        this.vehicles = new ArrayList<>();
         this.maxDuration = maxDuration;
         this.maxLoad = maxLoad;
         this.maxCars = maxCars;
@@ -64,5 +66,13 @@ public class Depot extends MapObject {
     }
     public List<Customer> getCustomers() {
         return customers;
+    }
+
+    public void addVehicle(Vehicle vehicle) {
+        vehicles.add(vehicle);
+    }
+
+    public void addCustomer(Customer customer) {
+        customers.add(customer);
     }
 }
