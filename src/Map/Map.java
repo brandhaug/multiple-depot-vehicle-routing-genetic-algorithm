@@ -20,10 +20,10 @@ public class Map {
     private double benchmarkFitness;
 
     // Map extreme values: used to calculate scales
-    public static int maximumX = -Integer.MAX_VALUE; // Largest x-value in map
-    public static int maximumY = -Integer.MAX_VALUE; // Largest y-value in map
-    public static int minimumX = Integer.MAX_VALUE; // Smallest x-value in map
-    public static int minimumY = Integer.MAX_VALUE; // Smallest y-value in map
+    public static int maximumX; // Largest x-value in map
+    public static int maximumY; // Largest y-value in map
+    public static int minimumX; // Smallest x-value in map
+    public static int minimumY; // Smallest y-value in map
 
     // Scales
     public static double scaleX; // Scales map to correct width in canvas
@@ -36,6 +36,7 @@ public class Map {
      * @throws IOException
      */
     public Map(String fileName) throws IOException {
+        resetExtremeValues();
         MapParser mapParser = new MapParser(fileName);
         this.depots = mapParser.getDepots();
         this.customers = mapParser.getCustomers();
@@ -43,10 +44,11 @@ public class Map {
         this.benchmarkFitness = mapParser.getBenchmark();
     }
 
-    /**
-     * Functionality loop
-     */
-    public void tick() {
+    private void resetExtremeValues() {
+        maximumX = -Integer.MAX_VALUE;
+        maximumY = -Integer.MAX_VALUE;
+        minimumX = Integer.MAX_VALUE;
+        minimumY = Integer.MAX_VALUE;
     }
 
     /**

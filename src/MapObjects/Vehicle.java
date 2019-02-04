@@ -207,10 +207,6 @@ public class Vehicle extends MapObject {
         return newRoute;
     }
 
-    @Override
-    public String toString() {
-        return Double.toString(calculateRouteDistance());
-    }
 
     public void addCustomerToRoute(Customer customer) {
         this.route.add(customer);
@@ -239,8 +235,7 @@ public class Vehicle extends MapObject {
 
         while (newRoute.size() != this.route.size()) {
             double minimumDistance = Double.MAX_VALUE;
-            for (int i = 0; i < this.route.size(); i++) {
-                Customer gene = this.route.get(i);
+            for (Customer gene : this.route) {
                 double distance = Utils.euclideanDistance(lastPoint.getX(), gene.getX(), lastPoint.getY(), gene.getY());
 
                 if (!newRoute.contains(gene) && distance < minimumDistance) {
@@ -258,10 +253,7 @@ public class Vehicle extends MapObject {
 
     @Override
     public Vehicle clone() {
-        List<Customer> copyOfRoute = new ArrayList<>();
-        for (Customer customer : route) {
-            copyOfRoute.add(customer);
-        }
+        List<Customer> copyOfRoute = new ArrayList<>(route);
         return new Vehicle(startDepot, copyOfRoute);
     }
 }

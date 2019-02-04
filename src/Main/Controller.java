@@ -55,7 +55,7 @@ public class Controller {
     @FXML
     private Canvas canvas;
     private Map map;
-    private String fileName = "p01"; // Current map TODO: Select map in GUI
+    private String fileName = "p01"; // Current map // TODO: Remove hard coding of fileName (set ComboBox before Map and GeneticAlgorithm in initialize)
 
     private GeneticAlgorithm ga; // GeneticAlgorithm: Contains a Population, which contains Solutions
 
@@ -83,7 +83,6 @@ public class Controller {
             map = new Map(fileName); // Parse file
             ga = new GeneticAlgorithm(map.getDepots()); // Creates initial population
             initializeGUI();
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -91,7 +90,6 @@ public class Controller {
         gc = canvas.getGraphicsContext2D(); // Used to draw in canvas
         render(); // Render Map (Depots and Customers) and alphaSolution (best Solution in population) on canvas
         final long startNanoTime = System.nanoTime(); // Time when system starts
-
         initialized = true;
 
         new AnimationTimer() { // Game loop
@@ -106,7 +104,6 @@ public class Controller {
                     tick(startNanoTime, currentNanoTime);
                     render();
                 }
-
             }
         }.start();
     }
