@@ -29,6 +29,14 @@ public class Vehicle extends MapObject {
         this.currentLoad = 0;
     }
 
+    public Vehicle(Depot startDepot, Depot endDepot, List<Customer> route) {
+        super(startDepot.getX(), startDepot.getY());
+        this.startDepot = startDepot;
+        this.endDepot = endDepot;
+        this.route = route;
+        this.currentLoad = 0;
+    }
+
     /**
      * Renders the route path
      *
@@ -243,7 +251,7 @@ public class Vehicle extends MapObject {
     @Override
     public Vehicle clone() {
         List<Customer> copyOfRoute = new ArrayList<>(route);
-        return new Vehicle(startDepot, copyOfRoute);
+        return new Vehicle(startDepot, endDepot, copyOfRoute);
     }
 
     public void addOtherRouteToRoute(int index, List<Customer> otherRoute) {
