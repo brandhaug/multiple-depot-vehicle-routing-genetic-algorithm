@@ -94,8 +94,8 @@ public class MapParser {
 
                 for (int i = 0; i < maxVehicles; i++) {
                     Vehicle vehicle = new Vehicle(depot);
-                    vehicles.add(vehicle); // TODO: Add maxDistance and maxLoad
-                    depot.addVehicle(vehicle);
+                    vehicles.add(vehicle);
+                    depot.getVehicles().add(vehicle);
                 }
 
                 depotIndex++;
@@ -130,7 +130,6 @@ public class MapParser {
         }
 
         line = br.readLine();
-        // TODO: Burde vi parse mer fra resultatfilen enn benchmark score?
         if (line  != null) {
             benchmarkFitness = Double.parseDouble(line);
         }
@@ -168,7 +167,7 @@ public class MapParser {
                     nearestDepot = depot;
                 }
             }
-            nearestDepot.addCustomer(customer);
+            nearestDepot.getCustomers().add(customer);
         }
     }
 

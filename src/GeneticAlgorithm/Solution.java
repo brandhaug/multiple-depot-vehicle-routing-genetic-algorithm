@@ -17,9 +17,6 @@ public class Solution {
     private List<Depot> depots;
     private List<Vehicle> vehicles = new ArrayList<>();
 
-    private int fitness; // Same as totalDistance for now
-    private double totalDistance; // Total distance of all Vehicle routes
-
     /**
      * Generates initialSolution and calculates distances
      *
@@ -43,7 +40,7 @@ public class Solution {
             System.out.println("========= Creating random initial vehicles =========");
         }
 
-        for (Depot depot : this.depots) {
+        for (Depot depot : depots) {
             List<Vehicle> depotVehicles = new ArrayList<>();
 
             for (int i = 0; i < depot.getVehicles().size(); i++) {
@@ -53,8 +50,6 @@ public class Solution {
 
             List<Customer> depotCustomers = depot.getCustomers(); // Current depot's customers
 
-            // TODO: Ta høyde for vehicle sin max distance og max load
-
             for (Customer customer : depotCustomers) { // Assign customer to random vehicle
                 boolean customerAdded = false;
                 int customerTriesLeft = 1000;
@@ -62,7 +57,7 @@ public class Solution {
                     int randomIndex = Utils.randomIndex(depotVehicles.size());
 
                     // Add customer to route if it does not overstep max load
-                    if (depotVehicles.get(randomIndex).getLoad() + customer.getLoadDemand() <= depot.getMaxLoad()) {
+                    if (depotVehicles.get(randomIndex).getCurrentLoad() + customer.getLoadDemand() <= depot.getMaxLoad()) {
                         depotVehicles.get(randomIndex).addCustomerToRoute(customer);
                         customerAdded = true;
                     }
@@ -72,19 +67,14 @@ public class Solution {
                 if (customerTriesLeft == 0) return false;
             }
 
-
-
             // Set end depot for each vehicle
             double currentMinDistance = Double.MAX_VALUE;
             for (Vehicle v : depotVehicles) {
-                if (v.getRoute().size() > 0)
-                {
-                    for (Depot d : depots)
-                    {
+                if (v.getRoute().size() > 0) {
+                    for (Depot d : depots) {
                         double distance = Utils.euclideanDistance(d.getX(), v.getRoute().get(v.getRoute().size() - 1).getX(),
                                 d.getY(), v.getRoute().get(v.getRoute().size() - 1).getY());
-                        if (distance < currentMinDistance)
-                        {
+                        if (distance < currentMinDistance) {
                             currentMinDistance = distance;
                             v.setEndDepot(d);
                         }
@@ -92,14 +82,14 @@ public class Solution {
                 }
             }
 
-            this.vehicles.addAll(depotVehicles);
+            vehicles.addAll(depotVehicles);
 
             if (Controller.verbose) {
                 System.out.println("========= END Creating random initial vehicles =========");
             }
         }
+
         // Optimize route for each vehicle
-        // TODO: Try vehicle.shuffle() to see difference
         for (Vehicle vehicle : vehicles) {
             vehicle.optimizeRoute();
         }
@@ -115,7 +105,7 @@ public class Solution {
         Vehicle vehicle = vehicles.get(randomIndex);
         Vehicle otherVehicle = getMutationPartner(vehicle);
 
-        List<Customer>[] newRoutes = vehicle.mutation2(otherVehicle.getRoute(), 1);
+        List<Customer>[] newRoutes = vehicle.mutation2(otherVehicle.getRoute());
         Vehicle newVehicle = new Vehicle(vehicle.getStartDepot(), newRoutes[0]);
         Vehicle newVehicle2 = new Vehicle(vehicle.getStartDepot(), newRoutes[1]);
 
@@ -136,7 +126,6 @@ public class Solution {
     /**
      * Finds another Vehicle as partner for mutation
      * Potential mutationPartner can only be a Vehicle from same Depot
-     * TODO: Try potential crossOverPartner with all vehicles
      *
      * @param vehicle
      * @return
@@ -168,8 +157,8 @@ public class Solution {
 
         int randomIndex = Utils.randomIndex(vehicles.size());
         Vehicle vehicle = vehicles.get(randomIndex);
-        // TODO: Referanse??
         List<Customer> newRoute = vehicle.mutate();
+        // TODO: vehicle.clone()
         Vehicle newVehicle = new Vehicle(vehicle.getStartDepot(), newRoute);
 
         newVehicles.remove(vehicle);
@@ -181,42 +170,15 @@ public class Solution {
 
     /**
      * Calculates fitness for all routes in solution
-     * TODO: Same as totalDistance: Either find a new fitness rating, or delete
      */
-    public int getFitness() {
-        int fitness = 0;
+    public double getFitness() {
+        double fitness = 0.0;
 
         for (Vehicle vehicle : vehicles) {
             fitness += vehicle.calculateRouteDistance();
         }
 
         return fitness;
-    }
-
-    /**
-     * Calculates total distance for all routes in Solution.
-     * TODO: Right now the distance are only calculated between customers, and not between depots and customers
-     */
-    public void calculateTotalDistance() {
-        int totalDistance = 0;
-
-        for (Vehicle vehicle : vehicles) {
-            totalDistance += (int) vehicle.calculateRouteDistance();
-        }
-
-        this.totalDistance = totalDistance;
-    }
-
-    public void setFitness(int fitness) {
-        this.fitness = fitness;
-    }
-
-    public double getTotalDistance() {
-        return totalDistance;
-    }
-
-    public void setTotalDistance(double totalDistance) {
-        this.totalDistance = totalDistance;
     }
 
     public List<Vehicle> getVehicles() {
@@ -279,7 +241,7 @@ public class Solution {
                     distance += Utils.euclideanDistance(otherRoute.get(otherRoute.size() - 1).getX(), customer.getX(), otherRoute.get(otherRoute.size() - 1).getY(), customer.getY());
                 }
 
-                int load = vehicle.getLoad();
+                int load = vehicle.getCurrentLoad();
                 for (Customer c : otherRoute) {
                     load += c.getLoadDemand();
                 }
@@ -318,12 +280,12 @@ public class Solution {
         return newVehicles;
     }
 
-    @Override
-    public Solution clone() {
-        List<Vehicle> copyOfVehicles = new ArrayList<>();
-        for (Vehicle vehicle : vehicles) {
-            copyOfVehicles.add(vehicle.clone());
-        }
-        return new Solution(depots, vehicles);
-    }
+//    @Override
+//    public Solution clone() {
+//        List<Vehicle> copyOfVehicles = new ArrayList<>();
+//        for (Vehicle vehicle : vehicles) {
+//            copyOfVehicles.add(vehicle.clone());
+//        }
+//        return new Solution(depots, copyOfVehicles);
+//    }
 }

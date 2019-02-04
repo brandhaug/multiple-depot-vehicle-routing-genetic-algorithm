@@ -34,7 +34,7 @@ public class Controller {
     @FXML
     private Label mapLabel; // Shows current Map
     @FXML
-    private Label timeLabel; // Shows current time TODO: Pause time when state is paused
+    private Label timeLabel; // Shows current time
     @FXML
     private Label depotsLabel; // Shows number of depots in Map
     @FXML
@@ -49,13 +49,12 @@ public class Controller {
     private Label benchmarkLabel; // Shows benchmark fitness for current map
     @FXML
     private ComboBox mapSelector; // Shows benchmark fitness for current map
-    // TODO: Label and slider for GeneticAlgorithm's mutationRate, crossOverRate, populationSize etc.
 
     // Map
     @FXML
     private Canvas canvas;
     private Map map;
-    private String fileName = "p01"; // Current map // TODO: Remove hard coding of fileName (set ComboBox before Map and GeneticAlgorithm in initialize)
+    private String fileName = "p01"; // Current map
 
     private GeneticAlgorithm ga; // GeneticAlgorithm: Contains a Population, which contains Solutions
 
@@ -180,7 +179,6 @@ public class Controller {
         fitnessLabel.setText("Fitness: " + ga.getAlphaFitness());
     }
 
-
     /**
      * Toggles paused state on button click
      */
@@ -193,13 +191,11 @@ public class Controller {
         } else {
             startButton.setText("Pause");
         }
-
     }
 
     @FXML
     private void selectMap() {
         fileName = mapSelector.getValue().toString();
         initialize();
-
     }
 }

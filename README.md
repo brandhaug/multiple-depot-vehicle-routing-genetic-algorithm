@@ -30,10 +30,10 @@ Survival of the fittest through natural selection
   * Make small changes to some of them
   
 ##### Components
-* **Gene**: Customer or TODO: Depot
+* **Gene**: Customer or Depot
 * **DNA**: List of genes/Sublist of Chromosome/Part of a route
 * **Chromosome**: Full DNA/List of merged DNAs/Full Route for one Vehicle
-* **Solution**: Full route for all Vehicles/Individual
+* **Solution**: Individual/Full route for all Vehicles
 * **Population**: List of all solutions/individuals
 
 ##### Operators

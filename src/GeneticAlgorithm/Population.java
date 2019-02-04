@@ -1,6 +1,5 @@
 package GeneticAlgorithm;
 
-import Main.Controller;
 import MapObjects.Customer;
 import MapObjects.Depot;
 import MapObjects.Vehicle;
@@ -49,8 +48,6 @@ public class Population {
     /**
      * One generation of Population
      * Loops through one generation of each Solution
-     * <p>
-     * One generation of solution
      * 1. Crossover
      * 2. Mutation
      * 3. Calculate distance and fitness
@@ -67,10 +64,8 @@ public class Population {
             }
         }
         solutions.addAll(children);
-        // Sort by fitness
-        solutions.sort(Comparator.comparingDouble(Solution::getFitness));
-        // Cut population to population size
-        solutions = solutions.stream().limit(populationSize).collect(Collectors.toList());
+        solutions.sort(Comparator.comparingDouble(Solution::getFitness)); // Sort by fitness
+        solutions = solutions.stream().limit(populationSize).collect(Collectors.toList()); // Cut population to population size
 
         generation++;
     }
@@ -97,17 +92,13 @@ public class Population {
                 children.add(child1);
                 children.add(child2);
                 routeAdded = true;
-            }
-            else {
+            } else {
                 triesLeft--;
             }
-
-
-
         }
     }
 
-    Solution findCrossOverPartner(Solution self) {
+    private Solution findCrossOverPartner(Solution self) {
         Solution partner = self;
         while (self == partner) {
             partner = solutions.get(Utils.randomIndex(solutions.size()));
@@ -120,39 +111,14 @@ public class Population {
      */
     private void generateInitialPopulation() {
         while (solutions.size() != populationSize) {
-            Solution solution = new Solution(this.depots);
+            Solution solution = new Solution(depots);
             boolean successful = solution.generateInitialSolution();
             if (successful) solutions.add(solution);
         }
     }
 
-    /**
-     * Sorts the Solutions based on fitness
-     * Selects n best Solutions. n = populationRoute to keep populationSize fixed
-     * TODO: Select parents for next generation before the the population is filtered
-     */
     public void selection() {
-        if (Controller.verbose) {
-            System.out.println("========= Performing selection on vehicles =========");
-            System.out.println("Vehicles size before selection: " + solutions.size());
-        }
 
-        //solutions.sort(Comparator.comparingDouble(Solution::getFitness)); // Sorts based on fitness
-        //this.alphaSolution = solutions.get(0); // Best Solution
-
-        // TODO: Select parents
-        for (int i = 0; i < solutions.size() * selectionRate; i++) {
-            Solution parent = solutions.get(i);
-        }
-
-        // Filters Solutions to populationSize. Because the list is sorted, the Solutions with worst fitness will be filtered
-        solutions = solutions.stream().limit(populationSize).collect(Collectors.toList());
-
-        if (Controller.verbose) {
-            System.out.println("Sorted solutions distances: " + solutions.toString());
-            System.out.println("Solutions size before selection: " + solutions.size());
-            System.out.println("========= END Performing selection on solutions =========");
-        }
     }
 
     public double getAlphaFitness() {

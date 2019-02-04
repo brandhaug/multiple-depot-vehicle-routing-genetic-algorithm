@@ -20,15 +20,11 @@ public class GeneticAlgorithm {
     private double mutationRate = 0.1; // 0.5%-1%.
     private double selectionRate = 0.2;
 
-
-    // Lists
     private List<Depot> depots;
-
     private Population population;
 
     /**
      * Creates initial population
-     *
      * @param depots
      */
     public GeneticAlgorithm(List<Depot> depots) {
@@ -80,45 +76,4 @@ public class GeneticAlgorithm {
 
     public int getGeneration() {
         return population.getGeneration();
-    }
-
-    public int getPopulationSize() {
-        return populationSize;
-    }
-
-    public void setPopulationSize(int populationSize) {
-        this.populationSize = populationSize;
-    }
-
-    public double getCrossOverRate() {
-        return crossOverRate;
-    }
-
-    public void setCrossOverRate(double crossOverRate) {
-        this.crossOverRate = crossOverRate;
-    }
-
-    public double getMutationRate() {
-        return mutationRate;
-    }
-
-    public void setMutationRate(double mutationRate) {
-        this.mutationRate = mutationRate;
-    }
-
-    public List<Depot> getDepots() {
-        return depots;
-    }
-
-    public void setDepots(List<Depot> depots) {
-        this.depots = depots;
-    }
-
-    public Population getPopulation() {
-        return population;
-    }
-
-    public void setPopulation(Population population) {
-        this.population = population;
-    }
-}
+    }}

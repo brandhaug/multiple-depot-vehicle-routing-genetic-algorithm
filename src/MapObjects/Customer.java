@@ -10,13 +10,13 @@ import javafx.scene.paint.Color;
  */
 public class Customer extends MapObject {
     private int id; // i: customer number
-    private int serviceDuration; // TODO: d: necessary service duration required for this customer
-    private int loadDemand; // TODO: q: demand for this customer
+    private int timeDemand;
+    private int loadDemand;
 
-    public Customer(int id, int x, int y, int serviceDuration, int loadDemand) {
+    public Customer(int id, int x, int y, int timeDemand, int loadDemand) {
         super(x, y);
         this.id = id;
-        this.serviceDuration = serviceDuration;
+        this.timeDemand = timeDemand;
         this.loadDemand = loadDemand;
     }
 
@@ -29,16 +29,6 @@ public class Customer extends MapObject {
     public void render(GraphicsContext gc) {
         gc.setStroke(Color.GRAY);
         gc.strokeOval(getPixelX() - 2, getPixelY() - 2, 5, 5);
-    }
-
-    /**
-     * Calculates euclidean distance between two Customers
-     * TODO: We may need this function for both Customers and Depots. If so, move it to MapObject
-     * @param otherCustomer
-     * @return
-     */
-    public double distance(Customer otherCustomer) {
-        return Utils.euclideanDistance(getX(), otherCustomer.getX(), getY(), otherCustomer.getY());
     }
 
     public int getLoadDemand() {

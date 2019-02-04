@@ -11,16 +11,14 @@ import java.util.List;
 public class Vehicle extends MapObject {
     private Depot startDepot;
     private Depot endDepot;
-    private int load;
+    private int currentLoad;
     private List<Customer> route = new ArrayList<>();
-
-    private int numberOfSplits;
 
     public Vehicle(Depot depot) {
         super(depot.getX(), depot.getY());
         this.startDepot = depot;
         this.endDepot = depot;
-        this.load = 0;
+        this.currentLoad = 0;
     }
 
     public Vehicle(Depot depot, List<Customer> route) {
@@ -28,7 +26,7 @@ public class Vehicle extends MapObject {
         this.startDepot = depot;
         this.endDepot = depot;
         this.route = route;
-        this.load = 0;
+        this.currentLoad = 0;
     }
 
     /**
@@ -38,18 +36,18 @@ public class Vehicle extends MapObject {
      */
     @Override
     public void render(GraphicsContext gc) {
-        if (this.route.size() > 0) {
-            gc.setStroke(this.startDepot.getColor());
-            gc.strokeLine(startDepot.getPixelX(), startDepot.getPixelY(), this.route.get(0).getPixelX(), this.route.get(0).getPixelY());
+        if (route.size() > 0) {
+            gc.setStroke(startDepot.getColor());
+            gc.strokeLine(startDepot.getPixelX(), startDepot.getPixelY(), route.get(0).getPixelX(), route.get(0).getPixelY());
 
-            for (int i = 0; i < this.route.size() - 1; i++) {
-                Customer gene = this.route.get(i);
-                Customer nextGene = this.route.get(i + 1);
+            for (int i = 0; i < route.size() - 1; i++) {
+                Customer gene = route.get(i);
+                Customer nextGene = route.get(i + 1);
 
                 gc.strokeLine(gene.getPixelX(), gene.getPixelY(), nextGene.getPixelX(), nextGene.getPixelY());
             }
 
-            gc.strokeLine(this.route.get(this.route.size() - 1).getPixelX(), this.route.get(this.route.size() - 1).getPixelY(), this.startDepot.getPixelX(), this.startDepot.getPixelY());
+            gc.strokeLine(route.get(route.size() - 1).getPixelX(), route.get(route.size() - 1).getPixelY(), startDepot.getPixelX(), startDepot.getPixelY());
         }
     }
 
@@ -57,61 +55,52 @@ public class Vehicle extends MapObject {
         return route;
     }
 
-    /**
-     * Shuffles route randomly
-     *
-     * @param route
-     */
-    private void setRoute(List<Customer> route) {
-        this.route = route;
-    }
-
     public Depot getStartDepot() {
         return startDepot;
     }
 
-    public void setStartDepot(Depot depot) {
-        this.startDepot = depot;
-    }
-
     public void setEndDepot(Depot depot) {
-        this.endDepot = depot;
+        endDepot = depot;
     }
 
-    public int getLoad() {
-        return load;
+    public int getCurrentLoad() {
+        return currentLoad;
     }
 
     /**
-     * Calculates total distance for this.route
+     * Calculates total distance for route
      *
      * @return
      */
     public double calculateRouteDistance() {
-        if (this.route.size() == 0) return 0.0;
-        double routeDistance = Utils.euclideanDistance(startDepot.getX(), route.get(0).getX(), startDepot.getY(), route.get(0).getY());
+        double routeDistance = 0.0;
 
-        for (int i = 0; i < this.route.size() - 1; i++) {
-            routeDistance += this.route.get(i).distance(this.route.get(i + 1));
+        if (route.size() == 0) {
+            return routeDistance;
         }
-        routeDistance += Utils.euclideanDistance(route.get(route.size() - 1).getX(), endDepot.getX(), route.get(route.size() - 1).getY(), endDepot.getY());
+
+        routeDistance += startDepot.distance(route.get(0));
+        for (int i = 0; i < route.size() - 1; i++) {
+            routeDistance += route.get(i).distance(route.get(i + 1));
+        }
+        routeDistance += route.get(route.size() - 1).distance(endDepot);
         return routeDistance;
     }
 
     /**
-     * Mixes n new routes by using this.route with a different route
+     * Mixes n new routes by using route with a different route
      *
-     * @param otherRoute TODO: @param numberOfCrossOvers
+     * @param otherRoute
      * @return
      */
-    public List<Customer>[] mutation2(List<Customer> otherRoute, int numberOfCrossOvers) {
-        final List<Customer>[] subRoutes = split(this.route, numberOfSplits);
-        final List<Customer>[] otherSubRoutes = split(otherRoute, numberOfSplits);
-        List<Customer> firstCrossOver = merge(subRoutes[0], otherSubRoutes[1], numberOfSplits);
-        List<Customer> secondCrossOver = merge(otherSubRoutes[0], subRoutes[1], numberOfSplits);
+    public List<Customer>[] mutation2(List<Customer> otherRoute) {
+        final List<Customer>[] subRoutes = split(route);
+        final List<Customer>[] otherSubRoutes = split(otherRoute);
+        List<Customer> firstCrossOver = merge(subRoutes[0], otherSubRoutes[1]);
+        List<Customer> secondCrossOver = merge(otherSubRoutes[0], subRoutes[1]);
 
         if (Controller.verbose) {
-            System.out.println("Route: " + this.route.toString());
+            System.out.println("Route: " + route.toString());
             System.out.println("Other route: " + otherRoute.toString());
             System.out.println("First crossover: " + firstCrossOver.toString());
             System.out.println("Second crossover: " + secondCrossOver.toString());
@@ -125,10 +114,10 @@ public class Vehicle extends MapObject {
     /**
      * Splits route in n parts
      *
-     * @param route TODO: @param numberOfSplits
+     * @param route
      * @return
      */
-    private List<Customer>[] split(List<Customer> route, int numberOfSplits) {
+    private List<Customer>[] split(List<Customer> route) {
         System.out.println("========= Splitting route to subRoutes =========");
         List<Customer> first = new ArrayList<>();
         List<Customer> second = new ArrayList<>();
@@ -161,10 +150,10 @@ public class Vehicle extends MapObject {
      * Merges the subRoute from two routes to a new route
      *
      * @param subRoute
-     * @param otherSubRoute TODO: @param numberOfSplits
+     * @param otherSubRoute
      * @return
      */
-    private List<Customer> merge(List<Customer> subRoute, List<Customer> otherSubRoute, int numberOfSplits) {
+    private List<Customer> merge(List<Customer> subRoute, List<Customer> otherSubRoute) {
         System.out.println("========= Merging two subRoutes to a route  =========");
         List<Customer> crossOver = new ArrayList<>(subRoute);
 
@@ -184,7 +173,7 @@ public class Vehicle extends MapObject {
      */
     public List<Customer> mutate() {
         System.out.println("Performing mutation on vehicle");
-        List<Customer> newRoute = new ArrayList<>(this.route);
+        List<Customer> newRoute = new ArrayList<>(route);
 
         if (newRoute.size() <= 1) {
             System.out.println("Route size is zero or one, returning same route");
@@ -209,19 +198,19 @@ public class Vehicle extends MapObject {
 
 
     public void addCustomerToRoute(Customer customer) {
-        this.route.add(customer);
-        this.load += customer.getLoadDemand();
+        route.add(customer);
+        currentLoad += customer.getLoadDemand();
     }
 
     public void removeCustomerFromRoute(Customer customer) {
-        this.route.remove(customer);
-        this.load -= customer.getLoadDemand();
+        route.remove(customer);
+        currentLoad -= customer.getLoadDemand();
     }
 
     public void shuffleRoute() {
-        Collections.shuffle(this.route);
+        Collections.shuffle(route);
         if (Controller.verbose) {
-            System.out.println("Shuffled route: " + this.route.toString());
+            System.out.println("Shuffled route: " + route.toString());
         }
     }
 
@@ -229,13 +218,13 @@ public class Vehicle extends MapObject {
      * Finds the nearest point for each
      */
     public void optimizeRoute() {
-        MapObject lastPoint = this.startDepot;
+        MapObject lastPoint = startDepot;
         List<Customer> newRoute = new ArrayList<>();
         Customer nearestGene = null;
 
-        while (newRoute.size() != this.route.size()) {
+        while (newRoute.size() != route.size()) {
             double minimumDistance = Double.MAX_VALUE;
-            for (Customer gene : this.route) {
+            for (Customer gene : route) {
                 double distance = Utils.euclideanDistance(lastPoint.getX(), gene.getX(), lastPoint.getY(), gene.getY());
 
                 if (!newRoute.contains(gene) && distance < minimumDistance) {
@@ -248,7 +237,7 @@ public class Vehicle extends MapObject {
             lastPoint = nearestGene;
         }
 
-        this.route = newRoute;
+        route = newRoute;
     }
 
     @Override

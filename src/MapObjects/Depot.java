@@ -12,7 +12,7 @@ import java.util.List;
  * Each depot is given m Vehicles
  */
 public class Depot extends MapObject {
-    private int maxDistance; // D: maximum duration of a route
+    private int maxTime; // D: maximum duration of a route
     private int maxLoad; // Q: allowed maximum load of a vehicle
     private int maxCars; // m: maximum number of vehicles available in each depot
     private static int depotIndex;
@@ -22,9 +22,9 @@ public class Depot extends MapObject {
     private List<Vehicle> vehicles = new ArrayList<>();
 
 
-    public Depot(int maxDistance, int maxLoad, int maxCars) {
+    public Depot(int maxTime, int maxLoad, int maxCars) {
         super(0, 0);
-        this.maxDistance = maxDistance;
+        this.maxTime = maxTime;
         this.maxLoad = maxLoad;
         this.maxCars = maxCars;
         this.color = colors[depotIndex]; // Sets color based on static counter
@@ -47,46 +47,21 @@ public class Depot extends MapObject {
         gc.fillOval(getPixelX() - 5, getPixelY() - 5, 10, 10);
     }
 
-    public int getMaxDistance() {
-        return maxDistance;
+    public int getMaxTime() {
+        return maxTime;
     }
-
-    public void setMaxDistance(int maxDistance) {
-        this.maxDistance = maxDistance;
-    }
-
     public int getMaxLoad() {
         return maxLoad;
     }
-
-    public void setMaxLoad(int maxLoad) {
-        this.maxLoad = maxLoad;
-    }
-
     public int getMaxCars() {
         return maxCars;
     }
-
-    public void setMaxCars(int maxCars) {
-        this.maxCars = maxCars;
-    }
-
     public Paint getColor() {
         return color;
     }
-
-    public void addVehicle(Vehicle vehicle) {
-        this.vehicles.add(vehicle);
-    }
-
     public List<Vehicle> getVehicles() {
         return vehicles;
     }
-
-    public void addCustomer(Customer customer) {
-        this.customers.add(customer);
-    }
-
     public List<Customer> getCustomers() {
         return customers;
     }
