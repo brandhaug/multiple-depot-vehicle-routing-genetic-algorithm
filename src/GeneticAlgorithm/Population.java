@@ -60,7 +60,8 @@ public class Population {
     public void tick() {
         List<Solution> children = new ArrayList<>();
         List<Solution> parentsToRemove = new ArrayList<>();
-        for (int i = 0; i < numberOfChildren; i++) {
+
+        for (int i = 0; i < numberOfChildren; i++) { // Would this actually make 2*numberOfChildren?
             Solution[] parents = selection();
             Solution[] crossOverChildren = crossOver(parents);
 
@@ -72,20 +73,20 @@ public class Population {
             parentsToRemove.addAll(List.of(parents[0], parents[1]));
         }
 
-        // TODO: Fix adding while looping
+        List<Solution> mutatedChildren = new ArrayList<>();
         for (Solution child : children) {
             double random = Utils.randomDouble();
             if (random < mutationRate) {
                 Solution mutatedChild = new Solution(depots, child.mutation());
-                children.add(mutatedChild);
+                mutatedChildren.add(mutatedChild);
             }
             else {
-                children.add(child);
+                mutatedChildren.add(child);
             }
         }
 
         solutions.removeAll(parentsToRemove);
-        solutions.addAll(children);
+        solutions.addAll(mutatedChildren);
         solutions.sort(Comparator.comparingDouble(Solution::getFitness)); // Sort by fitness
         solutions = solutions.stream().limit(populationSize).collect(Collectors.toList()); // Cut population to population size
 
