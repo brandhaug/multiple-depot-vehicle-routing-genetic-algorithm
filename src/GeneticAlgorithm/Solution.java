@@ -218,8 +218,8 @@ public class Solution {
 
         // Rull gjennom alle ruter og regn ut diff i fitness på alle mulige steder
         double minDistance = Double.MAX_VALUE;
-        Vehicle minVehicle = newVehicles.get(0);
-        int minIndex = 0;
+        Vehicle minVehicle = null;
+        int minIndex = -1;
 
         for (Vehicle vehicle : newVehicles) {
             for (int i = 0; i < vehicle.getRoute().size(); i++) {
@@ -252,6 +252,10 @@ public class Solution {
                         minIndex = i;
                     }
                 }
+            }
+
+            if (minVehicle == null) {
+                return vehicles;
             }
 
             // Find best ending point for route
