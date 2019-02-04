@@ -2,6 +2,7 @@ package Main;
 
 import GeneticAlgorithm.GeneticAlgorithm;
 import Map.Map;
+import Utils.Utils;
 import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -95,7 +96,7 @@ public class Controller {
             public void handle(long currentNanoTime) {
                 if (ga.getAlphaFitness() <= map.getBenchmark()) {
                     paused = true;
-                    fitnessLabel.setText("Fitness: " + ga.getAlphaFitness());
+                    fitnessLabel.setText("Fitness: " + Utils.round(ga.getAlphaFitness(), 2));
                     startButton.setText("Start");
                 }
 
@@ -176,7 +177,7 @@ public class Controller {
         double time = (currentNanoTime - startNanoTime) / 1000000000.0;
         generationLabel.setText("Generation: " + ga.getGeneration());
         timeLabel.setText("Time: " + (int) time);
-        fitnessLabel.setText("Fitness: " + ga.getAlphaFitness());
+        fitnessLabel.setText("Fitness: " + Utils.round(ga.getAlphaFitness(), 2));
     }
 
     /**

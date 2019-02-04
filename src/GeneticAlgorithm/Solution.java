@@ -64,7 +64,9 @@ public class Solution {
 
                     customerTriesLeft--;
                 }
-                if (customerTriesLeft == 0) return false;
+                if (customerTriesLeft == 0) {
+                    return false;
+                }
             }
 
             // Set end depot for each vehicle
@@ -158,7 +160,7 @@ public class Solution {
         int randomIndex = Utils.randomIndex(vehicles.size());
         Vehicle vehicle = vehicles.get(randomIndex);
         List<Customer> newRoute = vehicle.mutate();
-        // TODO: vehicle.clone()
+        // TODO: vehicle.clone() mest sannsynlig ikke nødvendig
         Vehicle newVehicle = new Vehicle(vehicle.getStartDepot(), newRoute);
 
         newVehicles.remove(vehicle);

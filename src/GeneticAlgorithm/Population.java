@@ -113,7 +113,12 @@ public class Population {
         while (solutions.size() != populationSize) {
             Solution solution = new Solution(depots);
             boolean successful = solution.generateInitialSolution();
-            if (successful) solutions.add(solution);
+            if (!successful) {
+                System.out.println("Generating initial solution failed");
+            } else {
+                solutions.add(solution);
+
+            }
         }
     }
 

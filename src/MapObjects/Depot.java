@@ -12,7 +12,7 @@ import java.util.List;
  * Each depot is given m Vehicles
  */
 public class Depot extends MapObject {
-    private int maxTime; // D: maximum duration of a route
+    private int maxDuration; // D: maximum duration of a route
     private int maxLoad; // Q: allowed maximum load of a vehicle
     private int maxCars; // m: maximum number of vehicles available in each depot
     private static int depotIndex;
@@ -22,9 +22,9 @@ public class Depot extends MapObject {
     private List<Vehicle> vehicles = new ArrayList<>();
 
 
-    public Depot(int maxTime, int maxLoad, int maxCars) {
+    public Depot(int maxDuration, int maxLoad, int maxCars) {
         super(0, 0);
-        this.maxTime = maxTime;
+        this.maxDuration = maxDuration;
         this.maxLoad = maxLoad;
         this.maxCars = maxCars;
         this.color = colors[depotIndex]; // Sets color based on static counter
@@ -47,8 +47,8 @@ public class Depot extends MapObject {
         gc.fillOval(getPixelX() - 5, getPixelY() - 5, 10, 10);
     }
 
-    public int getMaxTime() {
-        return maxTime;
+    public int getMaxDuration() {
+        return maxDuration;
     }
     public int getMaxLoad() {
         return maxLoad;
