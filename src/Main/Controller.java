@@ -59,7 +59,7 @@ public class Controller {
     private boolean initialized = false; // Used to start/pause game loop
 
     // Settings
-    public static boolean verbose = true; // Used to enable logging with System.out.println()
+    public static boolean verbose = false; // Used to enable logging with System.out.println()
 
     /**
      * Initializes GUI
@@ -70,7 +70,7 @@ public class Controller {
     private void initialize() {
         try {
             map = new Map(fileName); // Parse file
-            ga = new GeneticAlgorithm(map.getDepots()); // Creates initial population
+            ga = new GeneticAlgorithm(map.getDepots());
             initializeGUI();
         } catch (IOException e) {
             e.printStackTrace();
@@ -83,15 +83,16 @@ public class Controller {
 
         new AnimationTimer() { // Game loop
             public void handle(long currentNanoTime) {
-                if (ga.getAlphaFitness() <= map.getBenchmark()) {
-                    paused = true;
-                    fitnessLabel.setText("Fitness: " + Utils.round(ga.getAlphaFitness(), 2));
-                    startButton.setText("Start");
-                }
-
                 if (!paused) {
                     tick(startNanoTime, currentNanoTime);
                     render();
+                }
+
+                double alphaFitness = ga.getAlphaFitness();
+                if (alphaFitness != -1 && alphaFitness <= map.getBenchmark()) {
+                    paused = true;
+                    fitnessLabel.setText("Fitness: " + Utils.round(ga.getAlphaFitness(), 2));
+                    startButton.setText("Start");
                 }
             }
         }.start();
@@ -187,5 +188,6 @@ public class Controller {
     private void selectMap() {
         fileName = mapSelector.getValue().toString();
         initialize();
+        paused = true;
     }
 }

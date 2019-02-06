@@ -1,6 +1,5 @@
 package MapObjects;
 
-import Utils.Utils;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
@@ -9,11 +8,11 @@ import javafx.scene.paint.Color;
  * Contained in a Vehicle's route
  */
 public class Customer extends MapObject {
-    private int id; // i: customer number
+    private String id; // i: customer number
     private int timeDemand;
     private int loadDemand;
 
-    public Customer(int id, int x, int y, int timeDemand, int loadDemand) {
+    public Customer(String id, int x, int y, int timeDemand, int loadDemand) {
         super(x, y);
         this.id = id;
         this.timeDemand = timeDemand;
@@ -23,7 +22,6 @@ public class Customer extends MapObject {
     /**
      * Draws customer on canvas
      * Represented as a gray circle
-     * @param gc
      */
     @Override
     public void render(GraphicsContext gc) {
@@ -35,12 +33,12 @@ public class Customer extends MapObject {
         return loadDemand;
     }
 
-    /**
-     * Prints CustomerId
-     * Used to print Customers in a Vehicle's route
-     */
+    public int getTimeDemand() {
+        return timeDemand;
+    }
+
     @Override
     public String toString() {
-        return Integer.toString(id);
+        return id;
     }
 }

@@ -96,6 +96,27 @@ public class Vehicle extends MapObject {
     }
 
     /**
+     * Calculates total distance for route
+     *
+     * @return
+     */
+    public double calculateRouteDuration() {
+        double routeDistance = 0.0;
+
+        if (route.size() == 0) {
+            return routeDistance;
+        }
+
+        routeDistance += startDepot.distance(route.get(0));
+        for (int i = 0; i < route.size() - 1; i++) {
+            routeDistance += route.get(i).getTimeDemand();
+            routeDistance += route.get(i).distance(route.get(i + 1));
+        }
+        routeDistance += route.get(route.size() - 1).distance(endDepot);
+        return routeDistance;
+    }
+
+    /**
      * Mixes n new routes by using route with a different route
      *
      * @param otherRoute

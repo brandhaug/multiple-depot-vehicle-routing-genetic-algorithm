@@ -53,9 +53,6 @@ public class MapParser {
         int totalCustomers = 0; // n: total number of customers
         int depotsCount = 0; // t: number of depots
 
-        int maxDistance = 0; // D: maximum duration of a route
-        int maxLoad = 0; // Q: allowed maximum load of a vehicle
-
         if (Controller.verbose) {
             System.out.println("========= Parsing map file =========");
         }
@@ -80,7 +77,7 @@ public class MapParser {
                 if (Controller.verbose) {
                     System.out.println("Customer info: " + line);
                 }
-                Customer customer = new Customer(lineArr[0], lineArr[1], lineArr[2], lineArr[3], lineArr[4]);
+                Customer customer = new Customer(Integer.toString(lineArr[0]), lineArr[1], lineArr[2], lineArr[3], lineArr[4]);
                 customers.add(customer);
                 setExtremeValues(lineArr[1], lineArr[2]);
 
@@ -95,7 +92,6 @@ public class MapParser {
                 for (int i = 0; i < maxVehicles; i++) {
                     Vehicle vehicle = new Vehicle(depot);
                     vehicles.add(vehicle);
-                    depot.addVehicle(vehicle);
                 }
 
                 depotIndex++;

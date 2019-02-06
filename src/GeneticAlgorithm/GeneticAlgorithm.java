@@ -17,9 +17,9 @@ public class GeneticAlgorithm {
     // Parameters
     private int populationSize = 200; // 20-100 dependent on problem
     private double crossOverRate = 0.8; // 80%-95%
-    private double mutationRate = 0.1; // 0.5%-1%.
+    private double mutationRate = 0.9; // 0.5%-1%.
     private double selectionRate = 0.2;
-    private int tournamentSize = 5;
+    private int tournamentSize = 3;
     private int numberOfChildren = populationSize/3;
 
     private List<Depot> depots;
@@ -56,9 +56,12 @@ public class GeneticAlgorithm {
      * @param gc
      */
     private void renderAlphaSolution(GraphicsContext gc) {
-        Solution solution = getAlphaSolution();
-        for (Vehicle vehicle : solution.getVehicles()) {
-            vehicle.render(gc);
+        Solution alphaSolution = getAlphaSolution();
+
+        if (alphaSolution != null) {
+            for (Vehicle vehicle : alphaSolution.getVehicles()) {
+                vehicle.render(gc);
+            }
         }
     }
 

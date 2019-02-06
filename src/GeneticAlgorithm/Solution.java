@@ -42,11 +42,11 @@ public class Solution {
         }
 
         for (Depot depot : depots) {
-            List<Vehicle> depotVehicles = new ArrayList<>();
+            List<Vehicle> vehicles = new ArrayList<>();
 
             for (int i = 0; i < depot.getMaxCars(); i++) {
                 Vehicle v = new Vehicle(depot);
-                depotVehicles.add(v);
+                vehicles.add(v);
             }
 
             List<Customer> depotCustomers = depot.getCustomers(); // Current depot's customers
@@ -55,12 +55,25 @@ public class Solution {
                 boolean customerAdded = false;
                 int customerTriesLeft = 1000;
                 while (!customerAdded && customerTriesLeft > 0) {
-                    int randomIndex = Utils.randomIndex(depotVehicles.size()); // Random vehicle index
+                    int randomIndex = Utils.randomIndex(vehicles.size()); // Random vehicle index
+                    Vehicle randomVehicle = vehicles.get(randomIndex);
 
-                    // Add customer to random vehicle's route if it does not overstep max load
-                    if (depotVehicles.get(randomIndex).getCurrentLoad() + customer.getLoadDemand() <= depot.getMaxLoad()) {
-                        depotVehicles.get(randomIndex).addCustomerToRoute(customer);
-                        customerAdded = true;
+                    // Check load constraint
+                    if (randomVehicle.getCurrentLoad() + customer.getLoadDemand() <= depot.getMaxLoad()) {
+                        randomVehicle.addCustomerToRoute(customer);
+
+                        // Check duration constraint
+                        if (depot.getMaxDuration() != 0.0) {
+                            randomVehicle.optimizeRoute();
+
+                            if (randomVehicle.calculateRouteDuration() > depot.getMaxDuration()) {
+                                randomVehicle.removeCustomerFromRoute(customer);
+                            } else {
+                                customerAdded = true;
+                            }
+                        } else {
+                            customerAdded = true;
+                        }
                     }
 
                     customerTriesLeft--;
@@ -70,22 +83,22 @@ public class Solution {
                 }
             }
 
-            // Set end depot for each vehicle
-            double currentMinDistance = Double.MAX_VALUE;
-            for (Vehicle v : depotVehicles) {
-                if (v.getRoute().size() > 0) {
-                    for (Depot d : depots) {
-                        double distance = Utils.euclideanDistance(d.getX(), v.getRoute().get(v.getRoute().size() - 1).getX(),
-                                d.getY(), v.getRoute().get(v.getRoute().size() - 1).getY());
-                        if (distance < currentMinDistance) {
-                            currentMinDistance = distance;
-                            v.setEndDepot(d);
-                        }
-                    }
-                }
-            }
+            // Set end depot for each vehicle TODO: Check trello
+//            double currentMinDistance = Double.MAX_VALUE;
+//            for (Vehicle v : depotVehicles) {
+//                if (v.getRoute().size() > 0) {
+//                    for (Depot d : depots) {
+//                        double distance = Utils.euclideanDistance(d.getX(), v.getRoute().get(v.getRoute().size() - 1).getX(),
+//                                d.getY(), v.getRoute().get(v.getRoute().size() - 1).getY());
+//                        if (distance < currentMinDistance) {
+//                            currentMinDistance = distance;
+//                            v.setEndDepot(d);
+//                        }
+//                    }
+//                }
+//            }
 
-            vehicles.addAll(depotVehicles);
+            this.vehicles.addAll(vehicles);
 
             if (Controller.verbose) {
                 System.out.println("========= END Creating random initial vehicles =========");
@@ -95,6 +108,12 @@ public class Solution {
         // Optimize route for each vehicle
         for (Vehicle vehicle : vehicles) {
             vehicle.optimizeRoute();
+            double maxDuration = vehicle.getStartDepot().getMaxDuration();
+            double duration = vehicle.calculateRouteDuration();
+
+            if (maxDuration != 0.0 && duration > maxDuration) {
+                return false;
+            }
         }
         return true;
     }
