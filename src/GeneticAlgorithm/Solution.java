@@ -197,7 +197,9 @@ public class Solution {
 
 
     public List<Vehicle> mutation2(List<Vehicle> vehicles) {
-        System.out.println("========= Performing crossover on vehicles =========");
+        if (Controller.verbose) {
+            System.out.println("========= Performing crossover on vehicles =========");
+        }
 
         List<Vehicle> newVehicles = new ArrayList<>(vehicles);
 
@@ -217,8 +219,9 @@ public class Solution {
         newVehicles.add(newVehicle);
         newVehicles.add(newVehicle2);
 
-
-        System.out.println("========= END Performing crossover on vehicles =========");
+        if (Controller.verbose) {
+            System.out.println("========= END Performing crossover on vehicles =========");
+        }
 
         return newVehicles;
     }
@@ -252,7 +255,9 @@ public class Solution {
      * Mutation is only executed if random < crossOverRate
      */
     public List<Vehicle> mutation() {
-        System.out.println("========= Performing mutation on vehicles =========");
+        if (Controller.verbose) {
+            System.out.println("========= Performing mutation on vehicles =========");
+        }
         List<Vehicle> newVehicles = new ArrayList<>(vehicles);
 
         int randomIndex = Utils.randomIndex(vehicles.size());
@@ -264,7 +269,9 @@ public class Solution {
         newVehicles.remove(vehicle);
         newVehicles.add(newVehicle);
 
-        System.out.println("========= END Performing mutation on vehicles =========");
+        if (Controller.verbose) {
+            System.out.println("========= END Performing mutation on vehicles =========");
+        }
         return newVehicles;
     }
 
@@ -293,7 +300,9 @@ public class Solution {
         if (vehicles == null) {
             throw new NullPointerException("No vehicles in solution");
         } else if (otherRoute.size() == 0) {
-            System.out.println("Other Route is 0");
+            if (Controller.verbose) {
+                System.out.println("Other Route is 0");
+            }
             return vehicles;
         }
 
@@ -372,7 +381,9 @@ public class Solution {
 
         minVehicle.addOtherRouteToRoute(minIndex, otherRoute);
 
-        System.out.println("CrossOver finished, returning new list of Vehicles");
+        if (Controller.verbose) {
+            System.out.println("CrossOver finished, returning new list of Vehicles");
+        }
 
         return newVehicles;
     }

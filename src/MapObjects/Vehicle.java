@@ -168,7 +168,9 @@ public class Vehicle extends MapObject {
      * @return
      */
     private List<Customer>[] split(List<Customer> route) {
-        System.out.println("========= Splitting route to subRoutes =========");
+        if (Controller.verbose) {
+            System.out.println("========= Splitting route to subRoutes =========");
+        }
         List<Customer> first = new ArrayList<>();
         List<Customer> second = new ArrayList<>();
         int size = route.size();
@@ -176,7 +178,9 @@ public class Vehicle extends MapObject {
         if (size != 0) {
             int partitionIndex = Utils.randomIndex(size) + 1;
 
-            System.out.println("Partition Index: " + partitionIndex);
+            if (Controller.verbose) {
+                System.out.println("Partition Index: " + partitionIndex);
+            }
 
             for (int i = 0; i < route.size(); i++) {
                 if (partitionIndex > i) {
@@ -186,12 +190,16 @@ public class Vehicle extends MapObject {
                 }
             }
         }
-
-        System.out.println("First subRoute: " + first.toString());
-        System.out.println("Second subRoute: " + second.toString());
+        if (Controller.verbose) {
+            System.out.println("First subRoute: " + first.toString());
+            System.out.println("Second subRoute: " + second.toString());
+        }
 
         List<Customer>[] splittedRoute = new List[]{first, second};
-        System.out.println("========= END Splitting route to subRoutes =========");
+
+        if (Controller.verbose) {
+            System.out.println("========= END Splitting route to subRoutes =========");
+        }
 
         return splittedRoute;
     }
@@ -204,15 +212,21 @@ public class Vehicle extends MapObject {
      * @return
      */
     private List<Customer> merge(List<Customer> subRoute, List<Customer> otherSubRoute) {
-        System.out.println("========= Merging two subRoutes to a route  =========");
+        if (Controller.verbose) {
+            System.out.println("========= Merging two subRoutes to a route  =========");
+        }
         List<Customer> crossOver = new ArrayList<>(subRoute);
 
-        System.out.println("Initial subRoute: " + crossOver);
+        if (Controller.verbose) {
+            System.out.println("Initial subRoute: " + crossOver);
+        }
 
-       crossOver.addAll(otherSubRoute);
+        crossOver.addAll(otherSubRoute);
 
-        System.out.println("Merged subRoutes: " + crossOver);
-        System.out.println("========= Merging two subRoutes to a route  =========");
+        if (Controller.verbose) {
+            System.out.println("Merged subRoutes: " + crossOver);
+            System.out.println("========= Merging two subRoutes to a route  =========");
+        }
         return crossOver;
     }
 
@@ -222,7 +236,9 @@ public class Vehicle extends MapObject {
      * @return
      */
     public List<Customer> mutate() {
-        System.out.println("Performing mutation on vehicle");
+        if (Controller.verbose) {
+            System.out.println("Performing mutation on vehicle");
+        }
         List<Customer> newRoute = new ArrayList<>(route);
 
         if (newRoute.size() <= 1) {
@@ -238,11 +254,15 @@ public class Vehicle extends MapObject {
             indexB = Utils.randomIndex(newRoute.size());
         }
 
-        System.out.println(newRoute);
-        Collections.swap(newRoute, indexA, indexB);
-        System.out.println(newRoute);
 
-        System.out.println("Mutation on Vehicle finished, returning new Route");
+        //TODO: SHOULD THESE PRINTLN BE REMOVED?
+        //System.out.println(newRoute);
+        Collections.swap(newRoute, indexA, indexB);
+        //System.out.println(newRoute);
+
+        if (Controller.verbose) {
+            System.out.println("Mutation on Vehicle finished, returning new Route");
+        }
         return newRoute;
     }
 
