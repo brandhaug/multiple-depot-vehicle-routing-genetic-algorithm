@@ -42,7 +42,8 @@ public class Controller {
     @FXML private ComboBox mapSelector; // Shows benchmark fitness for current map
 
     // Map
-    @FXML private Canvas canvas;
+    @FXML
+    private Canvas canvas;
     private Map map;
     private String fileName = "p01"; // Current map
 
@@ -88,11 +89,13 @@ public class Controller {
                     render();
                 }
 
-                double alphaFitness = ga.getAlphaFitness();
-                if (alphaFitness != -1 && alphaFitness <= map.getBenchmark()) {
-                    paused = true;
-                    fitnessLabel.setText("Fitness: " + Utils.round(ga.getAlphaFitness(), 2));
-                    startButton.setText("Start");
+                if (ga.getAlphaSolution() != null) {
+                    double alphaFitness = ga.getAlphaFitness();
+                    if (alphaFitness <= map.getBenchmark()) {
+                        paused = true;
+                        fitnessLabel.setText("Fitness: " + Utils.round(ga.getAlphaFitness(), 2));
+                        startButton.setText("Start");
+                    }
                 }
             }
         }.start();
@@ -167,7 +170,9 @@ public class Controller {
         double time = (currentNanoTime - startNanoTime) / 1000000000.0;
         generationLabel.setText("Generation: " + ga.getGeneration());
         timeLabel.setText("Time: " + (int) time);
-        fitnessLabel.setText("Fitness: " + Utils.round(ga.getAlphaFitness(), 2));
+        if (ga.getAlphaSolution() != null) {
+            fitnessLabel.setText("Fitness: " + Utils.round(ga.getAlphaFitness(), 2));
+        }
     }
 
     /**

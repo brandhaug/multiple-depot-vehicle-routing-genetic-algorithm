@@ -182,15 +182,11 @@ public class Population {
     }
 
     public double getAlphaFitness() {
-        if (generation == 0) {
-            return -1;
-        }
-
         return alphaSolution.getFitness();
     }
 
     public Solution getAlphaSolution() {
-        if (generation == 0) {
+        if (solutions.size() == 0) {
             return null;
         }
 
