@@ -116,6 +116,23 @@ public class Vehicle extends MapObject {
         return routeDistance;
     }
 
+    public double calculateRouteDuration(int index, Customer customerToCheck) {
+        if (route.size() == 0) {
+            return (startDepot.distance(customerToCheck) + customerToCheck.distance(endDepot));
+        }
+
+        double distance = 0.0;
+        List<Customer> copy = new ArrayList<>(route);
+        copy.add(index, customerToCheck);
+
+        distance += startDepot.distance(copy.get(0));
+        for (int i = 0; i < copy.size() - 1; i++) {
+            distance += copy.get(i).distance(copy.get(i + 1));
+        }
+        distance += copy.get(copy.size() - 1).distance(endDepot);
+        return distance;
+    }
+
     /**
      * Mixes n new routes by using route with a different route
      *
@@ -228,6 +245,11 @@ public class Vehicle extends MapObject {
 
     public void addCustomerToRoute(Customer customer) {
         route.add(customer);
+        currentLoad += customer.getLoadDemand();
+    }
+
+    public void addCustomerToRoute(int index, Customer customer) {
+        route.add(index, customer);
         currentLoad += customer.getLoadDemand();
     }
 
