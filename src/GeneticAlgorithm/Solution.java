@@ -297,16 +297,15 @@ public class Solution {
 
         for (Vehicle vehicle : vehicles) {
             writer.newLine();
-            // s k d q list
-            writer.write(vehicle.getStartDepot().getId() + " "
-                    + vehicle.getStartDepot().getMaxVehicles() + " "
-                    + Utils.round(vehicle.calculateRouteDistance(), 2) + " "
-                    + vehicle.getCurrentLoad() + " "
-                    + vehicle.getEndDepot().getId() + "   "
-                    + vehicle.getRoute().toString()
-                    .replace(",", "")  //remove the commas
-                    .replace("[", "")  //remove the right bracket
-                    .replace("]", "")  //remove the left bracket);
+            writer.write(vehicle.getStartDepot().getId() + " " // s: number of the start depot
+                    + vehicle.getStartDepot().getMaxVehicles() + " " // k: number of the vehicle (for above depot)
+                    + Utils.round(vehicle.calculateRouteDistance(), 2) + " " // d: duration of the route for a particular vehicle from a particular depot
+                    + vehicle.getCurrentLoad() + " " // q: carried load of the vehicle
+                    + vehicle.getEndDepot().getId() + "   " // e: number of the end depot
+                    + vehicle.getRoute().toString() // list: ordered sequence of customers (served by a particular vehicle)
+                    .replace(",", "")  // remove the commas
+                    .replace("[", "")  // remove the right bracket
+                    .replace("]", "")  // remove the left bracket
             );
         }
 
