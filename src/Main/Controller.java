@@ -190,6 +190,7 @@ public class Controller {
             saveButton.setVisible(true);
         } else {
             startButton.setText("Pause");
+            saveButton.setVisible(false);
         }
     }
 
