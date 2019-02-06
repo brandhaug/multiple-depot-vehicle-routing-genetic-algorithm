@@ -59,28 +59,37 @@ public class Solution {
                 while (!customerAdded && triesLeft > 0) {
 
                     double currentMinDistance = Double.MAX_VALUE;
-                    int currentMinIndex = 0;
+                    int currentMinIndex = -1;
                     Vehicle currentMinVehicle = null;
 
                     Collections.shuffle(depotVehicles);
                     for (Vehicle vehicle : depotVehicles) {
+
+                        double distance;
+                        double vehicleMinDistance = Double.MAX_VALUE;
+                        int vehicleMinIndex = -1;
+
+
                         if (vehicle.getCurrentLoad() + customer.getLoadDemand() <= depot.getMaxLoad()) {
-                            double distance;
                             if (vehicle.getRoute().size() == 0) {
-                                currentMinDistance = 0.0;
-                                currentMinIndex = 0;
-                                currentMinVehicle = vehicle;
-                            }
+                                vehicleMinDistance = vehicle.calculateRouteDuration(0, customer);
+                                vehicleMinIndex = 0;
+                            } else {
+                                for (int i = 0; i < vehicle.getRoute().size(); i++) {
+                                    distance = vehicle.calculateRouteDuration(i, customer);
 
-                            for (int i = 0; i < vehicle.getRoute().size(); i++) {
-                                distance = vehicle.calculateRouteDuration(i, customer);
-
-                                if (distance < currentMinDistance) {
-                                    currentMinDistance = distance;
-                                    currentMinIndex = i;
-                                    currentMinVehicle = vehicle;
+                                    if (distance < vehicleMinDistance) {
+                                        vehicleMinDistance = distance;
+                                        vehicleMinIndex = i;
+                                    }
                                 }
                             }
+                        }
+
+                        if (vehicleMinDistance < currentMinDistance) {
+                            currentMinDistance = vehicleMinDistance;
+                            currentMinIndex = vehicleMinIndex;
+                            currentMinVehicle = vehicle;
                         }
                     }
                     if (currentMinVehicle != null) {
@@ -89,12 +98,10 @@ public class Solution {
                         if (depot.getMaxDuration() != 0.0 && currentMinVehicle.calculateRouteDuration() > depot.getMaxDuration()) {
                             currentMinVehicle.removeCustomerFromRoute(customer);
                             triesLeft--;
-                        }
-                        else {
+                        } else {
                             customerAdded = true;
                         }
-                    }
-                    else {
+                    } else {
                         triesLeft--;
                     }
                 }
@@ -112,6 +119,78 @@ public class Solution {
 
         return true;
     }
+
+    /**
+     * Each Depot has n Vehicles and m Customers
+     * Loops through all Depots, and assigns the Depot's Customers to a random Depot's vehicle.
+     */
+    public boolean generateInitialSolution2() {
+        if (Controller.verbose) {
+            System.out.println("========= Creating random initial vehicles =========");
+        }
+
+        for (Depot depot : depots) {
+            List<Vehicle> vehicles = new ArrayList<>();
+
+            for (int i = 0; i < depot.getMaxCars(); i++) {
+                Vehicle v = new Vehicle(depot);
+                vehicles.add(v);
+            }
+
+            List<Customer> depotCustomers = depot.getCustomers(); // Current depot's customers
+            Collections.shuffle(depotCustomers);
+
+            for (Customer customer : depotCustomers) { // Assign customer to random vehicle
+                boolean customerAdded = false;
+                int customerTriesLeft = 100;
+                while (!customerAdded && customerTriesLeft > 0) {
+                    int randomIndex = Utils.randomIndex(vehicles.size()); // Random vehicle index
+                    Vehicle randomVehicle = vehicles.get(randomIndex);
+
+                    // Check load constraint
+                    if (randomVehicle.getCurrentLoad() + customer.getLoadDemand() <= depot.getMaxLoad()) {
+                        randomVehicle.addCustomerToRoute(customer);
+
+                        // Check duration constraint
+                        if (depot.getMaxDuration() != 0.0) {
+                            randomVehicle.optimizeRoute();
+
+                            if (randomVehicle.calculateRouteDuration() > depot.getMaxDuration()) {
+                                randomVehicle.removeCustomerFromRoute(customer);
+                                customerTriesLeft--;
+                            } else {
+                                customerAdded = true;
+                            }
+                        } else {
+                            customerAdded = true;
+                        }
+                    }
+                }
+                if (customerTriesLeft == 0) { // Giving up generating this initial solution
+                    return false;
+                }
+            }
+
+            this.vehicles.addAll(vehicles);
+
+            if (Controller.verbose) {
+                System.out.println("========= END Creating random initial vehicles =========");
+            }
+        }
+
+        // Optimize route for each vehicle
+        for (Vehicle vehicle : vehicles) {
+            vehicle.optimizeRoute();
+            double maxDuration = vehicle.getStartDepot().getMaxDuration();
+            double duration = vehicle.calculateRouteDuration();
+
+            if (maxDuration != 0.0 && duration > maxDuration) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     public List<Vehicle> mutation2(List<Vehicle> vehicles) {
         System.out.println("========= Performing crossover on vehicles =========");
