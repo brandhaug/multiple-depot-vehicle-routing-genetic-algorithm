@@ -136,7 +136,7 @@ public class Solution {
         for (Depot depot : depots) {
             List<Vehicle> vehicles = new ArrayList<>();
 
-            for (int i = 0; i < depot.getMaxCars(); i++) {
+            for (int i = 0; i < depot.getMaxVehicles(); i++) {
                 Vehicle v = new Vehicle(depot);
                 vehicles.add(v);
             }

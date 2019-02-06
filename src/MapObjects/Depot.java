@@ -78,10 +78,6 @@ public class Depot extends MapObject {
         return color;
     }
 
-    public List<Vehicle> getVehicles() {
-        return vehicles;
-    }
-
     public List<Customer> getCustomers() {
         return customers;
     }

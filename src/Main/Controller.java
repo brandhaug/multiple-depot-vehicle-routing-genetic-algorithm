@@ -201,6 +201,8 @@ public class Controller {
     }
 
     public void stop() {
+        paused = true;
+        startButton.setText("Start");
         initialize();
     }
 
