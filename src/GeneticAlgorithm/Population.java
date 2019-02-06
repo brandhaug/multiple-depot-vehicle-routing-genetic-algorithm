@@ -96,6 +96,40 @@ public class Population {
         generation++;
     }
 
+    /**
+     * Generates initial population which generates n random Solutions. n = populationSize
+     */
+    private void generateInitialPopulation() {
+        int triesLeft = 1000;
+        boolean force;
+
+        while (solutions.size() != populationSize) {
+            if (triesLeft == 0) {
+                force = true;
+            } else  {
+                force = false;
+            }
+
+            Solution solution = new Solution(depots);
+            boolean successful = solution.generateInitialSolution(force);
+            if (!successful && !force) {
+                triesLeft--;
+            } else {
+                solutions.add(solution);
+            }
+        }
+
+        // Hard maps initialSolution: 7, 11, 16, 17, 19, 20, 22, 23
+        // Hard maps initialSolution2: 7, 8, 9, 10, 11, 16, 17, 19, 20, 22, 23
+        if (solutions.size() != populationSize) {
+            throw new Error("Generating initial population failed - created " + solutions.size() + " of " + populationSize + " solutions");
+        }
+
+        if (Controller.verbose) {
+            System.out.println("Initial population of " + populationSize + " generated with " + triesLeft + " tries left");
+        }
+    }
+
     private Solution[] crossOver(Solution[] parents) {
         int triesLeft = 1000;
 
@@ -125,34 +159,6 @@ public class Population {
             }
         }
         return null;
-    }
-
-    /**
-     * Generates initial population which generates n random Solutions. n = populationSize
-     */
-    private void generateInitialPopulation() {
-        int triesLeft = 10000;
-
-        while (solutions.size() != populationSize && triesLeft != 0) {
-
-            Solution solution = new Solution(depots);
-            boolean successful = solution.generateInitialSolution();
-            if (!successful) {
-                triesLeft--;
-            } else {
-                solutions.add(solution);
-            }
-        }
-
-        // Hard maps initialSolution: 7, 11, 16, 17, 19, 20, 22, 23
-        // Hard maps initialSolution2: 7, 8, 9, 10, 11, 16, 17, 19, 20, 22, 23
-        if (solutions.size() != populationSize) {
-            throw new Error("Generating initial population failed - created " + solutions.size() + " of " + populationSize + " solutions");
-        }
-
-        if (Controller.verbose) {
-            System.out.println("Initial population of " + populationSize + " generated with " + triesLeft + " tries left");
-        }
     }
 
     private Solution[] selection() {
@@ -198,5 +204,11 @@ public class Population {
 
     public int getGeneration() {
         return generation;
+    }
+
+    public void reset() {
+        alphaSolution = null;
+        solutions = null;
+        generation = 0;
     }
 }

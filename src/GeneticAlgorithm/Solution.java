@@ -40,8 +40,9 @@ public class Solution {
     /**
      * Each Depot has n Vehicles and m Customers
      * Loops through all Depots, and assigns the Depot's Customers to a random Depot's vehicle.
+     * @param force
      */
-    public boolean generateInitialSolution() {
+    public boolean generateInitialSolution(boolean force) {
         if (Controller.verbose) {
             System.out.println("========= Creating random initial vehicles =========");
         }
@@ -99,7 +100,7 @@ public class Solution {
                     if (currentMinVehicle != null) {
                         currentMinVehicle.addCustomerToRoute(currentMinIndex, customer);
 
-                        if (depot.getMaxDuration() != 0.0 && currentMinVehicle.calculateRouteDuration() > depot.getMaxDuration()) {
+                        if (depot.getMaxDuration() != 0.0 && currentMinVehicle.calculateRouteDuration() > depot.getMaxDuration() && !force) {
                             currentMinVehicle.removeCustomerFromRoute(customer);
                             triesLeft--;
                         } else {
@@ -109,7 +110,7 @@ public class Solution {
                         triesLeft--;
                     }
                 }
-                if (triesLeft == 0) { // Giving up generating this initial solution
+                if (triesLeft == 0 && !force) { // Giving up generating this initial solution
                     return false;
                 }
             }
