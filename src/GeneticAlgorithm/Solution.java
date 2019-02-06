@@ -6,6 +6,10 @@ import Utils.Utils;
 import MapObjects.Customer;
 import MapObjects.Depot;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +48,7 @@ public class Solution {
         for (Depot depot : depots) {
             List<Vehicle> depotVehicles = new ArrayList<>();
 
-            for (int i = 0; i < depot.getMaxCars(); i++) {
+            for (int i = 0; i < depot.getMaxVehicles(); i++) {
                 Vehicle v = new Vehicle(depot);
                 depotVehicles.add(v);
             }
@@ -285,12 +289,27 @@ public class Solution {
         return newVehicles;
     }
 
-//    @Override
-//    public Solution clone() {
-//        List<Vehicle> copyOfVehicles = new ArrayList<>();
-//        for (Vehicle vehicle : vehicles) {
-//            copyOfVehicles.add(vehicle.clone());
-//        }
-//        return new Solution(depots, copyOfVehicles);
-//    }
+    public void saveToFile() throws IOException {
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        BufferedWriter writer = new BufferedWriter(new FileWriter("solution-" + Controller.fileName + "-" + timestamp.getTime()));
+
+        writer.write(Double.toString(Utils.round(getFitness(), 2)));
+
+        for (Vehicle vehicle : vehicles) {
+            writer.newLine();
+            // s k d q list
+            writer.write(vehicle.getStartDepot().getId() + " "
+                    + vehicle.getStartDepot().getMaxVehicles() + " "
+                    + Utils.round(vehicle.calculateRouteDistance(), 2) + " "
+                    + vehicle.getCurrentLoad() + " "
+                    + vehicle.getEndDepot().getId() + "   "
+                    + vehicle.getRoute().toString()
+                    .replace(",", "")  //remove the commas
+                    .replace("[", "")  //remove the right bracket
+                    .replace("]", "")  //remove the left bracket);
+            );
+        }
+
+        writer.close();
+    }
 }

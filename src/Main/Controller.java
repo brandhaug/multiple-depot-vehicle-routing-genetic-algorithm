@@ -31,6 +31,8 @@ public class Controller {
 
     // GUI
     @FXML private Button startButton; // Toggles between "Start" and "Pause", depending on state
+    @FXML private Button stopButton;
+    @FXML private Button saveButton;
     @FXML private Label mapLabel; // Shows current Map
     @FXML private Label timeLabel; // Shows current time
     @FXML private Label depotsLabel; // Shows number of depots in Map
@@ -44,7 +46,7 @@ public class Controller {
     // Map
     @FXML private Canvas canvas;
     private Map map;
-    private String fileName = "p01"; // Current map
+    public static String fileName = "p01"; // Current map
 
     private GeneticAlgorithm ga; // GeneticAlgorithm: Contains a Population, which contains Solutions
 
@@ -87,6 +89,7 @@ public class Controller {
                     paused = true;
                     fitnessLabel.setText("Fitness: " + Utils.round(ga.getAlphaFitness(), 2));
                     startButton.setText("Start");
+                    saveButton.setVisible(true);
                 }
 
                 if (!paused) {
@@ -128,6 +131,7 @@ public class Controller {
         vehiclesLabel.setText("Vehicles: " + map.getVehiclesSize()); // Number of vehicles
         customersLabel.setText("Customers: " + map.getCustomersSize()); // Number of customers
         benchmarkLabel.setText("Benchmark: " + map.getBenchmark());
+        saveButton.setVisible(false);
 
         if (!initialized) {
             initializeMapSelector();
@@ -178,6 +182,7 @@ public class Controller {
 
         if (paused) {
             startButton.setText("Start");
+            saveButton.setVisible(true);
         } else {
             startButton.setText("Pause");
         }
@@ -187,5 +192,17 @@ public class Controller {
     private void selectMap() {
         fileName = mapSelector.getValue().toString();
         initialize();
+    }
+
+    public void stop() {
+        initialize();
+    }
+
+    public void save() {
+        try {
+            ga.saveAlphaSolutionToFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

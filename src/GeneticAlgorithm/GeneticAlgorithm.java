@@ -4,6 +4,7 @@ import MapObjects.Depot;
 import MapObjects.Vehicle;
 import javafx.scene.canvas.GraphicsContext;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -78,4 +79,9 @@ public class GeneticAlgorithm {
 
     public int getGeneration() {
         return population.getGeneration();
-    }}
+    }
+
+    public void saveAlphaSolutionToFile() throws IOException {
+        getAlphaSolution().saveToFile();
+    }
+}

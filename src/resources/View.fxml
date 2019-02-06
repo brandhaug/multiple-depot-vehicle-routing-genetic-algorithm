@@ -22,6 +22,8 @@
             <Label fx:id="fitnessLabel" styleClass="label" text="Fitness: 0" textAlignment="CENTER" />
             <Label fx:id="benchmarkLabel" styleClass="label" text="Benchmark: 0" textAlignment="CENTER" />
             <Button fx:id="startButton" mnemonicParsing="false" onAction="#togglePaused" styleClass="button" text="Start" />
+            <Button fx:id="stopButton" mnemonicParsing="false" onAction="#stop" styleClass="button" text="Stop" />
+            <Button fx:id="saveButton" mnemonicParsing="false" onAction="#save" styleClass="button" text="Save" />
          </children>
       </VBox>
    </children>
