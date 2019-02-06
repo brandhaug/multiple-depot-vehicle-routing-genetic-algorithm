@@ -86,6 +86,7 @@ public class MapParser {
                     System.out.println("Depot location: " + line);
                 }
                 Depot depot = depots.get(depotIndex);
+                depot.setId(Integer.toString(lineArr[0]));
                 depot.setCoordinates(lineArr[1], lineArr[2]);
                 setExtremeValues(lineArr[1], lineArr[2]);
 

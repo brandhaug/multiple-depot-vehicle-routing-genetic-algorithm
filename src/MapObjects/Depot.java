@@ -12,9 +12,11 @@ import java.util.List;
  * Each depot is given m Vehicles
  */
 public class Depot extends MapObject {
+    private String id;
     private double maxDuration; // D: maximum duration of a route
     private int maxLoad; // Q: allowed maximum load of a vehicle
-    private int maxCars; // m: maximum number of vehicles available in each depot
+    private int maxVehicles; // m: maximum number of vehicles available in each depot
+
     private static int colorIndex;
 
     private Color[] colors = {Color.RED, Color.ORANGE, Color.GOLD, Color.GREEN, Color.BLUE, Color.INDIGO, Color.VIOLET}; // Possible depot colors
@@ -23,12 +25,13 @@ public class Depot extends MapObject {
     private List<Customer> customers;
 
 
-    public Depot(int maxDuration, int maxLoad, int maxCars) {
+    public Depot(int maxDuration, int maxLoad, int maxVehicles) {
         super(0, 0);
+        this.id = id;
         this.customers = new ArrayList<>();
         this.maxDuration = maxDuration;
         this.maxLoad = maxLoad;
-        this.maxCars = maxCars;
+        this.maxVehicles = maxVehicles;
         this.color = colors[colorIndex]; // Sets color based on static counter
 
         // Updates static counter
@@ -38,9 +41,11 @@ public class Depot extends MapObject {
             colorIndex++;
         }
     }
+
     /**
      * Draws Depot on canvas
      * Represented as a colored dot
+     *
      * @param gc
      */
     @Override
@@ -49,18 +54,34 @@ public class Depot extends MapObject {
         gc.fillOval(getPixelX() - 5, getPixelY() - 5, 10, 10);
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public double getMaxDuration() {
         return maxDuration;
     }
+
     public int getMaxLoad() {
         return maxLoad;
     }
-    public int getMaxCars() {
-        return maxCars;
+
+    public int getMaxVehicles() {
+        return maxVehicles;
     }
+
     public Paint getColor() {
         return color;
     }
+
+    public List<Vehicle> getVehicles() {
+        return vehicles;
+    }
+
     public List<Customer> getCustomers() {
         return customers;
     }

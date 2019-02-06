@@ -6,6 +6,10 @@ import Utils.Utils;
 import MapObjects.Customer;
 import MapObjects.Depot;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -45,7 +49,7 @@ public class Solution {
         for (Depot depot : depots) {
             List<Vehicle> depotVehicles = new ArrayList<>();
 
-            for (int i = 0; i < depot.getMaxCars(); i++) {
+            for (int i = 0; i < depot.getMaxVehicles(); i++) {
                 Vehicle v = new Vehicle(depot);
                 depotVehicles.add(v);
             }
@@ -366,11 +370,6 @@ public class Solution {
             }
         }
 
-//        if (minDistance == Double.MAX_VALUE) return null;
-
-        // Legg inn routeFromOtherSolution der fitness er best
-        // Legge inn end depot her?
-        // TODO: Error skjer når alle routes sizes i newVehicles er 0 (line 257)
         minVehicle.addOtherRouteToRoute(minIndex, otherRoute);
 
         System.out.println("CrossOver finished, returning new list of Vehicles");
@@ -378,12 +377,25 @@ public class Solution {
         return newVehicles;
     }
 
-//    @Override
-//    public Solution clone() {
-//        List<Vehicle> copyOfVehicles = new ArrayList<>();
-//        for (Vehicle vehicle : vehicles) {
-//            copyOfVehicles.add(vehicle.clone());
-//        }
-//        return new Solution(depots, copyOfVehicles);
-//    }
+    public void saveToFile() throws IOException {
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        BufferedWriter writer = new BufferedWriter(new FileWriter("solution-" + Controller.fileName + "-" + timestamp.getTime()));
+
+        writer.write(Double.toString(Utils.round(getFitness(), 2)));
+
+        for (Vehicle vehicle : vehicles) {
+            writer.newLine();
+            writer.write(vehicle.getStartDepot().getId() + " " // s: number of the start depot
+                    + vehicle.getStartDepot().getMaxVehicles() + " " // k: number of the vehicle (for above depot)
+                    + Utils.round(vehicle.calculateRouteDistance(), 2) + " " // d: duration of the route for a particular vehicle from a particular depot
+                    + vehicle.getCurrentLoad() + " " // q: carried load of the vehicle
+                    + vehicle.getEndDepot().getId() + "   " // e: number of the end depot
+                    + vehicle.getRoute().toString() // list: ordered sequence of customers (served by a particular vehicle)
+                    .replace(",", "")  // remove the commas
+                    .replace("[", "")  // remove the right bracket
+                    .replace("]", "")  // remove the left bracket
+            );
+        }
+        writer.close();
+    }
 }

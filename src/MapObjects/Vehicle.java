@@ -67,6 +67,10 @@ public class Vehicle extends MapObject {
         return startDepot;
     }
 
+    public Depot getEndDepot() {
+        return endDepot;
+    }
+
     public void setEndDepot(Depot depot) {
         endDepot = depot;
     }
