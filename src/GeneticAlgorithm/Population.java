@@ -144,7 +144,8 @@ public class Population {
             }
         }
 
-        // Hard maps: 7, 8, 9, 10, 11, 16, 17, 19, 20, 22, 23
+        // Hard maps initialSolution: 7, 11, 16, 17, 19, 20, 22, 23
+        // Hard maps initialSolution2: 7, 8, 9, 10, 11, 16, 17, 19, 20, 22, 23
         if (solutions.size() != populationSize) {
             throw new Error("Generating initial population failed - created " + solutions.size() + " of " + populationSize + " solutions");
         }
