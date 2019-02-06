@@ -277,11 +277,6 @@ public class Solution {
             }
         }
 
-//        if (minDistance == Double.MAX_VALUE) return null;
-
-        // Legg inn routeFromOtherSolution der fitness er best
-        // Legge inn end depot her?
-        // TODO: Error skjer når alle routes sizes i newVehicles er 0 (line 257)
         minVehicle.addOtherRouteToRoute(minIndex, otherRoute);
 
         System.out.println("CrossOver finished, returning new list of Vehicles");
@@ -308,7 +303,6 @@ public class Solution {
                     .replace("]", "")  // remove the left bracket
             );
         }
-
         writer.close();
     }
 }
