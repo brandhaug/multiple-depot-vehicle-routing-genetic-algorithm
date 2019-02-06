@@ -242,7 +242,9 @@ public class Vehicle extends MapObject {
         List<Customer> newRoute = new ArrayList<>(route);
 
         if (newRoute.size() <= 1) {
-            System.out.println("Route size is zero or one, returning same route");
+            if (Controller.verbose) {
+                System.out.println("Route size is zero or one, returning same route");
+            }
             return newRoute;
         }
 
@@ -254,11 +256,7 @@ public class Vehicle extends MapObject {
             indexB = Utils.randomIndex(newRoute.size());
         }
 
-
-        //TODO: SHOULD THESE PRINTLN BE REMOVED?
-        //System.out.println(newRoute);
         Collections.swap(newRoute, indexA, indexB);
-        //System.out.println(newRoute);
 
         if (Controller.verbose) {
             System.out.println("Mutation on Vehicle finished, returning new Route");

@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Controls GUI (View.fxml)
@@ -30,21 +31,32 @@ import java.util.List;
 public class Controller {
 
     // GUI
-    @FXML private Button startButton; // Toggles between "Start" and "Pause", depending on state
-    @FXML private Button stopButton;
-    @FXML private Button saveButton;
-    @FXML private Label mapLabel; // Shows current Map
-    @FXML private Label timeLabel; // Shows current time
-    @FXML private Label depotsLabel; // Shows number of depots in Map
-    @FXML private Label vehiclesLabel; // Shows number of vehicles in Map
-    @FXML private Label customersLabel; // Shows number of customers in Map
-    @FXML private Label generationLabel; // Shows generation in GeneticAlgorithm
-    @FXML private Label fitnessLabel;  // Shows alphaFitness (best Solution) of Population in GeneticAlgorithm
-    @FXML private Label benchmarkLabel; // Shows benchmark fitness for current map
-    @FXML private ComboBox mapSelector; // Shows benchmark fitness for current map
+    @FXML
+    private Button startButton; // Toggles between "Start" and "Pause", depending on state
+    @FXML
+    private Button resetButton;
+    @FXML
+    private Button saveButton;
+    @FXML
+    private Label timeLabel; // Shows current time
+    @FXML
+    private Label depotsLabel; // Shows number of depots in Map
+    @FXML
+    private Label vehiclesLabel; // Shows number of vehicles in Map
+    @FXML
+    private Label customersLabel; // Shows number of customers in Map
+    @FXML
+    private Label generationLabel; // Shows generation in GeneticAlgorithm
+    @FXML
+    private Label fitnessLabel;  // Shows alphaFitness (best Solution) of Population in GeneticAlgorithm
+    @FXML
+    private Label benchmarkLabel; // Shows benchmark fitness for current map
+    @FXML
+    private ComboBox mapSelector; // Shows benchmark fitness for current map
 
     // Map
-    @FXML private Canvas canvas;
+    @FXML
+    private Canvas canvas;
     private Map map;
     public static String fileName = "p01"; // Current map
 
@@ -59,6 +71,7 @@ public class Controller {
     // States
     private boolean paused = true; // Used to start/pause game loop
     private boolean initialized = false; // Used to start/pause game loop
+    private boolean terminated = false; // Used when reached map's benchmark - the termination-condition
 
     // Settings
     public static boolean verbose = false; // Used to enable logging with System.out.println()
@@ -79,7 +92,7 @@ public class Controller {
         }
 
         gc = canvas.getGraphicsContext2D(); // Used to draw in canvas
-        render(); // Render Map (Depots and Customers) and alphaSolution (best Solution in population) on canvas
+        render();
         final long startNanoTime = System.nanoTime(); // Time when system starts
         initialized = true;
 
@@ -90,14 +103,15 @@ public class Controller {
                     render();
                 }
 
-                if (ga.getAlphaSolution() != null) {
-                    double alphaFitness = ga.getAlphaFitness();
-                    if (alphaFitness <= map.getBenchmark()) {
-                        paused = true;
-                        fitnessLabel.setText("Fitness: " + Utils.round(ga.getAlphaFitness(), 2));
-                        startButton.setText("Start");
-                        saveButton.setVisible(true);
-                    }
+                if (ga.getAlphaSolution() != null && ga.getAlphaFitness() <= map.getBenchmark()) { // Reached benchmark
+                    terminated = true;
+                    paused = true;
+                    fitnessLabel.setText("Fitness: " + Utils.round(ga.getAlphaFitness(), 2));
+                    fitnessLabel.setStyle("-fx-font-weight: bold");
+                    startButton.setVisible(false);
+                    startButton.setText("Start");
+                    saveButton.setVisible(true);
+                    mapSelector.setVisible(true);
                 }
             }
         }.start();
@@ -129,7 +143,6 @@ public class Controller {
     }
 
     private void initializeGUI() {
-        mapLabel.setText("Map: " + fileName); // Current map
         depotsLabel.setText("Depots: " + map.getDepotsSize()); // Number of depots
         vehiclesLabel.setText("Vehicles: " + map.getVehiclesSize()); // Number of vehicles
         customersLabel.setText("Customers: " + map.getCustomersSize()); // Number of customers
@@ -143,9 +156,9 @@ public class Controller {
 
     private void initializeMapSelector() {
         ClassLoader classLoader = getClass().getClassLoader();
-        File folder = new File(classLoader.getResource("resources/maps").getFile());
+        File folder = new File(Objects.requireNonNull(classLoader.getResource("resources/maps")).getFile());
         File[] mapFiles = folder.listFiles();
-        Arrays.sort(mapFiles);
+        Arrays.sort(Objects.requireNonNull(mapFiles));
 
         if (mapFiles.length == 0) {
             throw new IllegalStateException("Map folder is empty");
@@ -185,29 +198,40 @@ public class Controller {
     private void togglePaused() {
         paused = !paused;
 
+
         if (paused) {
             startButton.setText("Start");
             saveButton.setVisible(true);
+            mapSelector.setVisible(true);
         } else {
             startButton.setText("Pause");
             saveButton.setVisible(false);
+            mapSelector.setVisible(false);
         }
     }
 
     @FXML
     private void selectMap() {
         fileName = mapSelector.getValue().toString();
-        initialize();
-        paused = true;
+        reset();
     }
 
-    public void stop() {
+    public void reset() {
         paused = true;
+        fitnessLabel.setStyle("-fx-font-weight: normal");
+        ga = null;
+        fitnessLabel.setText("Fitness: 0");
+        timeLabel.setText("Time: 0");
+        generationLabel.setText("Generation: 0");
+        startButton.setVisible(true);
         startButton.setText("Start");
+        mapSelector.setVisible(true);
+        terminated = false;
         initialize();
     }
 
-    public void save() {
+    @FXML
+    private void save() {
         try {
             ga.saveAlphaSolutionToFile();
         } catch (IOException e) {

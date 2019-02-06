@@ -8,10 +8,11 @@
 }
 
 .button {
+    -fx-pref-width: 100;
     -fx-font-family: "Open Sans";
     -fx-font-weight: bold;
     -fx-background-color: #eaeef1;
-    -fx-padding: .35em 1em;
+    -fx-padding: 1em 1em;
     -fx-border-color: #999999;
     -fx-text-fill: #222222;
     -fx-border-radius: 3px;
