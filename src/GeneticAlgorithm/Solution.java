@@ -270,7 +270,6 @@ public class Solution {
         int randomIndex = Utils.randomIndex(vehicles.size());
         Vehicle vehicle = vehicles.get(randomIndex);
         List<Customer> newRoute = vehicle.mutate();
-        // TODO: vehicle.clone() - mest sannsynlig ikke nødvendig
         Vehicle newVehicle = new Vehicle(vehicle.getStartDepot(), newRoute);
 
         newVehicles.remove(vehicle);
@@ -335,22 +334,10 @@ public class Solution {
         int minIndex = -1;
 
         for (Vehicle vehicle : newVehicles) {
-            for (int i = 0; i < vehicle.getRoute().size(); i++) {
-                Customer customer = vehicle.getRoute().get(i);
-
+            if (vehicle.getRoute().size() == 0) {
                 double distance = 0.0;
-
-                if (i == 0) { // Check between depot and first customer
-                    distance += Utils.euclideanDistance(otherRoute.get(0).getX(), vehicle.getStartDepot().getX(), otherRoute.get(0).getY(), vehicle.getStartDepot().getY());
-                    distance += Utils.euclideanDistance(otherRoute.get(otherRoute.size() - 1).getX(), customer.getX(), otherRoute.get(otherRoute.size() - 1).getY(), customer.getY());
-                } else if (i == newVehicles.size() - 1) { // Check between last customer and depot
-                    distance += Utils.euclideanDistance(customer.getX(), otherRoute.get(0).getX(), customer.getY(), otherRoute.get(0).getY());
-                    distance += Utils.euclideanDistance(vehicle.getStartDepot().getX(), otherRoute.get(otherRoute.size() - 1).getX(), vehicle.getStartDepot().getY(), otherRoute.get(otherRoute.size() - 1).getY());
-                } else { // Check between customers
-                    Customer lastCustomer = vehicle.getRoute().get(i - 1);
-                    distance += Utils.euclideanDistance(otherRoute.get(0).getX(), lastCustomer.getX(), otherRoute.get(0).getY(), lastCustomer.getY());
-                    distance += Utils.euclideanDistance(otherRoute.get(otherRoute.size() - 1).getX(), customer.getX(), otherRoute.get(otherRoute.size() - 1).getY(), customer.getY());
-                }
+                distance += Utils.euclideanDistance(otherRoute.get(0).getX(), vehicle.getStartDepot().getX(), otherRoute.get(0).getY(), vehicle.getStartDepot().getY());
+                distance += Utils.euclideanDistance(vehicle.getEndDepot().getX(), otherRoute.get(otherRoute.size() - 1).getX(), vehicle.getEndDepot().getY(), otherRoute.get(otherRoute.size() - 1).getY());
 
                 if (distance < minDistance) {
                     int loadIfAdded = vehicle.getCurrentLoad();
@@ -362,7 +349,39 @@ public class Solution {
                     if (loadIfAdded <= vehicle.getStartDepot().getMaxLoad()) {
                         minDistance = distance;
                         minVehicle = vehicle;
-                        minIndex = i;
+                        minIndex = 0;
+                    }
+                }
+            } else {
+                for (int i = 0; i < vehicle.getRoute().size(); i++) {
+                    Customer customer = vehicle.getRoute().get(i);
+
+                    double distance = 0.0;
+
+                    if (i == 0) { // Check between depot and first customer
+                        distance += Utils.euclideanDistance(otherRoute.get(0).getX(), vehicle.getStartDepot().getX(), otherRoute.get(0).getY(), vehicle.getStartDepot().getY());
+                        distance += Utils.euclideanDistance(otherRoute.get(otherRoute.size() - 1).getX(), customer.getX(), otherRoute.get(otherRoute.size() - 1).getY(), customer.getY());
+                    } else if (i == newVehicles.size() - 1) { // Check between last customer and depot
+                        distance += Utils.euclideanDistance(customer.getX(), otherRoute.get(0).getX(), customer.getY(), otherRoute.get(0).getY());
+                        distance += Utils.euclideanDistance(vehicle.getEndDepot().getX(), otherRoute.get(otherRoute.size() - 1).getX(), vehicle.getEndDepot().getY(), otherRoute.get(otherRoute.size() - 1).getY());
+                    } else { // Check between customers
+                        Customer lastCustomer = vehicle.getRoute().get(i - 1);
+                        distance += Utils.euclideanDistance(otherRoute.get(0).getX(), lastCustomer.getX(), otherRoute.get(0).getY(), lastCustomer.getY());
+                        distance += Utils.euclideanDistance(otherRoute.get(otherRoute.size() - 1).getX(), customer.getX(), otherRoute.get(otherRoute.size() - 1).getY(), customer.getY());
+                    }
+
+                    if (distance < minDistance) {
+                        int loadIfAdded = vehicle.getCurrentLoad();
+                        for (Customer c : otherRoute) {
+                            loadIfAdded += c.getLoadDemand();
+                        }
+
+                        // Checking constraints
+                        if (loadIfAdded <= vehicle.getStartDepot().getMaxLoad()) {
+                            minDistance = distance;
+                            minVehicle = vehicle;
+                            minIndex = i;
+                        }
                     }
                 }
             }
@@ -374,12 +393,12 @@ public class Solution {
             // Find best ending point for route
             if (vehicle.getRoute().size() > 0) {
                 double currentMinDistance = Double.MAX_VALUE;
-                Depot currentBestEnd = vehicle.getStartDepot();
+                Depot currentBestEnd = null;
                 for (Depot d : depots) {
-                    double distance = Utils.euclideanDistance(vehicle.getRoute().get(vehicle.getRoute().size() - 1).getX(), d.getX(),
-                            vehicle.getRoute().get(vehicle.getRoute().size() - 1).getY(), d.getY());
+                    double distance = d.distance(vehicle.getRoute().get(vehicle.getRoute().size() - 1));
                     if (distance < currentMinDistance) {
                         currentMinDistance = distance;
+                        currentBestEnd = d;
                     }
                 }
                 vehicle.setEndDepot(currentBestEnd);

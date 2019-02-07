@@ -133,7 +133,6 @@ public class Population {
         int triesLeft = 10000;
 
         while (solutions.size() != populationSize && triesLeft != 0) {
-
             Solution solution = new Solution(depots);
             boolean successful = solution.generateInitialSolution();
             if (!successful) {
