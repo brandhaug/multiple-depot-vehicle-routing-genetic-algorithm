@@ -16,12 +16,13 @@ import java.util.List;
 public class GeneticAlgorithm {
 
     // Parameters
-    private int populationSize = 200; // 20-100 dependent on problem
+    private int populationSize = 80; // 20-100 dependent on problem
     private double crossOverRate = 0.8; // 80%-95%
     private double mutationRate = 0.01; // 0.5%-1%.
     private double selectionRate = 0.2;
     private int tournamentSize = 3;
     private int numberOfChildren = populationSize/3;
+    private int penaltyRate = 10;
 
     private Population population;
 
@@ -30,7 +31,7 @@ public class GeneticAlgorithm {
      * @param depots
      */
     public GeneticAlgorithm(List<Depot> depots) {
-        population = new Population(depots, populationSize, crossOverRate, mutationRate, selectionRate, tournamentSize, numberOfChildren);
+        population = new Population(depots, populationSize, crossOverRate, mutationRate, selectionRate, tournamentSize, numberOfChildren, penaltyRate);
     }
 
     /**

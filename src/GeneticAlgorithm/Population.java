@@ -28,20 +28,21 @@ public class Population {
     private int tournamentSize;
     private double selectionRate;
     private int numberOfChildren;
+    private int penaltyRate;
 
 
     /**
      * Sets parameters
      * Generates initial population which generates n random Solutions. n = populationSize
-     *
-     * @param depots
+     *  @param depots
      * @param populationSize
      * @param crossOverRate
      * @param mutationRate
      * @param selectionRate
      * @param tournamentSize
+     * @param penaltyRate
      */
-    public Population(List<Depot> depots, int populationSize, double crossOverRate, double mutationRate, double selectionRate, int tournamentSize, int numberOfChildren) {
+    public Population(List<Depot> depots, int populationSize, double crossOverRate, double mutationRate, double selectionRate, int tournamentSize, int numberOfChildren, int penaltyRate) {
         this.depots = depots;
         this.populationSize = populationSize;
         this.crossOverRate = crossOverRate;
@@ -49,6 +50,7 @@ public class Population {
         this.selectionRate = selectionRate;
         this.tournamentSize = tournamentSize;
         this.numberOfChildren = numberOfChildren;
+        this.penaltyRate = penaltyRate;
     }
 
     /**
@@ -65,9 +67,9 @@ public class Population {
             generateInitialPopulation();
         } else {
             List<Individual> children = new ArrayList<>();
-            List<Individual> parentsToRemove = new ArrayList<>(); // Should we try to not remove them to enable elitism?
+//            List<Individual> parentsToRemove = new ArrayList<>(); // TODO: Should we try to not remove them to enable elitism?
 
-            for (int i = 0; i < numberOfChildren; i++) { // Would this actually make 2*numberOfChildren? Yes
+            for (int i = 0; i < individuals.size(); i++) { // Would this actually make 2*numberOfChildren? Yes
                 Individual[] parents = selection();
                 Individual[] crossOverChildren = crossOver(parents);
 
@@ -76,21 +78,21 @@ public class Population {
                 }
 
                 children.addAll(List.of(crossOverChildren[0], crossOverChildren[1]));
-                parentsToRemove.addAll(List.of(parents[0], parents[1]));
+//                parentsToRemove.addAll(List.of(parents[0], parents[1]));
             }
 
             List<Individual> childrenToAdd = new ArrayList<>();
             for (Individual child : children) {
                 double random = Utils.randomDouble();
                 if (random < mutationRate) {
-                    Individual mutatedChild = new Individual(depots, child.mutation());
+                    Individual mutatedChild = new Individual(depots, penaltyRate, child.mutation());
                     childrenToAdd.add(mutatedChild);
                 } else {
                     childrenToAdd.add(child);
                 }
             }
 
-            individuals.removeAll(parentsToRemove);
+//            individuals.removeAll(parentsToRemove);
             individuals.addAll(childrenToAdd);
             individuals.sort(Comparator.comparingDouble(Individual::getFitness)); // Sort by fitness
             individuals = individuals.stream().limit(populationSize).collect(Collectors.toList()); // Cut population to population size
@@ -110,8 +112,8 @@ public class Population {
                 force = true;
             }
 
-            Individual individual = new Individual(depots);
-            boolean successful = individual.generateInitialSolution2(force);
+            Individual individual = new Individual(depots, penaltyRate);
+            boolean successful = individual.generateRandomIndividual();
 
             if (successful || force) {
                 individuals.add(individual);
@@ -149,16 +151,16 @@ public class Population {
             List<Customer>[] routesFromS1 = splitRoute(solutionVehicle.getRoute());
             List<Customer>[] routesFromS2 = splitRoute(partnerVehicle.getRoute());
 
-            List<Vehicle> child1Vehicles = parents[0].crossOver(routesFromS2[0]);
-            List<Vehicle> child2Vehicles = parents[0].crossOver(routesFromS2[1]);
-            List<Vehicle> child3Vehicles = parents[1].crossOver(routesFromS1[0]);
-            List<Vehicle> child4Vehicles = parents[1].crossOver(routesFromS1[1]);
+            List<Vehicle> child1Vehicles = parents[0].crossOverNoConstraints(routesFromS2[0]);
+            List<Vehicle> child2Vehicles = parents[0].crossOverNoConstraints(routesFromS2[1]);
+            List<Vehicle> child3Vehicles = parents[1].crossOverNoConstraints(routesFromS1[0]);
+            List<Vehicle> child4Vehicles = parents[1].crossOverNoConstraints(routesFromS1[1]);
 
             if (child1Vehicles != null || child2Vehicles != null) {
-                Individual child1 = new Individual(depots, child1Vehicles);
-                Individual child2 = new Individual(depots, child2Vehicles);
-                Individual child3 = new Individual(depots, child3Vehicles);
-                Individual child4 = new Individual(depots, child4Vehicles);
+                Individual child1 = new Individual(depots, penaltyRate, child1Vehicles);
+                Individual child2 = new Individual(depots, penaltyRate, child2Vehicles);
+                Individual child3 = new Individual(depots, penaltyRate, child3Vehicles);
+                Individual child4 = new Individual(depots, penaltyRate, child4Vehicles);
                 return new Individual[]{child1, child2, child3, child4};
             } else {
                 triesLeft--;

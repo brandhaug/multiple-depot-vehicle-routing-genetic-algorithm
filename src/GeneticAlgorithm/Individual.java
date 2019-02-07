@@ -21,26 +21,31 @@ import java.util.List;
 public class Individual {
     private List<Depot> depots;
     private List<Vehicle> vehicles;
+    private int penaltyRate;
     private boolean isValid;
 
     /**
      * Generates initialSolution and calculates distances
      *
      * @param depots
+     * @param penaltyRate
      */
-    public Individual(List<Depot> depots) {
+    public Individual(List<Depot> depots, int penaltyRate) {
         this.depots = depots;
+        this.penaltyRate = penaltyRate;
         vehicles = new ArrayList<>();
     }
 
-    public Individual(List<Depot> depots, List<Vehicle> vehicles) {
+    public Individual(List<Depot> depots, int penaltyRate, List<Vehicle> vehicles) {
         this.depots = depots;
+        this.penaltyRate = penaltyRate;
         this.vehicles = new ArrayList<>(vehicles);
     }
 
     /**
      * Each Depot has n Vehicles and m Customers
      * Loops through all Depots, and assigns the Depot's Customers to a random Depot's vehicle.
+     *
      * @param force
      */
     public boolean generateInitialSolution(boolean force) {
@@ -49,7 +54,7 @@ public class Individual {
         }
 
         for (Depot depot : depots) {
-            List <Vehicle> depotVehicles = createDepotVehicles(depot);
+            List<Vehicle> depotVehicles = createDepotVehicles(depot);
 
             List<Customer> depotCustomers = new ArrayList<>(depot.getCustomers()); // Current depot's customers
             Collections.shuffle(depotCustomers);
@@ -73,11 +78,11 @@ public class Individual {
 
                         if (vehicle.getCurrentLoad() + customer.getLoadDemand() <= depot.getMaxLoad()) {
                             if (vehicle.getRoute().size() == 0) {
-                                vehicleMinDistance = vehicle.calculateRouteDuration(0, customer);
+                                vehicleMinDistance = vehicle.calculateRouteDurationIfAdded(0, customer);
                                 vehicleMinIndex = 0;
                             } else {
                                 for (int i = 0; i < vehicle.getRoute().size(); i++) {
-                                    distance = vehicle.calculateRouteDuration(i, customer);
+                                    distance = vehicle.calculateRouteDurationIfAdded(i, customer);
 
                                     if (distance < vehicleMinDistance) {
                                         vehicleMinDistance = distance;
@@ -121,11 +126,24 @@ public class Individual {
         return true;
     }
 
-    /**
-     * Each Depot has n Vehicles and m Customers
-     * Loops through all Depots, and assigns the Depot's Customers to a random Depot's vehicle.
-     * @param force
-     */
+    public boolean generateRandomIndividual() {
+        for (Depot depot : depots) {
+            List<Vehicle> depotVehicles = createDepotVehicles(depot);
+            List<Customer> depotCustomers = depot.getCustomers(); // Current depot's customers
+            Collections.shuffle(depotCustomers);
+
+            for (Customer customer : depotCustomers) { // Assign customer to random vehicle
+                int randomIndex = Utils.randomIndex(depotVehicles.size()); // Random vehicle index
+                Vehicle randomVehicle = depotVehicles.get(randomIndex);
+
+                randomVehicle.addCustomerToRouteSmartNoConstraints(customer);
+            }
+
+            this.vehicles.addAll(depotVehicles);
+        }
+        return true;
+    }
+
     public boolean generateInitialSolution2(boolean force) {
         if (Controller.verbose) {
             System.out.println("========= Creating random initial vehicles =========");
@@ -285,18 +303,49 @@ public class Individual {
             double maxDuration = vehicle.getStartDepot().getMaxDuration();
             double duration = vehicle.calculateRouteDuration();
             if (maxDuration != 0 && duration > maxDuration) {
-                penalty += Math.pow((duration - maxDuration), 2);
+//                penalty += Math.pow((duration - maxDuration), 2);
+                penalty += (duration - maxDuration);
             }
 
             double maxLoad = vehicle.getStartDepot().getMaxLoad();
             double load = vehicle.getCurrentLoad();
             if (maxLoad != 0 && load > maxLoad) {
-                penalty += Math.pow((load - maxLoad), 2);
+//                penalty += Math.pow((load - maxLoad), 2);
+                penalty += load - maxLoad;
             }
+
+            penalty = penalty * penaltyRate;
 
             if (penalty > 0) {
                 isValid = false;
             }
+
+            fitness += (duration + penalty);
+        }
+
+        return fitness;
+    }
+
+    public double getFitness(List<Vehicle> newVehicles) {
+        double fitness = 0.0;
+        for (Vehicle vehicle : newVehicles) {
+            double penalty = 0;
+
+            double maxDuration = vehicle.getStartDepot().getMaxDuration();
+            double duration = vehicle.calculateRouteDuration();
+            if (maxDuration != 0 && duration > maxDuration) {
+//                penalty += Math.pow((duration - maxDuration), 2);
+                penalty += (duration - maxDuration);
+            }
+
+            double maxLoad = vehicle.getStartDepot().getMaxLoad();
+            double load = vehicle.getCurrentLoad();
+            if (maxLoad != 0 && load > maxLoad) {
+//                penalty += Math.pow((load - maxLoad), 2);
+                penalty += load - maxLoad;
+            }
+
+            penalty = penalty * penaltyRate;
 
             fitness += (duration + penalty);
         }
@@ -319,16 +368,9 @@ public class Individual {
     }
 
     public List<Vehicle> crossOver(List<Customer> otherRoute) {
-        if (Controller.verbose) {
-            System.out.println("Performing mutation2");
-        }
-
         if (vehicles == null) {
             throw new NullPointerException("No vehicles in solution");
         } else if (otherRoute.size() == 0) {
-            if (Controller.verbose) {
-                System.out.println("Other Route is 0");
-            }
             return vehicles;
         }
 
@@ -432,6 +474,88 @@ public class Individual {
         }
 
         return newVehicles;
+    }
+
+    public List<Vehicle> crossOverNoConstraints(List<Customer> otherRoute) {
+        if (vehicles == null) {
+            throw new NullPointerException("No vehicles in solution");
+        } else if (otherRoute.size() == 0) {
+            return vehicles;
+        }
+
+        // Creating a deep copy of vehicles
+        List<Vehicle> newVehicles = new ArrayList<>();
+        for (Vehicle vehicle : vehicles) {
+            newVehicles.add(vehicle.clone());
+        }
+
+        // Remove route from routeFromPartner
+        for (Vehicle vehicle : newVehicles) {
+            List<Customer> routeCopy = new ArrayList<>(vehicle.getRoute()); // Copy to avoid error when removing while looping
+            for (Customer customer : routeCopy) {
+                if (otherRoute.contains(customer)) {
+                    vehicle.removeCustomerFromRoute(customer);
+                }
+            }
+        }
+
+        // Rull gjennom alle ruter og regn ut diff i fitness på alle mulige steder
+        double minFitnessIfAdded = Double.MAX_VALUE;
+        Vehicle minVehicle = null;
+        int minIndex = -1;
+
+        for (Vehicle vehicle : newVehicles) {
+            double fitnessIfAdded;
+
+            if (vehicle.getRoute().size() == 0) {
+                fitnessIfAdded = calculateFitnessIfAdded(newVehicles, vehicle, 0, otherRoute);
+
+                if (fitnessIfAdded < minFitnessIfAdded) {
+                    minFitnessIfAdded = fitnessIfAdded;
+                    minVehicle = vehicle;
+                    minIndex = 0;
+                }
+            } else {
+                for (int customerIndex = 0; customerIndex < vehicle.getRoute().size(); customerIndex++) {
+                    fitnessIfAdded = calculateFitnessIfAdded(newVehicles, vehicle, customerIndex, otherRoute);
+
+                    if (fitnessIfAdded < minFitnessIfAdded) {
+                        minFitnessIfAdded = fitnessIfAdded;
+                        minVehicle = vehicle;
+                        minIndex = customerIndex;
+                    }
+                }
+            }
+
+            if (minVehicle == null) {
+                throw new Error("MinVehicle is null");
+            }
+
+            // Find best ending point for route
+            if (vehicle.getRoute().size() > 0) {
+                double currentMinDistance = Double.MAX_VALUE;
+                Depot currentBestEnd = null;
+                for (Depot d : depots) {
+                    double distance = d.distance(vehicle.getRoute().get(vehicle.getRoute().size() - 1));
+                    if (distance < currentMinDistance) {
+                        currentMinDistance = distance;
+                        currentBestEnd = d;
+                    }
+                }
+                vehicle.setEndDepot(currentBestEnd);
+            }
+        }
+
+        minVehicle.addOtherRouteToRoute(minIndex, otherRoute);
+
+        return newVehicles;
+    }
+
+    private double calculateFitnessIfAdded(List<Vehicle> newVehicles, Vehicle vehicle, int customerIndex, List<Customer> otherRoute) {
+        vehicle.addOtherRouteToRoute(customerIndex, otherRoute);
+        double fitness = getFitness(newVehicles);
+        vehicle.removeRouteFromRoute(otherRoute);
+        return fitness;
     }
 
     public boolean isValid() {
