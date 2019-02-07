@@ -2,6 +2,7 @@ package Main;
 
 import GeneticAlgorithm.GeneticAlgorithm;
 import Map.Map;
+import MapObjects.Vehicle;
 import Utils.Utils;
 import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
@@ -112,6 +113,11 @@ public class Controller {
                     startButton.setText("Start");
                     saveButton.setVisible(true);
                     mapSelector.setVisible(true);
+
+                    System.out.println("Solution is valid: " + ga.getAlphaSolution().isValid());
+                    for (Vehicle v : ga.getAlphaSolution().getVehicles()) {
+                        System.out.println("Depot max load: " + v.getStartDepot().getMaxLoad() + ", vehicle max load: " + v.getCurrentLoad());
+                    }
                 }
             }
         }.start();

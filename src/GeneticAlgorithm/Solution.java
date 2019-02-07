@@ -395,6 +395,15 @@ public class Solution {
         return newVehicles;
     }
 
+    public boolean isValid() {
+        for (Vehicle vehicle : vehicles) {
+            // TODO: Also check maxDuration
+            if (vehicle.getCurrentLoad() > vehicle.getStartDepot().getMaxLoad())
+                return false;
+        }
+        return true;
+    }
+
     public void saveToFile() throws IOException {
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         BufferedWriter writer = new BufferedWriter(new FileWriter("solution-" + Controller.fileName + "-" + timestamp.getTime()));
