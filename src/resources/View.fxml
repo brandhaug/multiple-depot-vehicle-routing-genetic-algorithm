@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
@@ -13,16 +14,24 @@
       <VBox alignment="CENTER" layoutX="500.0" prefHeight="500.0" prefWidth="150.0" styleClass="vbox">
          <children>
             <ComboBox fx:id="mapSelector" onAction="#selectMap" styleClass="combo-box" />
-            <Label fx:id="mapLabel" styleClass="label" text="Map: null" textAlignment="CENTER" />
-            <Label fx:id="timeLabel" styleClass="label" text="Time: 0" textAlignment="CENTER" />
+            <Label fx:id="timeLabel" styleClass="label" text="Time: 0" textAlignment="CENTER">
+               <VBox.margin>
+                  <Insets bottom="20.0" top="20.0" />
+               </VBox.margin></Label>
             <Label fx:id="depotsLabel" styleClass="label" text="Depots: 0" textAlignment="CENTER" />
             <Label fx:id="vehiclesLabel" styleClass="label" text="Vehicles: 0" textAlignment="CENTER" />
             <Label fx:id="customersLabel" styleClass="label" text="Customers: 0" textAlignment="CENTER" />
             <Label fx:id="generationLabel" styleClass="label" text="Generation: 0" textAlignment="CENTER" />
-            <Label fx:id="fitnessLabel" styleClass="label" text="Fitness: 0" textAlignment="CENTER" />
+            <Label fx:id="fitnessLabel" styleClass="label" text="Fitness: 0" textAlignment="CENTER">
+               <VBox.margin>
+                  <Insets top="20.0" />
+               </VBox.margin></Label>
             <Label fx:id="benchmarkLabel" styleClass="label" text="Benchmark: 0" textAlignment="CENTER" />
-            <Button fx:id="startButton" mnemonicParsing="false" onAction="#togglePaused" styleClass="button" text="Start" />
-            <Button fx:id="stopButton" mnemonicParsing="false" onAction="#stop" styleClass="button" text="Stop" />
+            <Button fx:id="startButton" mnemonicParsing="false" onAction="#togglePaused" prefHeight="30.0" prefWidth="100.0" styleClass="button" text="Start">
+               <VBox.margin>
+                  <Insets top="20.0" />
+               </VBox.margin></Button>
+            <Button fx:id="resetButton" mnemonicParsing="false" onAction="#reset" styleClass="button" text="Reset" />
             <Button fx:id="saveButton" mnemonicParsing="false" onAction="#save" styleClass="button" text="Save" />
          </children>
       </VBox>
