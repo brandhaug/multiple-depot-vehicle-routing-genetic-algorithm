@@ -22,7 +22,8 @@
             <Label fx:id="vehiclesLabel" styleClass="label" text="Vehicles: 0" textAlignment="CENTER" />
             <Label fx:id="customersLabel" styleClass="label" text="Customers: 0" textAlignment="CENTER" />
             <Label fx:id="generationLabel" styleClass="label" text="Generation: 0" textAlignment="CENTER" />
-            <Label fx:id="fitnessLabel" styleClass="label" text="Fitness: 0" textAlignment="CENTER">
+            <Label fx:id="fitnessLabel" styleClass="label" text="Fitness: 0" textAlignment="CENTER" />
+               <Label fx:id="durationLabel" styleClass="label" text="Duration: 0" textAlignment="CENTER" >
                <VBox.margin>
                   <Insets top="20.0" />
                </VBox.margin></Label>

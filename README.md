@@ -23,8 +23,8 @@ GAs are commonly used to generate high-quality solutions to optimization and sea
 Survival of the fittest through natural selection
 
 * Generate a set of random solutions
-* Repeat until best solution is good enough:
-  * Test each solution in the set (rank them)
+* Repeat until best individual is good enough:
+  * Test each individual in the set (rank them)
   * Remove some bad solutions from set
   * Duplicate some good solutions
   * Make small changes to some of them

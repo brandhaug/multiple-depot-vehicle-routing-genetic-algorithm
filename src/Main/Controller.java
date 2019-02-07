@@ -33,30 +33,21 @@ public class Controller {
     // GUI
     @FXML
     private Button startButton; // Toggles between "Start" and "Pause", depending on state
-    @FXML
-    private Button resetButton;
-    @FXML
-    private Button saveButton;
-    @FXML
-    private Label timeLabel; // Shows current time
-    @FXML
-    private Label depotsLabel; // Shows number of depots in Map
-    @FXML
-    private Label vehiclesLabel; // Shows number of vehicles in Map
-    @FXML
-    private Label customersLabel; // Shows number of customers in Map
-    @FXML
-    private Label generationLabel; // Shows generation in GeneticAlgorithm
-    @FXML
-    private Label fitnessLabel;  // Shows alphaFitness (best Solution) of Population in GeneticAlgorithm
-    @FXML
-    private Label benchmarkLabel; // Shows benchmark fitness for current map
-    @FXML
-    private ComboBox mapSelector; // Shows benchmark fitness for current map
+    @FXML private Button resetButton;
+    @FXML private Button saveButton;
+    @FXML private Label timeLabel; // Shows current time
+    @FXML private Label depotsLabel; // Shows number of depots in Map
+    @FXML private Label vehiclesLabel; // Shows number of vehicles in Map
+    @FXML private Label customersLabel; // Shows number of customers in Map
+    @FXML private Label generationLabel; // Shows generation in GeneticAlgorithm
+    @FXML private Label fitnessLabel; // Shows alphaFitness (best Individual) of Population in GeneticAlgorithm
+    @FXML private Label durationLabel;  // Shows duration of alpha individual of Population in GeneticAlgorithm
+    @FXML private Label benchmarkLabel; // Shows benchmark fitness for current map
+    @FXML private ComboBox mapSelector; // Shows benchmark fitness for current map
 
     // Map
-    @FXML
-    private Canvas canvas;
+    @FXML private Canvas canvas;
+
     private Map map;
     public static String fileName = "p01"; // Current map
 
@@ -71,7 +62,6 @@ public class Controller {
     // States
     private boolean paused = true; // Used to start/pause game loop
     private boolean initialized = false; // Used to start/pause game loop
-    private boolean terminated = false; // Used when reached map's benchmark - the termination-condition
 
     // Settings
     public static boolean verbose = false; // Used to enable logging with System.out.println()
@@ -103,11 +93,11 @@ public class Controller {
                     render();
                 }
 
-                if (ga.getAlphaSolution() != null && ga.getAlphaFitness() <= map.getBenchmark()) { // Reached benchmark
-                    terminated = true;
+                if (ga.getAlphaSolution() != null && ga.getAlphaDuration() <= map.getBenchmark() && ga.isAlphaValid()) { // Reached benchmark
                     paused = true;
+                    durationLabel.setText("Duration: " + Utils.round(ga.getAlphaDuration(), 2));
                     fitnessLabel.setText("Fitness: " + Utils.round(ga.getAlphaFitness(), 2));
-                    fitnessLabel.setStyle("-fx-font-weight: bold");
+                    durationLabel.setStyle("-fx-font-weight: bold");
                     startButton.setVisible(false);
                     startButton.setText("Start");
                     saveButton.setVisible(true);
@@ -187,6 +177,7 @@ public class Controller {
         generationLabel.setText("Generation: " + ga.getGeneration());
         timeLabel.setText("Time: " + (int) time);
         if (ga.getAlphaSolution() != null) {
+            durationLabel.setText("Duration: " + Utils.round(ga.getAlphaDuration(), 2));
             fitnessLabel.setText("Fitness: " + Utils.round(ga.getAlphaFitness(), 2));
         }
     }
@@ -197,7 +188,6 @@ public class Controller {
     @FXML
     private void togglePaused() {
         paused = !paused;
-
 
         if (paused) {
             startButton.setText("Start");
@@ -218,15 +208,15 @@ public class Controller {
 
     public void reset() {
         paused = true;
-        fitnessLabel.setStyle("-fx-font-weight: normal");
+        durationLabel.setStyle("-fx-font-weight: normal");
         ga = null;
+        durationLabel.setText("Duration: 0");
         fitnessLabel.setText("Fitness: 0");
         timeLabel.setText("Time: 0");
         generationLabel.setText("Generation: 0");
         startButton.setVisible(true);
         startButton.setText("Start");
         mapSelector.setVisible(true);
-        terminated = false;
         initialize();
     }
 

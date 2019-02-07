@@ -55,27 +55,36 @@ public class GeneticAlgorithm {
      * @param gc
      */
     private void renderAlphaSolution(GraphicsContext gc) {
-        Solution alphaSolution = getAlphaSolution();
+        Individual alphaIndividual = getAlphaSolution();
 
-        if (alphaSolution != null) {
-            for (Vehicle vehicle : alphaSolution.getVehicles()) {
+        if (alphaIndividual != null) {
+            for (Vehicle vehicle : alphaIndividual.getVehicles()) {
                 vehicle.render(gc);
             }
         }
     }
 
     /**
-     * Get best fitness of Population
+     * Get best duration of Population
      */
+    public double getAlphaDuration() {
+        return population.getAlphaDuration();
+    }
+
     public double getAlphaFitness() {
         return population.getAlphaFitness();
     }
 
+    public boolean isAlphaValid() {
+        return population.isAlphaValid();
+    }
+
+
     /**
-     * Get best Solution (Solution with best fitness) of Population
+     * Get best Individual (Individual with best fitness) of Population
      */
-    public Solution getAlphaSolution() {
-        return population.getAlphaSolution();
+    public Individual getAlphaSolution() {
+        return population.getAlphaIndividual();
     }
 
     public int getGeneration() {
