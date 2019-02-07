@@ -16,9 +16,9 @@ import java.util.stream.Collectors;
  */
 public class Population {
     private List<Depot> depots;
-    private List<Solution> solutions = new ArrayList<>();
+    private List<Individual> individuals = new ArrayList<>();
 
-    private Solution alphaSolution; // Best Solution (with best fitness)
+    private Individual alphaIndividual; // Best Individual (with best fitness)
 
     private int generation = 0; // Increment after each tick() loop
 
@@ -53,7 +53,7 @@ public class Population {
 
     /**
      * One generation of Population
-     * Loops through one generation of each Solution
+     * Loops through one generation of each Individual
      * 1. Selection
      * 2. Crossover
      * 3. Mutation
@@ -64,12 +64,12 @@ public class Population {
         if (generation == 0) {
             generateInitialPopulation();
         } else {
-            List<Solution> children = new ArrayList<>();
-            List<Solution> parentsToRemove = new ArrayList<>(); // Should we try to not remove them to enable elitism?
+            List<Individual> children = new ArrayList<>();
+            List<Individual> parentsToRemove = new ArrayList<>(); // Should we try to not remove them to enable elitism?
 
             for (int i = 0; i < numberOfChildren; i++) { // Would this actually make 2*numberOfChildren? Yes
-                Solution[] parents = selection();
-                Solution[] crossOverChildren;
+                Individual[] parents = selection();
+                Individual[] crossOverChildren;
 
                 // Parents get to crossover if random is less than crossOverRate
                 double random = Utils.randomDouble();
@@ -87,37 +87,40 @@ public class Population {
                 parentsToRemove.addAll(List.of(parents[0], parents[1]));
             }
 
-            // Mutates children
-            List<Solution> childrenToAdd = new ArrayList<>();
-            for (Solution child : children) {
+            List<Individual> childrenToAdd = new ArrayList<>();
+            for (Individual child : children) {
                 double random = Utils.randomDouble();
                 if (random < mutationRate) {
-                    Solution mutatedChild = new Solution(depots, child.mutation2());
+                    Individual mutatedChild = new Individual(depots, child.mutation2());
                     childrenToAdd.add(mutatedChild);
                 } else {
                     childrenToAdd.add(child);
                 }
             }
 
+            individuals.removeAll(parentsToRemove);
+            individuals.addAll(childrenToAdd);
+            individuals.sort(Comparator.comparingDouble(Individual::getFitness)); // Sort by fitness
+            individuals = individuals.stream().limit(populationSize).collect(Collectors.toList()); // Cut population to population size
             /*
             Before: Remove parents, add children, sort, cut to populationSize
-            solutions.removeAll(parentsToRemove);
-            solutions.addAll(childrenToAdd);
-            solutions.sort(Comparator.comparingDouble(Solution::getFitness)); // Sort by fitness
-            solutions = solutions.stream().limit(populationSize).collect(Collectors.toList()); // Cut population to population size
+            individuals.removeAll(parentsToRemove);
+            individuals.addAll(childrenToAdd);
+            individuals.sort(Comparator.comparingDouble(Solution::getFitness)); // Sort by fitness
+            individuals = solutions.stream().limit(populationSize).collect(Collectors.toList()); // Cut population to population size
              */
             /*
             Now: Decide that the populationSize/20 best solutions from the previous generation get to survive
             if they have better fitness than the populationSize/20 worst children
             */
 
-            solutions.removeAll(parentsToRemove);
-            solutions.sort(Comparator.comparingDouble(Solution::getFitness)); // Sort by fitness
-            List<Solution> parentsToSave = new ArrayList<>(solutions.subList(0, populationSize/20));
-            solutions = childrenToAdd;
-            solutions.addAll(parentsToSave);
-            solutions.sort(Comparator.comparingDouble(Solution::getFitness)); // Sort by fitness
-            solutions = solutions.stream().limit(populationSize).collect(Collectors.toList()); // Cut population to population size
+            individuals.removeAll(parentsToRemove);
+            individuals.sort(Comparator.comparingDouble(Individual::getFitness)); // Sort by fitness
+            List<Individual> parentsToSave = new ArrayList<>(individuals.subList(0, populationSize/20));
+            individuals = childrenToAdd;
+            individuals.addAll(parentsToSave);
+            individuals.sort(Comparator.comparingDouble(Individual::getFitness)); // Sort by fitness
+            individuals = individuals.stream().limit(populationSize).collect(Collectors.toList()); // Cut population to population size
         }
         generation++;
     }
@@ -129,16 +132,16 @@ public class Population {
         int triesLeft = 1000;
         boolean force = false;
 
-        while (solutions.size() != populationSize) {
+        while (individuals.size() != populationSize) {
             if (triesLeft == 0) {
                 force = true;
             }
 
-            Solution solution = new Solution(depots);
-            boolean successful = solution.generateInitialSolution(force);
+            Individual individual = new Individual(depots);
+            boolean successful = individual.generateInitialSolution2(force);
 
             if (successful || force) {
-                solutions.add(solution);
+                individuals.add(individual);
             } else {
                 triesLeft--;
             }
@@ -147,7 +150,7 @@ public class Population {
         // Hard maps initialSolution: 7, 11, 16, 17, 19, 20, 22, 23
         // Hard maps initialSolution2: 7, 8, 9, 10, 11, 16, 17, 19, 20, 22, 23
         if (triesLeft == 0) {
-//            throw new Error("Generating initial population failed - created " + solutions.size() + " of " + populationSize + " solutions");
+//            throw new Error("Generating initial population failed - created " + individuals.size() + " of " + populationSize + " individuals");
             System.out.println("Generated population with constraint break");
         }
 
@@ -156,7 +159,7 @@ public class Population {
         }
     }
 
-    private Solution[] crossOver(Solution[] parents) {
+    private Individual[] crossOver(Individual[] parents) {
         int triesLeft = 1000;
 
         while (triesLeft > 0) {
@@ -178,6 +181,8 @@ public class Population {
             List<Vehicle> child3Vehicles = parents[1].crossOver(routesFromS1[0]);
             List<Vehicle> child4Vehicles = parents[1].crossOver(routesFromS1[1]);
 
+
+            /*
             //TODO: Check if this is right? Should both child1 and child2 be created if the other is null?
             if (child1Vehicles != null || child2Vehicles != null) {
                 // TODO: Check if solution is valid
@@ -189,6 +194,17 @@ public class Population {
                     return new Solution[]{child1, child2, child3, child4};
                 else
                     triesLeft--;
+            } else {
+                triesLeft--;
+            }
+             */
+
+            if (child1Vehicles != null || child2Vehicles != null) {
+                Individual child1 = new Individual(depots, child1Vehicles);
+                Individual child2 = new Individual(depots, child2Vehicles);
+                Individual child3 = new Individual(depots, child3Vehicles);
+                Individual child4 = new Individual(depots, child4Vehicles);
+                return new Individual[]{child1, child2, child3, child4};
             } else {
                 triesLeft--;
             }
@@ -237,53 +253,57 @@ public class Population {
         return new List[]{first, second};
     }
 
-    private Solution[] selection() {
-        Solution parent1 = tournament();
-        Solution parent2 = null;
+    private Individual[] selection() {
+        Individual parent1 = tournament();
+        Individual parent2 = null;
         while (parent2 == null || parent1 == parent2) {
             parent2 = tournament();
         }
 
-        return new Solution[]{parent1, parent2};
+        return new Individual[]{parent1, parent2};
     }
 
-    private Solution tournament() {
-        List<Solution> tournamentMembers = new ArrayList<>();
+    private Individual tournament() {
+        List<Individual> tournamentMembers = new ArrayList<>();
 
         for (int i = 0; i < tournamentSize; i++) {
             boolean contained = true;
-            Solution member = null;
+            Individual member = null;
             while (contained) {
                 int randomIndex = Utils.randomIndex(populationSize);
-                member = solutions.get(randomIndex);
+                member = individuals.get(randomIndex);
                 contained = tournamentMembers.contains(member);
             }
             tournamentMembers.add(member);
         }
-        tournamentMembers.sort(Comparator.comparingDouble(Solution::getFitness));
+        tournamentMembers.sort(Comparator.comparingDouble(Individual::getFitness));
         return tournamentMembers.get(0);
     }
 
+    public double getAlphaDuration() {
+        return alphaIndividual.getDuration();
+    }
+
     public double getAlphaFitness() {
-        return alphaSolution.getFitness();
+        return alphaIndividual.getFitness();
+    }
+
+    public Individual getAlphaIndividual() {
+        if (individuals.size() == 0) {
+            return null;
+        }
+
+        individuals.sort(Comparator.comparingDouble(Individual::getFitness)); // Sorts based on fitness
+        alphaIndividual = individuals.get(0); // Best Individual
+        return alphaIndividual;
     }
 
     public double getAverageFitness() {
         double fitness = 0.0;
-        for (Solution s : solutions) {
+        for (Individual s : individuals) {
             fitness += s.getFitness();
         }
-        return fitness / solutions.size();
-    }
-
-    public Solution getAlphaSolution() {
-        if (solutions.size() == 0) {
-            return null;
-        }
-
-        solutions.sort(Comparator.comparingDouble(Solution::getFitness)); // Sorts based on fitness
-        alphaSolution = solutions.get(0); // Best Solution
-        return alphaSolution;
+        return fitness / individuals.size();
     }
 
     public int getGeneration() {
@@ -291,8 +311,12 @@ public class Population {
     }
 
     public void reset() {
-        alphaSolution = null;
-        solutions = null;
+        alphaIndividual = null;
+        individuals = null;
         generation = 0;
+    }
+
+    public boolean isAlphaValid() {
+        return alphaIndividual.isValid();
     }
 }

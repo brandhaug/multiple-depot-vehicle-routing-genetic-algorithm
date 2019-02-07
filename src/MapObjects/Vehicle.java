@@ -131,16 +131,19 @@ public class Vehicle extends MapObject {
             return (startDepot.distance(customerToCheck) + customerToCheck.distance(endDepot));
         }
 
-        double distance = 0.0;
+        double duration = 0.0;
         List<Customer> copy = new ArrayList<>(route);
         copy.add(index, customerToCheck);
 
-        distance += startDepot.distance(copy.get(0));
+        duration += startDepot.distance(copy.get(0));
+        duration += copy.get(0).getLoadDemand();
         for (int i = 0; i < copy.size() - 1; i++) {
-            distance += copy.get(i).distance(copy.get(i + 1));
+            duration += copy.get(i).distance(copy.get(i + 1));
+            duration += copy.get(i + 1).getLoadDemand();
         }
-        distance += copy.get(copy.size() - 1).distance(endDepot);
-        return distance;
+        duration += copy.get(copy.size() - 1).distance(endDepot);
+
+        return duration;
     }
 
     /**
@@ -327,9 +330,39 @@ public class Vehicle extends MapObject {
     }
 
     public void addOtherRouteToRoute(int index, List<Customer> otherRoute) {
+        for (Customer c : otherRoute) {
+            currentLoad += c.getLoadDemand();
+        }
+
         route.addAll(index, otherRoute);
         for (Customer customer : otherRoute) {
             currentLoad += customer.getLoadDemand();
         }
+    }
+
+    public boolean addCustomerToRouteSmart(Customer customerToAdd) {
+        double minDuration = Double.MAX_VALUE;
+        int minIndex = -1;
+
+        if (currentLoad + customerToAdd.getLoadDemand() > startDepot.getMaxLoad()) {
+            return false;
+        } else if (route.size() == 0) {
+            addCustomerToRoute(customerToAdd);
+            return true;
+        } else {
+            for (int i = 0; i < route.size(); i++) {
+                double duration = calculateRouteDuration(i, customerToAdd);
+
+                if (duration < minDuration) {
+                    minDuration = duration;
+                    minIndex = i;
+                }
+            }
+
+            addCustomerToRoute(minIndex, customerToAdd);
+            return true;
+        }
+
+
     }
 }
