@@ -196,31 +196,38 @@ public class Solution {
     }
 
 
-    public List<Vehicle> mutation2(List<Vehicle> vehicles) {
+    public List<Vehicle> mutation2() {
         if (Controller.verbose) {
-            System.out.println("========= Performing crossover on vehicles =========");
+            System.out.println("========= Performing mutation on solution =========");
         }
 
-        List<Vehicle> newVehicles = new ArrayList<>(vehicles);
+        // Copy of vehicles
+        List<Vehicle> newVehicles = new ArrayList<>();
+        for (Vehicle vehicle : vehicles) {
+            newVehicles.add(vehicle.clone());
+        }
 
-        int randomIndex = Utils.randomIndex(vehicles.size());
-        Vehicle vehicle = vehicles.get(randomIndex);
-        Vehicle otherVehicle = getMutationPartner(vehicle);
+        // Pick two random vehicles
+        int randomIndex1 = Utils.randomIndex(vehicles.size());
+        int randomIndex2 = Utils.randomIndex(vehicles.size());
+        while (randomIndex1 == randomIndex2) {
+            randomIndex2 = Utils.randomIndex(vehicles.size());
+        }
+        Vehicle randomVehicle1 = vehicles.get(randomIndex1).clone();
+        Vehicle randomVehicle2 = vehicles.get(randomIndex2).clone();
 
-        List<Customer>[] newRoutes = vehicle.mutation2(otherVehicle.getRoute());
-        Vehicle newVehicle = new Vehicle(vehicle.getStartDepot(), newRoutes[0]);
-        Vehicle newVehicle2 = new Vehicle(vehicle.getStartDepot(), newRoutes[1]);
+        // Remove the old vehicles
+        newVehicles.remove(randomVehicle1);
+        newVehicles.remove(randomVehicle2);
 
-        // Remove parents
-        newVehicles.remove(vehicle);
-        newVehicles.remove(otherVehicle);
-
-        // Add children
-        newVehicles.add(newVehicle);
-        newVehicles.add(newVehicle2);
+        // TODO: CHECK CONSTRAINTS, AND ALSO MAKE SURE LOAD IS CORRECT
+        // Mutate the two vehicles and add them to newVehicles
+        List<Customer>[] newRoutes = randomVehicle1.mutation2(randomVehicle2.getRoute());
+        newVehicles.add(new Vehicle(randomVehicle1.getStartDepot(), randomVehicle1.getEndDepot(), newRoutes[0]));
+        newVehicles.add(new Vehicle(randomVehicle2.getStartDepot(), randomVehicle2.getEndDepot(), newRoutes[1]));
 
         if (Controller.verbose) {
-            System.out.println("========= END Performing crossover on vehicles =========");
+            System.out.println("========= END Performing mutation on solution =========");
         }
 
         return newVehicles;

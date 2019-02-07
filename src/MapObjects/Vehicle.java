@@ -156,9 +156,7 @@ public class Vehicle extends MapObject {
             System.out.println("Second crossover: " + secondCrossOver.toString());
         }
 
-        List<Customer>[] crossOvers = new List[]{firstCrossOver, secondCrossOver};
-
-        return crossOvers;
+        return new List[]{firstCrossOver, secondCrossOver};
     }
 
     /**
@@ -176,7 +174,7 @@ public class Vehicle extends MapObject {
         int size = route.size();
 
         if (size != 0) {
-            int partitionIndex = Utils.randomIndex(size) + 1;
+            int partitionIndex = Utils.randomIndex(size);
 
             if (Controller.verbose) {
                 System.out.println("Partition Index: " + partitionIndex);
@@ -195,13 +193,11 @@ public class Vehicle extends MapObject {
             System.out.println("Second subRoute: " + second.toString());
         }
 
-        List<Customer>[] splittedRoute = new List[]{first, second};
-
         if (Controller.verbose) {
             System.out.println("========= END Splitting route to subRoutes =========");
         }
 
-        return splittedRoute;
+        return new List[]{first, second};
     }
 
     /**
@@ -223,11 +219,12 @@ public class Vehicle extends MapObject {
 
         crossOver.addAll(otherSubRoute);
 
+
         if (Controller.verbose) {
             System.out.println("Merged subRoutes: " + crossOver);
             System.out.println("========= Merging two subRoutes to a route  =========");
         }
-        return crossOver;
+        return optimizeRoute(crossOver);
     }
 
     /**
@@ -293,13 +290,17 @@ public class Vehicle extends MapObject {
      * Finds the nearest point for each
      */
     public void optimizeRoute() {
+        route = optimizeRoute(route);
+    }
+
+    private List<Customer> optimizeRoute(List<Customer> routeToOptimize) {
         MapObject lastPoint = startDepot;
         List<Customer> newRoute = new ArrayList<>();
         Customer nearestGene = null;
 
-        while (newRoute.size() != route.size()) {
+        while (newRoute.size() != routeToOptimize.size()) {
             double minimumDistance = Double.MAX_VALUE;
-            for (Customer gene : route) {
+            for (Customer gene : routeToOptimize) {
                 double distance = Utils.euclideanDistance(lastPoint.getX(), gene.getX(), lastPoint.getY(), gene.getY());
 
                 if (!newRoute.contains(gene) && distance < minimumDistance) {
@@ -312,7 +313,7 @@ public class Vehicle extends MapObject {
             lastPoint = nearestGene;
         }
 
-        route = newRoute;
+        return newRoute;
     }
 
     @Override

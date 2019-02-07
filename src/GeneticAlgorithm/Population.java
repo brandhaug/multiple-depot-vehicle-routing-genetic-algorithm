@@ -77,19 +77,18 @@ public class Population {
                 parentsToRemove.addAll(List.of(parents[0], parents[1]));
             }
 
-            List<Solution> mutatedChildren = new ArrayList<>();
+            List<Solution> childrenToAdd = new ArrayList<>();
             for (Solution child : children) {
                 double random = Utils.randomDouble();
                 if (random < mutationRate) {
                     Solution mutatedChild = new Solution(depots, child.mutation());
-                    mutatedChildren.add(mutatedChild);
+                    childrenToAdd.add(mutatedChild);
                 } else {
-//                mutatedChildren.add(child);
+                childrenToAdd.add(child);
                 }
             }
-
             solutions.removeAll(parentsToRemove);
-            solutions.addAll(mutatedChildren);
+            solutions.addAll(childrenToAdd);
             solutions.sort(Comparator.comparingDouble(Solution::getFitness)); // Sort by fitness
             solutions = solutions.stream().limit(populationSize).collect(Collectors.toList()); // Cut population to population size
         }
