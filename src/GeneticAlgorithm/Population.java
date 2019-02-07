@@ -54,9 +54,11 @@ public class Population {
     /**
      * One generation of Population
      * Loops through one generation of each Solution
-     * 1. Crossover
-     * 2. Mutation
-     * 3. Calculate distance and fitness
+     * 1. Selection
+     * 2. Crossover
+     * 3. Mutation
+     * 4. Calculate distance and fitness
+     * 5. Filtering
      */
     public void tick() {
         if (generation == 0) {
@@ -101,28 +103,28 @@ public class Population {
      */
     private void generateInitialPopulation() {
         int triesLeft = 1000;
-        boolean force;
+        boolean force = false;
 
         while (solutions.size() != populationSize) {
             if (triesLeft == 0) {
                 force = true;
-            } else  {
-                force = false;
             }
 
             Solution solution = new Solution(depots);
             boolean successful = solution.generateInitialSolution(force);
-            if (!successful && !force) {
-                triesLeft--;
-            } else {
+
+            if (successful || force) {
                 solutions.add(solution);
+            } else {
+                triesLeft--;
             }
         }
 
         // Hard maps initialSolution: 7, 11, 16, 17, 19, 20, 22, 23
         // Hard maps initialSolution2: 7, 8, 9, 10, 11, 16, 17, 19, 20, 22, 23
-        if (solutions.size() != populationSize) {
-            throw new Error("Generating initial population failed - created " + solutions.size() + " of " + populationSize + " solutions");
+        if (triesLeft == 0) {
+//            throw new Error("Generating initial population failed - created " + solutions.size() + " of " + populationSize + " solutions");
+            System.out.println("Generated population with constraint break");
         }
 
         if (Controller.verbose) {
@@ -144,21 +146,66 @@ public class Population {
             int randIndex2 = Utils.randomIndex(parents[1].getVehicles().size());
 
             Vehicle partnerVehicle = partnerVehicles.get(randIndex2);
-            List<Customer> routeFromS1 = new ArrayList<>(solutionVehicle.getRoute());
-            List<Customer> routeFromS2 = new ArrayList<>(partnerVehicle.getRoute());
+            List<Customer>[] routesFromS1 = splitRoute(solutionVehicle.getRoute());
+            List<Customer>[] routesFromS2 = splitRoute(partnerVehicle.getRoute());
 
-            List<Vehicle> child1Vehicles = parents[0].crossOver(routeFromS2);
-            List<Vehicle> child2Vehicles = parents[1].crossOver(routeFromS1);
+            List<Vehicle> child1Vehicles = parents[0].crossOver(routesFromS2[0]);
+            List<Vehicle> child2Vehicles = parents[0].crossOver(routesFromS2[1]);
+            List<Vehicle> child3Vehicles = parents[1].crossOver(routesFromS1[0]);
+            List<Vehicle> child4Vehicles = parents[1].crossOver(routesFromS1[1]);
 
             if (child1Vehicles != null || child2Vehicles != null) {
                 Solution child1 = new Solution(depots, child1Vehicles);
                 Solution child2 = new Solution(depots, child2Vehicles);
-                return new Solution[]{child1, child2};
+                Solution child3 = new Solution(depots, child3Vehicles);
+                Solution child4 = new Solution(depots, child4Vehicles);
+                return new Solution[]{child1, child2, child3, child4};
             } else {
                 triesLeft--;
             }
         }
         return null;
+    }
+
+    /**
+     * Splits route in n parts
+     *
+     * @param route
+     * @return
+     */
+    private List<Customer>[] splitRoute(List<Customer> route) {
+        if (Controller.verbose) {
+            System.out.println("========= Splitting route to subRoutes =========");
+        }
+        List<Customer> first = new ArrayList<>();
+        List<Customer> second = new ArrayList<>();
+        int size = route.size();
+
+        if (size != 0) {
+            int partitionIndex = Utils.randomIndex(size);
+
+            if (Controller.verbose) {
+                System.out.println("Partition Index: " + partitionIndex);
+            }
+
+            for (int i = 0; i < route.size(); i++) {
+                if (partitionIndex > i) {
+                    first.add(route.get(i));
+                } else {
+                    second.add(route.get(i));
+                }
+            }
+        }
+        if (Controller.verbose) {
+            System.out.println("First subRoute: " + first.toString());
+            System.out.println("Second subRoute: " + second.toString());
+        }
+
+        if (Controller.verbose) {
+            System.out.println("========= END Splitting route to subRoutes =========");
+        }
+
+        return new List[]{first, second};
     }
 
     private Solution[] selection() {

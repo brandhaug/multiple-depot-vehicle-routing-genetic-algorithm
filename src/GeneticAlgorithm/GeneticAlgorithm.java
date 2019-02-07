@@ -23,7 +23,6 @@ public class GeneticAlgorithm {
     private int tournamentSize = 3;
     private int numberOfChildren = populationSize/3;
 
-    private List<Depot> depots;
     private Population population;
 
     /**
@@ -31,7 +30,6 @@ public class GeneticAlgorithm {
      * @param depots
      */
     public GeneticAlgorithm(List<Depot> depots) {
-        this.depots = depots;
         population = new Population(depots, populationSize, crossOverRate, mutationRate, selectionRate, tournamentSize, numberOfChildren);
     }
 
