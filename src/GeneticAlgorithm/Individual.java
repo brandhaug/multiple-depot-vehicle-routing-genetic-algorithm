@@ -442,13 +442,13 @@ public class Individual {
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         BufferedWriter writer = new BufferedWriter(new FileWriter("solution-" + Controller.fileName + "-" + timestamp.getTime()));
 
-        writer.write(Double.toString(Utils.round(getFitness(), 2)));
+        writer.write(Double.toString(Utils.round(getDuration(), 2)));
 
         for (Vehicle vehicle : vehicles) {
             writer.newLine();
             writer.write(vehicle.getStartDepot().getId() + " " // s: number of the start depot
                     + vehicle.getStartDepot().getMaxVehicles() + " " // k: number of the vehicle (for above depot)
-                    + Utils.round(vehicle.calculateRouteDistance(), 2) + " " // d: duration of the route for a particular vehicle from a particular depot
+                    + Utils.round(vehicle.calculateRouteDuration(), 2) + " " // d: duration of the route for a particular vehicle from a particular depot
                     + vehicle.getCurrentLoad() + " " // q: carried load of the vehicle
                     + vehicle.getEndDepot().getId() + "   " // e: number of the end depot
                     + vehicle.getRoute().toString() // list: ordered sequence of customers (served by a particular vehicle)
