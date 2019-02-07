@@ -334,14 +334,12 @@ public class Individual {
             double maxDuration = vehicle.getStartDepot().getMaxDuration();
             double duration = vehicle.calculateRouteDuration();
             if (maxDuration != 0 && duration > maxDuration) {
-//                penalty += Math.pow((duration - maxDuration), 2);
                 penalty += (duration - maxDuration);
             }
 
             double maxLoad = vehicle.getStartDepot().getMaxLoad();
             double load = vehicle.getCurrentLoad();
             if (maxLoad != 0 && load > maxLoad) {
-//                penalty += Math.pow((load - maxLoad), 2);
                 penalty += load - maxLoad;
             }
 
