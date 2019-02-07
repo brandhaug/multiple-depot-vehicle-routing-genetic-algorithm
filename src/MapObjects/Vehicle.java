@@ -11,7 +11,7 @@ import java.util.List;
 public class Vehicle extends MapObject {
     private Depot startDepot;
     private Depot endDepot;
-    private int currentLoad;
+    private int currentLoad = 0;
     private List<Customer> route = new ArrayList<>();
 
     public Vehicle(Depot depot) {
@@ -26,9 +26,8 @@ public class Vehicle extends MapObject {
         this.startDepot = depot;
         this.endDepot = depot;
         this.route = route;
-        this.currentLoad = 0;
-        for (Customer customer : route) {
-            currentLoad += customer.getLoadDemand();
+        for (Customer customer: route) {
+            this.currentLoad += customer.getLoadDemand();
         }
     }
 
@@ -37,9 +36,8 @@ public class Vehicle extends MapObject {
         this.startDepot = startDepot;
         this.endDepot = endDepot;
         this.route = route;
-        this.currentLoad = 0;
-        for (Customer customer : route) {
-            currentLoad += customer.getLoadDemand();
+        for (Customer customer: route) {
+            this.currentLoad += customer.getLoadDemand();
         }
     }
 
@@ -126,7 +124,7 @@ public class Vehicle extends MapObject {
         return routeDistance;
     }
 
-    public double calculateRouteDuration(int index, Customer customerToCheck) {
+    public double calculateRouteDurationIfAdded(int index, Customer customerToCheck) {
         if (route.size() == 0) {
             return (startDepot.distance(customerToCheck) + customerToCheck.distance(endDepot));
         }
@@ -136,10 +134,32 @@ public class Vehicle extends MapObject {
         copy.add(index, customerToCheck);
 
         duration += startDepot.distance(copy.get(0));
-        duration += copy.get(0).getLoadDemand();
+        duration += copy.get(0).getTimeDemand();
         for (int i = 0; i < copy.size() - 1; i++) {
             duration += copy.get(i).distance(copy.get(i + 1));
-            duration += copy.get(i + 1).getLoadDemand();
+            duration += copy.get(i + 1).getTimeDemand();
+        }
+        duration += copy.get(copy.size() - 1).distance(endDepot);
+
+        return duration;
+    }
+
+    public double calculateRouteDurationIfAdded(int index, List<Customer> routeToCheck) {
+        if (routeToCheck.size() == 0) {
+            return calculateRouteDuration();
+        } else if (route.size() == 0) {
+            return startDepot.distance(routeToCheck.get(0)) + endDepot.distance(routeToCheck.get((routeToCheck.size() - 1)));
+        }
+
+        double duration = 0.0;
+        List<Customer> copy = new ArrayList<>(route);
+        copy.addAll(index, routeToCheck);
+
+        duration += startDepot.distance(copy.get(0));
+        duration += copy.get(0).getTimeDemand();
+        for (int i = 0; i < copy.size() - 1; i++) {
+            duration += copy.get(i).distance(copy.get(i + 1));
+            duration += copy.get(i + 1).getTimeDemand();
         }
         duration += copy.get(copy.size() - 1).distance(endDepot);
 
@@ -335,9 +355,6 @@ public class Vehicle extends MapObject {
         }
 
         route.addAll(index, otherRoute);
-        for (Customer customer : otherRoute) {
-            currentLoad += customer.getLoadDemand();
-        }
     }
 
     public boolean addCustomerToRouteSmart(Customer customerToAdd) {
@@ -351,7 +368,7 @@ public class Vehicle extends MapObject {
             return true;
         } else {
             for (int i = 0; i < route.size(); i++) {
-                double duration = calculateRouteDuration(i, customerToAdd);
+                double duration = calculateRouteDurationIfAdded(i, customerToAdd);
 
                 if (duration < minDuration) {
                     minDuration = duration;
@@ -364,5 +381,34 @@ public class Vehicle extends MapObject {
         }
 
 
+    }
+
+    public boolean addCustomerToRouteSmartNoConstraints(Customer customerToAdd) {
+        double minDuration = Double.MAX_VALUE;
+        int minIndex = -1;
+
+        if (route.size() == 0) {
+            addCustomerToRoute(customerToAdd);
+        } else {
+            for (int i = 0; i < route.size(); i++) {
+                double duration = calculateRouteDurationIfAdded(i, customerToAdd);
+
+                if (duration < minDuration) {
+                    minDuration = duration;
+                    minIndex = i;
+                }
+            }
+
+            addCustomerToRoute(minIndex, customerToAdd);
+        }
+        return true;
+    }
+
+    public void removeRouteFromRoute(List<Customer> otherRoute) {
+        for (Customer c : otherRoute) {
+            currentLoad -= c.getLoadDemand();
+        }
+
+        route.removeAll(otherRoute);
     }
 }

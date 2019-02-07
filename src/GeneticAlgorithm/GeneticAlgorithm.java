@@ -22,6 +22,7 @@ public class GeneticAlgorithm {
     private double selectionRate = 0.2;
     private int tournamentSize = 3;
     private int numberOfChildren = populationSize/2;
+    private int penaltyRate = 10;
 
     private Population population;
 
@@ -30,7 +31,7 @@ public class GeneticAlgorithm {
      * @param depots
      */
     public GeneticAlgorithm(List<Depot> depots) {
-        population = new Population(depots, populationSize, crossOverRate, mutationRate, selectionRate, tournamentSize, numberOfChildren);
+        population = new Population(depots, populationSize, crossOverRate, mutationRate, selectionRate, tournamentSize, numberOfChildren, penaltyRate);
     }
 
     /**

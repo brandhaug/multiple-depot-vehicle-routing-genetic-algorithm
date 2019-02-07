@@ -19,7 +19,7 @@
             <ComboBox fx:id="mapSelector" onAction="#selectMap" styleClass="combo-box" />
             <Label fx:id="timeLabel" styleClass="label" text="Time: 0" textAlignment="CENTER">
                <VBox.margin>
-                  <Insets bottom="20.0" top="20.0" />
+                  <Insets bottom="10.0" top="10.0" />
                </VBox.margin></Label>
             <Label fx:id="depotsLabel" styleClass="label" text="Depots: 0" textAlignment="CENTER" />
             <Label fx:id="vehiclesLabel" styleClass="label" text="Vehicles: 0" textAlignment="CENTER" />
@@ -28,12 +28,12 @@
             <Label fx:id="fitnessLabel" styleClass="label" text="Fitness: 0" textAlignment="CENTER" />
                <Label fx:id="durationLabel" styleClass="label" text="Duration: 0" textAlignment="CENTER" >
                <VBox.margin>
-                  <Insets top="20.0" />
+                  <Insets top="10.0" />
                </VBox.margin></Label>
             <Label fx:id="benchmarkLabel" styleClass="label" text="Benchmark: 0" textAlignment="CENTER" />
             <Button fx:id="startButton" mnemonicParsing="false" onAction="#togglePaused" prefHeight="30.0" prefWidth="100.0" styleClass="button" text="Start">
                <VBox.margin>
-                  <Insets top="20.0" />
+                  <Insets top="10.0" />
                </VBox.margin></Button>
             <Button fx:id="resetButton" mnemonicParsing="false" onAction="#reset" styleClass="button" text="Reset" />
             <Button fx:id="saveButton" mnemonicParsing="false" onAction="#save" styleClass="button" text="Save" />

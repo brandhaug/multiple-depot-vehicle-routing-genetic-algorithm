@@ -7,6 +7,7 @@ import MapObjects.Vehicle;
 import Utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,20 +29,21 @@ public class Population {
     private int tournamentSize;
     private double selectionRate;
     private int numberOfChildren;
+    private int penaltyRate;
 
 
     /**
      * Sets parameters
      * Generates initial population which generates n random Solutions. n = populationSize
-     *
      * @param depots
      * @param populationSize
      * @param crossOverRate
      * @param mutationRate
      * @param selectionRate
      * @param tournamentSize
+     * @param penaltyRate
      */
-    public Population(List<Depot> depots, int populationSize, double crossOverRate, double mutationRate, double selectionRate, int tournamentSize, int numberOfChildren) {
+    public Population(List<Depot> depots, int populationSize, double crossOverRate, double mutationRate, double selectionRate, int tournamentSize, int numberOfChildren, int penaltyRate) {
         this.depots = depots;
         this.populationSize = populationSize;
         this.crossOverRate = crossOverRate;
@@ -49,6 +51,7 @@ public class Population {
         this.selectionRate = selectionRate;
         this.tournamentSize = tournamentSize;
         this.numberOfChildren = numberOfChildren;
+        this.penaltyRate = penaltyRate;
     }
 
     /**
@@ -78,13 +81,12 @@ public class Population {
                     if (crossOverChildren == null) {
                         crossOverChildren = parents;
                     }
-                }
-                else {
+                } else {
                     crossOverChildren = parents;
                 }
 
                 children.addAll(List.of(crossOverChildren[0], crossOverChildren[1]));
-                parentsToRemove.addAll(List.of(parents[0], parents[1]));
+                parentsToRemove.addAll(Arrays.asList(parents));
             }
 
             List<Individual> childrenToAdd = new ArrayList<>();
@@ -98,10 +100,6 @@ public class Population {
                 }
             }
 
-            individuals.removeAll(parentsToRemove);
-            individuals.addAll(childrenToAdd);
-            individuals.sort(Comparator.comparingDouble(Individual::getFitness)); // Sort by fitness
-            individuals = individuals.stream().limit(populationSize).collect(Collectors.toList()); // Cut population to population size
             /*
             Before: Remove parents, add children, sort, cut to populationSize
             individuals.removeAll(parentsToRemove);
@@ -137,7 +135,7 @@ public class Population {
                 force = true;
             }
 
-            Individual individual = new Individual(depots);
+            Individual individual = new Individual(depots, penaltyRate);
             boolean successful = individual.generateInitialSolution2(force);
 
             if (successful || force) {
@@ -152,10 +150,6 @@ public class Population {
         if (triesLeft == 0) {
 //            throw new Error("Generating initial population failed - created " + individuals.size() + " of " + populationSize + " individuals");
             System.out.println("Generated population with constraint break");
-        }
-
-        if (Controller.verbose) {
-            System.out.println("Initial population of " + populationSize + " generated with " + triesLeft + " tries left");
         }
     }
 
@@ -200,10 +194,10 @@ public class Population {
              */
 
             if (child1Vehicles != null || child2Vehicles != null) {
-                Individual child1 = new Individual(depots, child1Vehicles);
-                Individual child2 = new Individual(depots, child2Vehicles);
-                Individual child3 = new Individual(depots, child3Vehicles);
-                Individual child4 = new Individual(depots, child4Vehicles);
+                Individual child1 = new Individual(depots, penaltyRate, child1Vehicles);
+                Individual child2 = new Individual(depots, penaltyRate, child2Vehicles);
+                Individual child3 = new Individual(depots, penaltyRate, child3Vehicles);
+                Individual child4 = new Individual(depots, penaltyRate, child4Vehicles);
                 return new Individual[]{child1, child2, child3, child4};
             } else {
                 triesLeft--;
@@ -219,19 +213,12 @@ public class Population {
      * @return
      */
     private List<Customer>[] splitRoute(List<Customer> route) {
-        if (Controller.verbose) {
-            System.out.println("========= Splitting route to subRoutes =========");
-        }
         List<Customer> first = new ArrayList<>();
         List<Customer> second = new ArrayList<>();
         int size = route.size();
 
         if (size != 0) {
             int partitionIndex = Utils.randomIndex(size);
-
-            if (Controller.verbose) {
-                System.out.println("Partition Index: " + partitionIndex);
-            }
 
             for (int i = 0; i < route.size(); i++) {
                 if (partitionIndex > i) {
@@ -241,14 +228,7 @@ public class Population {
                 }
             }
         }
-        if (Controller.verbose) {
-            System.out.println("First subRoute: " + first.toString());
-            System.out.println("Second subRoute: " + second.toString());
-        }
 
-        if (Controller.verbose) {
-            System.out.println("========= END Splitting route to subRoutes =========");
-        }
 
         return new List[]{first, second};
     }
