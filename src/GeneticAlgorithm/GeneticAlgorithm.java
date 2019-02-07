@@ -22,7 +22,7 @@ public class GeneticAlgorithm {
     private double selectionRate = 0.2;
     private int tournamentSize = 3;
     private int numberOfChildren = populationSize/3;
-    private int penaltyRate = 10;
+    private int penaltyRate = 2;
 
     private Population population;
 

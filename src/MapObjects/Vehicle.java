@@ -176,17 +176,17 @@ public class Vehicle extends MapObject {
     public List<Customer>[] mutation2(List<Customer> otherRoute) {
         final List<Customer>[] subRoutes = splitRoute(route);
         final List<Customer>[] otherSubRoutes = splitRoute(otherRoute);
-        List<Customer> firstCrossOver = merge(subRoutes[0], otherSubRoutes[1]);
-        List<Customer> secondCrossOver = merge(otherSubRoutes[0], subRoutes[1]);
+        List<Customer> firstRoute = merge(subRoutes[0], otherSubRoutes[1]);
+        List<Customer> secondRoute = merge(otherSubRoutes[0], subRoutes[1]);
 
         if (Controller.verbose) {
             System.out.println("Route: " + route.toString());
             System.out.println("Other route: " + otherRoute.toString());
-            System.out.println("First crossover: " + firstCrossOver.toString());
-            System.out.println("Second crossover: " + secondCrossOver.toString());
+            System.out.println("First crossover: " + firstRoute.toString());
+            System.out.println("Second crossover: " + secondRoute.toString());
         }
 
-        return new List[]{firstCrossOver, secondCrossOver};
+        return new List[]{firstRoute, secondRoute};
     }
 
     /**
