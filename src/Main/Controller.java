@@ -9,16 +9,16 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Controls GUI (View.fxml)
@@ -54,6 +54,12 @@ public class Controller {
     private Label benchmarkLabel; // Shows benchmark fitness for current map
     @FXML
     private ComboBox mapSelector; // Shows benchmark fitness for current map
+    @FXML
+    private LineChart lineChart; // Shows statistics
+    @FXML
+    private NumberAxis xAxis;
+    @FXML
+    private NumberAxis yAxis;
 
     // Map
     @FXML
@@ -62,6 +68,14 @@ public class Controller {
     public static String fileName = "p01"; // Current map
 
     private GeneticAlgorithm ga; // GeneticAlgorithm: Contains a Population, which contains Solutions
+
+    // Line chart
+    private XYChart.Series seriesAlphaSolution; // Fitness per generation of alpha solution
+    private XYChart.Series seriesPopulation; // Average fitness per generation of population
+    private HashMap<Integer, Double> alphaSolutionFitnessData;
+    private HashMap<Integer, Double> populationFitnessData;
+    private boolean shouldUpdate = false;
+    private double initialFitness;
 
     // Canvas
     public final static int CANVAS_WIDTH = 500; // Canvas width set in View.fxml
@@ -91,6 +105,8 @@ public class Controller {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        initializeLineChart();
+
 
         gc = canvas.getGraphicsContext2D(); // Used to draw in canvas
         render();
@@ -100,8 +116,18 @@ public class Controller {
         new AnimationTimer() { // Game loop
             public void handle(long currentNanoTime) {
                 if (!paused) {
+                    if (ga.getGeneration() == 1)
+                        initialFitness = ga.getAverageFitness();
+
                     tick(startNanoTime, currentNanoTime);
+                    alphaSolutionFitnessData.put(ga.getGeneration(), ga.getAlphaFitness());
+                    populationFitnessData.put(ga.getGeneration(), ga.getAverageFitness());
+                    shouldUpdate = true;
                     render();
+                }
+
+                if (paused && ga.getAlphaSolution() != null) {
+                    updateLinechart();
                 }
 
                 if (ga.getAlphaSolution() != null && ga.getAlphaFitness() <= map.getBenchmark()) { // Reached benchmark
@@ -233,7 +259,46 @@ public class Controller {
         startButton.setText("Start");
         mapSelector.setVisible(true);
         terminated = false;
+        lineChart.getData().removeAll(seriesAlphaSolution);
+        lineChart.getData().removeAll(seriesPopulation);
         initialize();
+    }
+
+    private void initializeLineChart() {
+        alphaSolutionFitnessData = new HashMap<>();
+        populationFitnessData = new HashMap<>();
+
+        seriesAlphaSolution = new XYChart.Series();
+        seriesAlphaSolution.setName("Alpha solution");
+        seriesPopulation = new XYChart.Series();
+        seriesPopulation.setName("Population");
+
+        lineChart.setCreateSymbols(false);
+        lineChart.setAnimated(false);
+        lineChart.setHorizontalGridLinesVisible(true);
+        lineChart.getXAxis().setAutoRanging(false);
+        lineChart.getYAxis().setAutoRanging(false);
+        lineChart.getData().setAll(seriesAlphaSolution, seriesPopulation);
+    }
+
+    private void updateLinechart() {
+        if (!shouldUpdate) return;
+        shouldUpdate = false;
+
+        alphaSolutionFitnessData.forEach((key, value) -> {
+            seriesAlphaSolution.getData().add(new XYChart.Data<>(key, value));
+        });
+
+        populationFitnessData.forEach((key, value) -> {
+            seriesPopulation.getData().add(new XYChart.Data<>(key, value));
+        });
+
+        xAxis.setLowerBound(0);
+        xAxis.setUpperBound(ga.getGeneration());
+        yAxis.setLowerBound(map.getBenchmark());
+        yAxis.setUpperBound(initialFitness);
+        lineChart.getData().removeAll(seriesAlphaSolution);
+        lineChart.getData().addAll(seriesAlphaSolution);
     }
 
     @FXML

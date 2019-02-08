@@ -215,6 +215,14 @@ public class Population {
         return alphaSolution.getFitness();
     }
 
+    public double getAverageFitness() {
+        double fitness = 0.0;
+        for (Solution s : solutions) {
+            fitness += s.getFitness();
+        }
+        return fitness / solutions.size();
+    }
+
     public Solution getAlphaSolution() {
         if (solutions.size() == 0) {
             return null;

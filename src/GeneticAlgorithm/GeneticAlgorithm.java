@@ -73,6 +73,7 @@ public class GeneticAlgorithm {
         return population.getAlphaFitness();
     }
 
+    public double getAverageFitness() { return population.getAverageFitness(); }
     /**
      * Get best Solution (Solution with best fitness) of Population
      */

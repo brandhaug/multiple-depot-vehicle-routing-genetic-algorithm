@@ -335,6 +335,7 @@ public class Solution {
         int minIndex = -1;
 
         for (Vehicle vehicle : newVehicles) {
+            // TODO: Check if it is best to place other route in an empty route in this solution - For loop hopper over tomme ruter akkurat nå
             for (int i = 0; i < vehicle.getRoute().size(); i++) {
                 Customer customer = vehicle.getRoute().get(i);
 
