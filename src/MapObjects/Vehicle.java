@@ -11,14 +11,13 @@ import java.util.List;
 public class Vehicle extends MapObject {
     private Depot startDepot;
     private Depot endDepot;
-    private int currentLoad;
+    private int currentLoad = 0;
     private List<Customer> route = new ArrayList<>();
 
     public Vehicle(Depot depot) {
         super(depot.getX(), depot.getY());
         this.startDepot = depot;
         this.endDepot = depot;
-        this.currentLoad = 0;
     }
 
     public Vehicle(Depot depot, List<Customer> route) {
@@ -26,8 +25,7 @@ public class Vehicle extends MapObject {
         this.startDepot = depot;
         this.endDepot = depot;
         this.route = route;
-        this.currentLoad = 0;
-        for (Customer customer: route) {
+        for (Customer customer : route) {
             this.currentLoad += customer.getLoadDemand();
         }
     }
@@ -37,7 +35,7 @@ public class Vehicle extends MapObject {
         this.startDepot = startDepot;
         this.endDepot = endDepot;
         this.route = route;
-        for (Customer customer: route) {
+        for (Customer customer : route) {
             this.currentLoad += customer.getLoadDemand();
         }
     }
@@ -72,6 +70,10 @@ public class Vehicle extends MapObject {
         return startDepot;
     }
 
+    public int getMaxLoad() {
+        return startDepot.getMaxLoad();
+    }
+
     public Depot getEndDepot() {
         return endDepot;
     }
@@ -84,24 +86,22 @@ public class Vehicle extends MapObject {
         return currentLoad;
     }
 
-    /**
-     * Calculates total distance for route
-     *
-     * @return
-     */
-    public double calculateRouteDistance() {
-        double routeDistance = 0.0;
+    public int getLoadIfCustomerAdded(Customer customer) {
+        return currentLoad + customer.getLoadDemand();
+    }
 
-        if (route.size() == 0) {
-            return routeDistance;
+    public int getLoadIfRouteAdded(List<Customer> route) {
+        return currentLoad + getRouteLoad(route);
+    }
+
+    private int getRouteLoad(List<Customer> route) {
+        int routeLoad = 0;
+
+        for (Customer customer : route) {
+            routeLoad += customer.getLoadDemand();
         }
 
-        routeDistance += startDepot.distance(route.get(0));
-        for (int i = 0; i < route.size() - 1; i++) {
-            routeDistance += route.get(i).distance(route.get(i + 1));
-        }
-        routeDistance += route.get(route.size() - 1).distance(endDepot);
-        return routeDistance;
+        return routeLoad;
     }
 
     /**
@@ -125,7 +125,7 @@ public class Vehicle extends MapObject {
         return routeDistance;
     }
 
-    public double calculateRouteDurationIfAdded(int index, Customer customerToCheck) {
+    public double calculateRouteDurationIfCustomerAdded(int index, Customer customerToCheck) {
         if (route.size() == 0) {
             return (startDepot.distance(customerToCheck) + customerToCheck.distance(endDepot));
         }
@@ -145,27 +145,27 @@ public class Vehicle extends MapObject {
         return duration;
     }
 
-    public double calculateRouteDurationIfAdded(int index, List<Customer> routeToCheck) {
-        if (routeToCheck.size() == 0) {
-            return calculateRouteDuration();
-        } else if (route.size() == 0) {
-            return startDepot.distance(routeToCheck.get(0)) + endDepot.distance(routeToCheck.get((routeToCheck.size() - 1)));
-        }
-
-        double duration = 0.0;
-        List<Customer> copy = new ArrayList<>(route);
-        copy.addAll(index, routeToCheck);
-
-        duration += startDepot.distance(copy.get(0));
-        duration += copy.get(0).getTimeDemand();
-        for (int i = 0; i < copy.size() - 1; i++) {
-            duration += copy.get(i).distance(copy.get(i + 1));
-            duration += copy.get(i + 1).getTimeDemand();
-        }
-        duration += copy.get(copy.size() - 1).distance(endDepot);
-
-        return duration;
-    }
+//    public double calculateRouteDurationIfRouteAdded(int index, List<Customer> routeToCheck) {
+//        if (routeToCheck.size() == 0) {
+//            return calculateRouteDuration();
+//        } else if (route.size() == 0) {
+//            return startDepot.distance(routeToCheck.get(0)) + endDepot.distance(routeToCheck.get((routeToCheck.size() - 1)));
+//        }
+//
+//        double duration = 0.0;
+//        List<Customer> copy = new ArrayList<>(route);
+//        copy.addAll(index, routeToCheck);
+//
+//        duration += startDepot.distance(copy.get(0));
+//        duration += copy.get(0).getTimeDemand();
+//        for (int i = 0; i < copy.size() - 1; i++) {
+//            duration += copy.get(i).distance(copy.get(i + 1));
+//            duration += copy.get(i + 1).getTimeDemand();
+//        }
+//        duration += copy.get(copy.size() - 1).distance(endDepot);
+//
+//        return duration;
+//    }
 
     /**
      * Mixes n new routes by using route with a different route
@@ -173,20 +173,13 @@ public class Vehicle extends MapObject {
      * @param otherRoute
      * @return
      */
-    public List<Customer>[] mutation2(List<Customer> otherRoute) {
-        final List<Customer>[] subRoutes = splitRoute(route);
-        final List<Customer>[] otherSubRoutes = splitRoute(otherRoute);
-        List<Customer> firstRoute = merge(subRoutes[0], otherSubRoutes[1]);
-        List<Customer> secondRoute = merge(otherSubRoutes[0], subRoutes[1]);
+    public List<Customer>[] crossMutate(List<Customer> otherRoute) {
+        final List<Customer>[] subRoutes = Utils.splitRoute(route);
+        final List<Customer>[] otherSubRoutes = Utils.splitRoute(otherRoute);
+        List<Customer> mutatedRoute = merge(subRoutes[0], otherSubRoutes[1]);
+        List<Customer> mutatedRoute2 = merge(otherSubRoutes[0], subRoutes[1]);
 
-        if (Controller.verbose) {
-            System.out.println("Route: " + route.toString());
-            System.out.println("Other route: " + otherRoute.toString());
-            System.out.println("First crossover: " + firstRoute.toString());
-            System.out.println("Second crossover: " + secondRoute.toString());
-        }
-
-        return new List[]{firstRoute, secondRoute};
+        return new List[]{mutatedRoute, mutatedRoute2};
     }
 
     /**
@@ -195,40 +188,7 @@ public class Vehicle extends MapObject {
      * @param route
      * @return
      */
-    private List<Customer>[] splitRoute(List<Customer> route) {
-        if (Controller.verbose) {
-            System.out.println("========= Splitting route to subRoutes =========");
-        }
-        List<Customer> first = new ArrayList<>();
-        List<Customer> second = new ArrayList<>();
-        int size = route.size();
 
-        if (size != 0) {
-            int partitionIndex = Utils.randomIndex(size);
-
-            if (Controller.verbose) {
-                System.out.println("Partition Index: " + partitionIndex);
-            }
-
-            for (int i = 0; i < route.size(); i++) {
-                if (partitionIndex > i) {
-                    first.add(route.get(i));
-                } else {
-                    second.add(route.get(i));
-                }
-            }
-        }
-        if (Controller.verbose) {
-            System.out.println("First subRoute: " + first.toString());
-            System.out.println("Second subRoute: " + second.toString());
-        }
-
-        if (Controller.verbose) {
-            System.out.println("========= END Splitting route to subRoutes =========");
-        }
-
-        return new List[]{first, second};
-    }
 
     /**
      * Merges the subRoute from two routes to a new route
@@ -262,9 +222,9 @@ public class Vehicle extends MapObject {
      *
      * @return
      */
-    public List<Customer> mutate() {
+    public List<Customer> swapMutate() {
         if (Controller.verbose) {
-            System.out.println("Performing mutation on vehicle");
+            System.out.println("Performing swapMutation on vehicle");
         }
         List<Customer> newRoute = new ArrayList<>(route);
 
@@ -358,7 +318,7 @@ public class Vehicle extends MapObject {
         route.addAll(index, otherRoute);
     }
 
-    public boolean addCustomerToRouteSmart(Customer customerToAdd) {
+    public boolean smartAddCustomerToRoute(Customer customerToAdd, boolean fitness) {
         double minDuration = Double.MAX_VALUE;
         int minIndex = -1;
 
@@ -369,7 +329,12 @@ public class Vehicle extends MapObject {
             return true;
         } else {
             for (int i = 0; i < route.size(); i++) {
-                double duration = calculateRouteDurationIfAdded(i, customerToAdd);
+                double duration;
+//                if (fitness) {
+//                     duration = calculateFitnessIfAdded(i, customerToAdd); // TODO Calculate fitnessIfAdded
+//                } else {
+                duration = calculateRouteDurationIfCustomerAdded(i, customerToAdd);
+//                }
 
                 if (duration < minDuration) {
                     minDuration = duration;
@@ -380,29 +345,10 @@ public class Vehicle extends MapObject {
             addCustomerToRoute(minIndex, customerToAdd);
             return true;
         }
-
-
     }
 
-    public boolean addCustomerToRouteSmartNoConstraints(Customer customerToAdd) {
-        double minDuration = Double.MAX_VALUE;
-        int minIndex = -1;
-
-        if (route.size() == 0) {
-            addCustomerToRoute(customerToAdd);
-        } else {
-            for (int i = 0; i < route.size(); i++) {
-                double duration = calculateRouteDurationIfAdded(i, customerToAdd);
-
-                if (duration < minDuration) {
-                    minDuration = duration;
-                    minIndex = i;
-                }
-            }
-
-            addCustomerToRoute(minIndex, customerToAdd);
-        }
-        return true;
+    private double calculateFitnessIfAdded(int i, Customer customerToAdd) {
+        return 0.0;
     }
 
     public void removeRouteFromRoute(List<Customer> otherRoute) {

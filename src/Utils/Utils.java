@@ -1,7 +1,11 @@
 package Utils;
 
+import MapObjects.Customer;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class Utils {
@@ -46,5 +50,24 @@ public class Utils {
         BigDecimal bd = new BigDecimal(value);
         bd = bd.setScale(places, RoundingMode.HALF_UP);
         return bd.doubleValue();
+    }
+
+    public static List<Customer>[] splitRoute(List<Customer> route) {
+        List<Customer> first = new ArrayList<>();
+        List<Customer> second = new ArrayList<>();
+        int size = route.size();
+
+        if (size != 0) {
+            int partitionIndex = Utils.randomIndex(size);
+
+            for (int i = 0; i < route.size(); i++) {
+                if (partitionIndex > i) {
+                    first.add(route.get(i));
+                } else {
+                    second.add(route.get(i));
+                }
+            }
+        }
+        return new List[]{first, second};
     }
 }

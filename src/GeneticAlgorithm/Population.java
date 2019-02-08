@@ -28,21 +28,36 @@ public class Population {
     private int tournamentSize;
     private double selectionRate;
     private int numberOfChildren;
-    private int penaltyRate;
+    private int durationPenaltyRate;
+    private int loadPenaltyRate;
+    private boolean elitism;
+    private boolean forceLoadConstraint;
 
 
     /**
      * Sets parameters
      * Generates initial population which generates n random Solutions. n = populationSize
-     *  @param depots
+     * @param depots
      * @param populationSize
      * @param crossOverRate
      * @param mutationRate
      * @param selectionRate
      * @param tournamentSize
-     * @param penaltyRate
+     * @param durationPenaltyRate
+     * @param loadPenaltyRate
+     * @param forceLoadConstraint
      */
-    public Population(List<Depot> depots, int populationSize, double crossOverRate, double mutationRate, double selectionRate, int tournamentSize, int numberOfChildren, int penaltyRate) {
+    public Population(List<Depot> depots,
+                      int populationSize,
+                      double crossOverRate,
+                      double mutationRate,
+                      double selectionRate,
+                      int tournamentSize,
+                      int numberOfChildren,
+                      int durationPenaltyRate,
+                      int loadPenaltyRate,
+                      boolean elitism,
+                      boolean forceLoadConstraint) {
         this.depots = depots;
         this.populationSize = populationSize;
         this.crossOverRate = crossOverRate;
@@ -50,7 +65,10 @@ public class Population {
         this.selectionRate = selectionRate;
         this.tournamentSize = tournamentSize;
         this.numberOfChildren = numberOfChildren;
-        this.penaltyRate = penaltyRate;
+        this.durationPenaltyRate = durationPenaltyRate;
+        this.loadPenaltyRate = loadPenaltyRate;
+        this.elitism = elitism;
+        this.forceLoadConstraint = forceLoadConstraint;
     }
 
     /**
@@ -67,34 +85,47 @@ public class Population {
             generateInitialPopulation();
         } else {
             List<Individual> children = new ArrayList<>();
-//            List<Individual> parentsToRemove = new ArrayList<>(); // TODO: Should we try to not remove them to enable elitism?
+            List<Individual> parentsToRemove = new ArrayList<>();
 
-            for (int i = 0; i < individuals.size(); i++) { // Would this actually make 2*numberOfChildren? Yes
+            for (int i = 0; i < numberOfChildren; i++) { // Would this actually make 2*numberOfChildren?
                 Individual[] parents = selection();
-                Individual[] crossOverChildren = crossOver(parents);
+                Individual[] crossOverChildren;
 
-                if (crossOverChildren == null) {
+                // Parents get to crossover if random is less than crossOverRate
+                double random = Utils.randomDouble();
+                if (random < crossOverRate) {
+                    crossOverChildren = crossOver(parents);
+                    if (crossOverChildren == null) {
+                        crossOverChildren = parents;
+                    }
+                } else {
                     crossOverChildren = parents;
                 }
 
                 children.addAll(List.of(crossOverChildren[0], crossOverChildren[1]));
-//                parentsToRemove.addAll(List.of(parents[0], parents[1]));
+
+                if (!elitism) {
+                    parentsToRemove.addAll(List.of(parents[0], parents[1]));
+                }
             }
 
             List<Individual> childrenToAdd = new ArrayList<>();
             for (Individual child : children) {
                 double random = Utils.randomDouble();
                 if (random < mutationRate) {
-                    Individual mutatedChild = new Individual(depots, penaltyRate, child.mutation());
+                    // TODO: Optimize parameters
+//                    Individual mutatedChild = new Individual(depots, durationPenaltyRate, child.swapMutation());
+                    Individual mutatedChild = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child.crossMutation());
                     childrenToAdd.add(mutatedChild);
                 } else {
                     childrenToAdd.add(child);
                 }
             }
-
-//            individuals.removeAll(parentsToRemove);
+            if (!elitism) {
+                individuals.removeAll(parentsToRemove);
+            }
             individuals.addAll(childrenToAdd);
-            individuals.sort(Comparator.comparingDouble(Individual::getFitness)); // Sort by fitness
+            individuals.sort(Comparator.comparingDouble(Individual::calculateFitness)); // Sort by fitness
             individuals = individuals.stream().limit(populationSize).collect(Collectors.toList()); // Cut population to population size
         }
         generation++;
@@ -112,8 +143,12 @@ public class Population {
                 force = true;
             }
 
-            Individual individual = new Individual(depots, penaltyRate);
-            boolean successful = individual.generateRandomIndividual();
+            Individual individual = new Individual(depots, durationPenaltyRate, loadPenaltyRate);
+
+            // TODO: Parameter optimize
+            boolean successful = individual.generateOptimizedIndividual(force);
+//            boolean successful = individual.generateOptimizedIndividual2();
+//            boolean successful = individual.generateRandomIndividual();
 
             if (successful || force) {
                 individuals.add(individual);
@@ -148,66 +183,26 @@ public class Population {
             int randIndex2 = Utils.randomIndex(parents[1].getVehicles().size());
 
             Vehicle partnerVehicle = partnerVehicles.get(randIndex2);
-            List<Customer>[] routesFromS1 = splitRoute(solutionVehicle.getRoute());
-            List<Customer>[] routesFromS2 = splitRoute(partnerVehicle.getRoute());
+            List<Customer>[] routesFromS1 = Utils.splitRoute(solutionVehicle.getRoute());
+            List<Customer>[] routesFromS2 = Utils.splitRoute(partnerVehicle.getRoute());
 
-            List<Vehicle> child1Vehicles = parents[0].crossOverNoConstraints(routesFromS2[0]);
-            List<Vehicle> child2Vehicles = parents[0].crossOverNoConstraints(routesFromS2[1]);
-            List<Vehicle> child3Vehicles = parents[1].crossOverNoConstraints(routesFromS1[0]);
-            List<Vehicle> child4Vehicles = parents[1].crossOverNoConstraints(routesFromS1[1]);
+            // TODO: Parameter optimize
+            List<Vehicle> child1Vehicles = parents[0].fitnessCrossOver(routesFromS2[0], forceLoadConstraint);
+            List<Vehicle> child2Vehicles = parents[0].fitnessCrossOver(routesFromS2[1], forceLoadConstraint);
+            List<Vehicle> child3Vehicles = parents[1].fitnessCrossOver(routesFromS1[0], forceLoadConstraint);
+            List<Vehicle> child4Vehicles = parents[1].fitnessCrossOver(routesFromS1[1], forceLoadConstraint);
 
             if (child1Vehicles != null || child2Vehicles != null) {
-                Individual child1 = new Individual(depots, penaltyRate, child1Vehicles);
-                Individual child2 = new Individual(depots, penaltyRate, child2Vehicles);
-                Individual child3 = new Individual(depots, penaltyRate, child3Vehicles);
-                Individual child4 = new Individual(depots, penaltyRate, child4Vehicles);
+                Individual child1 = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child1Vehicles);
+                Individual child2 = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child2Vehicles);
+                Individual child3 = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child3Vehicles);
+                Individual child4 = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child4Vehicles);
                 return new Individual[]{child1, child2, child3, child4};
             } else {
                 triesLeft--;
             }
         }
         return null;
-    }
-
-    /**
-     * Splits route in n parts
-     *
-     * @param route
-     * @return
-     */
-    private List<Customer>[] splitRoute(List<Customer> route) {
-        if (Controller.verbose) {
-            System.out.println("========= Splitting route to subRoutes =========");
-        }
-        List<Customer> first = new ArrayList<>();
-        List<Customer> second = new ArrayList<>();
-        int size = route.size();
-
-        if (size != 0) {
-            int partitionIndex = Utils.randomIndex(size);
-
-            if (Controller.verbose) {
-                System.out.println("Partition Index: " + partitionIndex);
-            }
-
-            for (int i = 0; i < route.size(); i++) {
-                if (partitionIndex > i) {
-                    first.add(route.get(i));
-                } else {
-                    second.add(route.get(i));
-                }
-            }
-        }
-        if (Controller.verbose) {
-            System.out.println("First subRoute: " + first.toString());
-            System.out.println("Second subRoute: " + second.toString());
-        }
-
-        if (Controller.verbose) {
-            System.out.println("========= END Splitting route to subRoutes =========");
-        }
-
-        return new List[]{first, second};
     }
 
     private Individual[] selection() {
@@ -233,7 +228,7 @@ public class Population {
             }
             tournamentMembers.add(member);
         }
-        tournamentMembers.sort(Comparator.comparingDouble(Individual::getFitness));
+        tournamentMembers.sort(Comparator.comparingDouble(Individual::calculateFitness));
         return tournamentMembers.get(0);
     }
 
@@ -242,7 +237,7 @@ public class Population {
     }
 
     public double getAlphaFitness() {
-        return alphaIndividual.getFitness();
+        return alphaIndividual.calculateFitness();
     }
 
     public Individual getAlphaIndividual() {
@@ -250,7 +245,7 @@ public class Population {
             return null;
         }
 
-        individuals.sort(Comparator.comparingDouble(Individual::getFitness)); // Sorts based on fitness
+        individuals.sort(Comparator.comparingDouble(Individual::calculateFitness)); // Sorts based on fitness
         alphaIndividual = individuals.get(0); // Best Individual
         return alphaIndividual;
     }
