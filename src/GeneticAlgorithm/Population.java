@@ -34,7 +34,6 @@ public class Population {
     private boolean elitism;
     private boolean forceLoadConstraint;
 
-
     /**
      * Sets parameters
      * Generates initial population which generates n random Solutions. n = populationSize
@@ -115,8 +114,9 @@ public class Population {
                 double random = Utils.randomDouble();
                 if (random < mutationRate) {
                     // TODO: Optimize parameters
-//                    Individual mutatedChild = new Individual(depots, durationPenaltyRate, child.swapMutation());
-                    Individual mutatedChild = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child.crossMutation());                    childrenToAdd.add(mutatedChild);
+//                    Individual mutatedChild = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child.swapMutation());
+                    Individual mutatedChild = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child.crossMutation());
+                    childrenToAdd.add(mutatedChild);
                 } else {
                     childrenToAdd.add(child);
                 }
@@ -161,8 +161,8 @@ public class Population {
             Individual individual = new Individual(depots, durationPenaltyRate, loadPenaltyRate);
 
             // TODO: Parameter optimize
-            boolean successful = individual.generateOptimizedIndividual(force);
-//            boolean successful = individual.generateOptimizedIndividual2();
+//            boolean successful = individual.generateOptimizedIndividual(force);
+            boolean successful = individual.generateOptimizedIndividual2();
 //            boolean successful = individual.generateRandomIndividual();
 
             if (successful || force) {
@@ -234,13 +234,37 @@ public class Population {
     }
 
     private Individual[] selection() {
-        Individual parent1 = tournament();
-        Individual parent2 = null;
-        while (parent2 == null || parent1 == parent2) {
-            parent2 = tournament();
+        // TODO: Optimize parameters
+//        Individual parent1 = tournament();
+        Individual parent1 = rouletteWheel();
+        Individual parent2 = parent1;
+        while (parent1 == parent2) {
+//            parent2 = tournament();
+            parent2 = rouletteWheel();
         }
 
         return new Individual[]{parent1, parent2};
+    }
+
+    private Individual rouletteWheel() {
+        double totalFitness = 0.0;
+
+        for (Individual individual : individuals) {
+            totalFitness += individual.calculateFitness();
+        }
+
+        int threshold = Utils.randomIndex((int) totalFitness);
+        totalFitness = 0.0;
+
+        for (Individual individual : individuals) {
+            totalFitness += individual.calculateFitness();
+
+            if ((int) totalFitness > threshold) {
+                return individual;
+            }
+        }
+
+        return null;
     }
 
     private Individual tournament() {
