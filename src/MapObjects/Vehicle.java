@@ -190,23 +190,9 @@ public class Vehicle extends MapObject {
      * @return
      */
     private List<Customer> merge(List<Customer> subRoute, List<Customer> otherSubRoute) {
-        if (Controller.verbose) {
-            System.out.println("========= Merging two subRoutes to a route  =========");
-        }
-        List<Customer> crossOver = new ArrayList<>(subRoute);
-
-        if (Controller.verbose) {
-            System.out.println("Initial subRoute: " + crossOver);
-        }
-
-        crossOver.addAll(otherSubRoute);
-
-
-        if (Controller.verbose) {
-            System.out.println("Merged subRoutes: " + crossOver);
-            System.out.println("========= Merging two subRoutes to a route  =========");
-        }
-        return optimizeRoute(crossOver);
+        List<Customer> mergedRoute = new ArrayList<>(subRoute);
+        mergedRoute.addAll(otherSubRoute);
+        return mergedRoute;
     }
 
     /**

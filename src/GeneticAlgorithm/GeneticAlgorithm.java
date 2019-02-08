@@ -25,7 +25,7 @@ public class GeneticAlgorithm {
     private int durationPenaltyRate = 100;
     private int loadPenaltyRate = 100;
     private boolean elitism = true;
-    private boolean forceLoadConstraint = false;
+    private boolean incest = false;
 
     private Population population;
 
@@ -44,7 +44,7 @@ public class GeneticAlgorithm {
                 durationPenaltyRate,
                 loadPenaltyRate,
                 elitism,
-                forceLoadConstraint);
+                incest);
     }
 
     /**
