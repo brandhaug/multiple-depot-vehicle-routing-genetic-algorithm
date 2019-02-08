@@ -16,16 +16,16 @@ import java.util.List;
 public class GeneticAlgorithm {
 
     // Parameters
-    private int populationSize = 100; // 20-100 dependent on problem
+    private int populationSize = 60; // 20-100 dependent on problem
     private double crossOverRate = 0.80; // 80%-95%
     private double mutationRate = 0.01; // 0.5%-1%.
     private double selectionRate = 0.2;
     private int tournamentSize = 3;
-    private int numberOfChildren = populationSize/3;
+    private int numberOfChildren = populationSize/4;
     private int durationPenaltyRate = 100;
     private int loadPenaltyRate = 100;
     private boolean elitism = true;
-    private boolean forceLoadConstraint = false;
+    private boolean incest = false;
 
     private Population population;
 
@@ -44,7 +44,7 @@ public class GeneticAlgorithm {
                 durationPenaltyRate,
                 loadPenaltyRate,
                 elitism,
-                forceLoadConstraint);
+                incest);
     }
 
     /**

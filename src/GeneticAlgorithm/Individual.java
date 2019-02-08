@@ -281,11 +281,10 @@ public class Individual {
 
     /**
      * @param otherRoute
-     * @param forceLoadConstraint
      * @return
      */
 
-    public List<Vehicle> fitnessCrossOver(List<Customer> otherRoute, boolean forceLoadConstraint) {
+    public List<Vehicle> singlePointCrossOver(List<Customer> otherRoute) {
         if (vehicles == null) {
             throw new NullPointerException("No vehicles in solution");
         } else if (otherRoute.size() == 0) {
@@ -294,7 +293,7 @@ public class Individual {
 
         List<Vehicle> newVehicles = deepCopyVehicles();
 
-        // Remove route from routeFromPartner
+        // Remove route from otherRoute
         removeRouteFromVehicles(newVehicles, otherRoute);
 
         // Rull gjennom alle ruter og regn ut diff i fitness på alle mulige steder
@@ -308,21 +307,17 @@ public class Individual {
             if (vehicle.getRoute().size() == 0) {
                 fitnessIfAdded = calculateFitnessIfRouteAdded(newVehicles, vehicle, 0, otherRoute);
 
-                if (!forceLoadConstraint || vehicle.getLoadIfRouteAdded(otherRoute) <= vehicle.getMaxLoad()) {
-                    minFitnessIfAdded = fitnessIfAdded;
-                    minVehicle = vehicle;
-                    minIndex = 0;
-                }
+                minFitnessIfAdded = fitnessIfAdded;
+                minVehicle = vehicle;
+                minIndex = 0;
             } else {
                 for (int routeIndex = 0; routeIndex < vehicle.getRoute().size(); routeIndex++) {
                     fitnessIfAdded = calculateFitnessIfRouteAdded(newVehicles, vehicle, routeIndex, otherRoute);
 
-                    if (!forceLoadConstraint || vehicle.getLoadIfRouteAdded(otherRoute) <= vehicle.getMaxLoad()) {
-                        if (fitnessIfAdded < minFitnessIfAdded) {
-                            minFitnessIfAdded = fitnessIfAdded;
-                            minVehicle = vehicle;
-                            minIndex = routeIndex;
-                        }
+                    if (fitnessIfAdded < minFitnessIfAdded) {
+                        minFitnessIfAdded = fitnessIfAdded;
+                        minVehicle = vehicle;
+                        minIndex = routeIndex;
                     }
                 }
             }

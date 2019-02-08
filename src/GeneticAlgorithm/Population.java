@@ -22,6 +22,7 @@ public class Population {
     private Individual alphaIndividual; // Best Individual (with best fitness)
 
     private int generation = 0; // Increment after each tick() loop
+    private List<Double> generations;
 
     private int populationSize; // Number of Solutions in population
     private double crossOverRate;
@@ -32,13 +33,12 @@ public class Population {
     private int durationPenaltyRate;
     private int loadPenaltyRate;
     private boolean elitism;
-    private boolean forceLoadConstraint;
+    private boolean incest;
 
     /**
      * Sets parameters
      * Generates initial population which generates n random Solutions. n = populationSize
-     *
-     * @param depots
+     *  @param depots
      * @param populationSize
      * @param crossOverRate
      * @param mutationRate
@@ -46,7 +46,7 @@ public class Population {
      * @param tournamentSize
      * @param durationPenaltyRate
      * @param loadPenaltyRate
-     * @param forceLoadConstraint
+     * @param incest
      */
     public Population(List<Depot> depots,
                       int populationSize,
@@ -58,7 +58,7 @@ public class Population {
                       int durationPenaltyRate,
                       int loadPenaltyRate,
                       boolean elitism,
-                      boolean forceLoadConstraint) {
+                      boolean incest) {
         this.depots = depots;
         this.populationSize = populationSize;
         this.crossOverRate = crossOverRate;
@@ -69,7 +69,7 @@ public class Population {
         this.durationPenaltyRate = durationPenaltyRate;
         this.loadPenaltyRate = loadPenaltyRate;
         this.elitism = elitism;
-        this.forceLoadConstraint = forceLoadConstraint;
+        this.incest = incest;
     }
 
     /**
@@ -184,10 +184,10 @@ public class Population {
             List<Customer>[] routesFromS2 = Utils.splitRoute(partnerVehicle.getRoute());
 
             // TODO: Parameter optimize
-            List<Vehicle> child1Vehicles = parents[0].fitnessCrossOver(routesFromS2[0], forceLoadConstraint);
-            List<Vehicle> child2Vehicles = parents[0].fitnessCrossOver(routesFromS2[1], forceLoadConstraint);
-            List<Vehicle> child3Vehicles = parents[1].fitnessCrossOver(routesFromS1[0], forceLoadConstraint);
-            List<Vehicle> child4Vehicles = parents[1].fitnessCrossOver(routesFromS1[1], forceLoadConstraint);
+            List<Vehicle> child1Vehicles = parents[0].singlePointCrossOver(routesFromS2[0]);
+            List<Vehicle> child2Vehicles = parents[0].singlePointCrossOver(routesFromS2[1]);
+            List<Vehicle> child3Vehicles = parents[1].singlePointCrossOver(routesFromS1[0]);
+            List<Vehicle> child4Vehicles = parents[1].singlePointCrossOver(routesFromS1[1]);
 
             if (child1Vehicles != null || child2Vehicles != null) {
                 Individual child1 = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child1Vehicles);
@@ -208,6 +208,7 @@ public class Population {
 //        Individual parent1 = tournament();
         Individual parent1 = rouletteWheel();
         Individual parent2 = parent1;
+
         while (parent1 == parent2) {
 //            parent2 = tournament();
             parent2 = rouletteWheel();
