@@ -27,7 +27,8 @@ public class Individual {
 
     /**
      * Generates initialSolution and calculates distances
-     *  @param depots
+     *
+     * @param depots
      * @param durationPenaltyRate
      * @param loadPenaltyRate
      */
@@ -91,15 +92,15 @@ public class Individual {
 
                     if (minVehicle == null) {
                         triesLeft--;
-                    }
-
-                    minVehicle.addCustomerToRoute(minRouteIndex, customer);
-
-                    if (depot.getMaxDuration() != 0.0 && minVehicle.calculateRouteDuration() > depot.getMaxDuration() && !force) {
-                        minVehicle.removeCustomerFromRoute(customer);
-                        triesLeft--;
                     } else {
-                        customerAdded = true;
+                        minVehicle.addCustomerToRoute(minRouteIndex, customer); // TODO: Error
+
+                        if (depot.getMaxDuration() != 0.0 && minVehicle.calculateRouteDuration() > depot.getMaxDuration() && !force) {
+                            minVehicle.removeCustomerFromRoute(customer);
+                            triesLeft--;
+                        } else {
+                            customerAdded = true;
+                        }
                     }
                 }
                 if (triesLeft == 0 && !force) { // Giving up generating this initial isValid
@@ -122,9 +123,10 @@ public class Individual {
             List<Customer> depotCustomers = depot.getCustomers(); // Current depot's customers
             Collections.shuffle(depotCustomers);
 
+            int triesLeft = 100;
             for (Customer customer : depotCustomers) { // Assign customer to random vehicle
                 boolean customerAdded = false;
-                while (!customerAdded) {
+                while (!customerAdded && triesLeft > 0) {
                     int randomIndex = Utils.randomIndex(depotVehicles.size()); // Random vehicle index
                     Vehicle randomVehicle = depotVehicles.get(randomIndex);
 
@@ -132,6 +134,14 @@ public class Individual {
                     if (randomVehicle.getCurrentLoad() + customer.getLoadDemand() <= depot.getMaxLoad()) {
                         customerAdded = randomVehicle.smartAddCustomerToRoute(customer, true);
                     }
+
+                    if (!customerAdded) {
+                        triesLeft--;
+                    }
+                }
+
+                if (triesLeft == 0) { // Giving up generating this initial isValid
+                    return false;
                 }
             }
 
@@ -148,12 +158,12 @@ public class Individual {
             Collections.shuffle(depotCustomers);
 
             for (Customer customer : depotCustomers) { // Assign customer to random vehicle
+                boolean customerAdded = false;
                 int randomIndex = Utils.randomIndex(depotVehicles.size()); // Random vehicle index
                 Vehicle randomVehicle = depotVehicles.get(randomIndex);
-                boolean customerAdded = randomVehicle.smartAddCustomerToRoute(customer, false);
 
-                if (!customerAdded) {
-                    throw new Error("Did not add customer");
+                while (!customerAdded) {
+                    customerAdded = randomVehicle.addCustomerToRoute(customer);
                 }
             }
 
@@ -198,9 +208,9 @@ public class Individual {
         // Pick two random vehicles
         int randomIndex1 = Utils.randomIndex(vehicles.size());
         int randomIndex2 = randomIndex1;
-        while (randomIndex1 == randomIndex2) {
-            randomIndex2 = Utils.randomIndex(vehicles.size());
-        }
+//        while (randomIndex1 == randomIndex2) { //TODO: Should this be possible or not?
+        randomIndex2 = Utils.randomIndex(vehicles.size());
+//        }
 
         Vehicle randomVehicle1 = vehicles.get(randomIndex1).clone();
         Vehicle randomVehicle2 = vehicles.get(randomIndex2).clone();
@@ -270,7 +280,6 @@ public class Individual {
     }
 
     /**
-     *
      * @param otherRoute
      * @param forceLoadConstraint
      * @return

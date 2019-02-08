@@ -252,9 +252,10 @@ public class Vehicle extends MapObject {
     }
 
 
-    public void addCustomerToRoute(Customer customer) {
+    public boolean addCustomerToRoute(Customer customer) {
         route.add(customer);
         currentLoad += customer.getLoadDemand();
+        return true;
     }
 
     public void addCustomerToRoute(int index, Customer customer) {
