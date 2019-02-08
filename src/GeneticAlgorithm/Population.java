@@ -1,6 +1,5 @@
 package GeneticAlgorithm;
 
-import Main.Controller;
 import MapObjects.Customer;
 import MapObjects.Depot;
 import MapObjects.Vehicle;
@@ -95,17 +94,13 @@ public class Population {
                 double random = Utils.randomDouble();
                 if (random < crossOverRate) {
                     crossOverChildren = crossOver(parents);
-                    if (crossOverChildren == null) {
-                        crossOverChildren = parents;
+                    if (crossOverChildren != null) {
+                        children.addAll(Arrays.asList(crossOverChildren));
                     }
-                } else {
-                    crossOverChildren = parents;
                 }
 
-                children.addAll(List.of(crossOverChildren[0], crossOverChildren[1]));
-
-                if (!elitism) {
-                    parentsToRemove.addAll(Arrays.asList(parents[0], parents[1]));
+                if (!elitism && children.size() != 0) {
+                    parentsToRemove.addAll(List.of(parents[0], parents[1]));
                 }
             }
 
@@ -226,6 +221,7 @@ public class Population {
                 Individual child3 = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child3Vehicles);
                 Individual child4 = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child4Vehicles);
                 return new Individual[]{child1, child2, child3, child4};
+//                return new Individual[]{child1, child2};
             } else {
                 triesLeft--;
             }
