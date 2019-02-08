@@ -271,7 +271,7 @@ public class Controller {
         seriesAlphaSolution = new XYChart.Series();
         seriesAlphaSolution.setName("Alpha solution");
         seriesPopulation = new XYChart.Series();
-        seriesPopulation.setName("Population");
+        seriesPopulation.setName("Population average");
 
         lineChart.setCreateSymbols(false);
         lineChart.setAnimated(false);
