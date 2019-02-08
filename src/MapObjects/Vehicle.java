@@ -27,6 +27,9 @@ public class Vehicle extends MapObject {
         this.endDepot = depot;
         this.route = route;
         this.currentLoad = 0;
+        for (Customer customer : route) {
+            currentLoad += customer.getLoadDemand();
+        }
     }
 
     public Vehicle(Depot startDepot, Depot endDepot, List<Customer> route) {
@@ -35,6 +38,9 @@ public class Vehicle extends MapObject {
         this.endDepot = endDepot;
         this.route = route;
         this.currentLoad = 0;
+        for (Customer customer : route) {
+            currentLoad += customer.getLoadDemand();
+        }
     }
 
     /**
@@ -322,5 +328,8 @@ public class Vehicle extends MapObject {
 
     public void addOtherRouteToRoute(int index, List<Customer> otherRoute) {
         route.addAll(index, otherRoute);
+        for (Customer customer : otherRoute) {
+            currentLoad += customer.getLoadDemand();
+        }
     }
 }

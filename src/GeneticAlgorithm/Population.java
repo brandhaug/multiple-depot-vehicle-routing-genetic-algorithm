@@ -69,9 +69,17 @@ public class Population {
 
             for (int i = 0; i < numberOfChildren; i++) { // Would this actually make 2*numberOfChildren? Yes
                 Solution[] parents = selection();
-                Solution[] crossOverChildren = crossOver(parents);
+                Solution[] crossOverChildren;
 
-                if (crossOverChildren == null) {
+                // Parents get to crossover if random is less than crossOverRate
+                double random = Utils.randomDouble();
+                if (random < crossOverRate) {
+                    crossOverChildren = crossOver(parents);
+                    if (crossOverChildren == null) {
+                        crossOverChildren = parents;
+                    }
+                }
+                else {
                     crossOverChildren = parents;
                 }
 
@@ -79,19 +87,35 @@ public class Population {
                 parentsToRemove.addAll(List.of(parents[0], parents[1]));
             }
 
+            // Mutates children
             List<Solution> childrenToAdd = new ArrayList<>();
             for (Solution child : children) {
                 double random = Utils.randomDouble();
                 if (random < mutationRate) {
-                    Solution mutatedChild = new Solution(depots, child.mutation());
+                    Solution mutatedChild = new Solution(depots, child.mutation2());
                     childrenToAdd.add(mutatedChild);
                 } else {
                     childrenToAdd.add(child);
                 }
             }
 
+            /*
+            Before: Remove parents, add children, sort, cut to populationSize
             solutions.removeAll(parentsToRemove);
             solutions.addAll(childrenToAdd);
+            solutions.sort(Comparator.comparingDouble(Solution::getFitness)); // Sort by fitness
+            solutions = solutions.stream().limit(populationSize).collect(Collectors.toList()); // Cut population to population size
+             */
+            /*
+            Now: Decide that the populationSize/20 best solutions from the previous generation get to survive
+            if they have better fitness than the populationSize/20 worst children
+            */
+
+            solutions.removeAll(parentsToRemove);
+            solutions.sort(Comparator.comparingDouble(Solution::getFitness)); // Sort by fitness
+            List<Solution> parentsToSave = new ArrayList<>(solutions.subList(0, populationSize/20));
+            solutions = childrenToAdd;
+            solutions.addAll(parentsToSave);
             solutions.sort(Comparator.comparingDouble(Solution::getFitness)); // Sort by fitness
             solutions = solutions.stream().limit(populationSize).collect(Collectors.toList()); // Cut population to population size
         }
@@ -154,12 +178,17 @@ public class Population {
             List<Vehicle> child3Vehicles = parents[1].crossOver(routesFromS1[0]);
             List<Vehicle> child4Vehicles = parents[1].crossOver(routesFromS1[1]);
 
+            //TODO: Check if this is right? Should both child1 and child2 be created if the other is null?
             if (child1Vehicles != null || child2Vehicles != null) {
+                // TODO: Check if solution is valid
                 Solution child1 = new Solution(depots, child1Vehicles);
                 Solution child2 = new Solution(depots, child2Vehicles);
                 Solution child3 = new Solution(depots, child3Vehicles);
                 Solution child4 = new Solution(depots, child4Vehicles);
-                return new Solution[]{child1, child2, child3, child4};
+                if (child1.isValid() && child2.isValid() && child3.isValid() && child4.isValid())
+                    return new Solution[]{child1, child2, child3, child4};
+                else
+                    triesLeft--;
             } else {
                 triesLeft--;
             }
@@ -237,6 +266,14 @@ public class Population {
 
     public double getAlphaFitness() {
         return alphaSolution.getFitness();
+    }
+
+    public double getAverageFitness() {
+        double fitness = 0.0;
+        for (Solution s : solutions) {
+            fitness += s.getFitness();
+        }
+        return fitness / solutions.size();
     }
 
     public Solution getAlphaSolution() {
