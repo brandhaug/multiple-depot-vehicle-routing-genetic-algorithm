@@ -22,13 +22,10 @@ public class GeneticAlgorithm {
     private double selectionRate = 0.2;
     private int tournamentSize = 3;
     private int numberOfChildren = populationSize/3;
-    private int durationPenaltyRate = 3;
-    private int loadPenaltyRate = 3;
+    private int durationPenaltyRate = 100;
+    private int loadPenaltyRate = 100;
     private boolean elitism = true;
     private boolean forceLoadConstraint = false;
-
-    // Settings
-    //TODO: private boolean optimizeParameters = false;
 
     private Population population;
 
