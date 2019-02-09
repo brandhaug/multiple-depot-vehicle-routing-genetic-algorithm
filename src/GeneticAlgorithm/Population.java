@@ -303,7 +303,7 @@ public class Population {
     public double getAverageFitness() {
         double fitness = 0.0;
         for (Individual s : individuals) {
-            fitness += s.getFitness();
+            fitness += s.calculateFitness();
         }
         return fitness / individuals.size();
     }
