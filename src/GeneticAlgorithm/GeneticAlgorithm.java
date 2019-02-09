@@ -22,10 +22,10 @@ public class GeneticAlgorithm {
     private double selectionRate = 0.2;
     private int tournamentSize = 3;
     private int numberOfChildren = populationSize/3;
+    private int numberOfParentsToSave = populationSize/20;
     private int durationPenaltyRate = 100;
     private int loadPenaltyRate = 100;
     private boolean elitism = true;
-    private boolean incest = false;
 
     private Population population;
 
@@ -41,10 +41,10 @@ public class GeneticAlgorithm {
                 selectionRate,
                 tournamentSize,
                 numberOfChildren,
+                numberOfParentsToSave,
                 durationPenaltyRate,
                 loadPenaltyRate,
-                elitism,
-                incest);
+                elitism);
     }
 
     /**

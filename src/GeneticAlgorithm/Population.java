@@ -29,23 +29,14 @@ public class Population {
     private int tournamentSize;
     private double selectionRate;
     private int numberOfChildren;
+    private int numberOfParentsToSave;
     private int durationPenaltyRate;
     private int loadPenaltyRate;
     private boolean elitism;
-    private boolean incest;
 
     /**
      * Sets parameters
      * Generates initial population which generates n random Solutions. n = populationSize
-     * @param depots
-     * @param populationSize
-     * @param crossOverRate
-     * @param mutationRate
-     * @param selectionRate
-     * @param tournamentSize
-     * @param durationPenaltyRate
-     * @param loadPenaltyRate
-     * @param incest
      */
     public Population(List<Depot> depots,
                       int populationSize,
@@ -54,10 +45,10 @@ public class Population {
                       double selectionRate,
                       int tournamentSize,
                       int numberOfChildren,
+                      int numberOfParentsToSave,
                       int durationPenaltyRate,
                       int loadPenaltyRate,
-                      boolean elitism,
-                      boolean incest) {
+                      boolean elitism) {
         this.depots = depots;
         this.populationSize = populationSize;
         this.crossOverRate = crossOverRate;
@@ -65,10 +56,10 @@ public class Population {
         this.selectionRate = selectionRate;
         this.tournamentSize = tournamentSize;
         this.numberOfChildren = numberOfChildren;
+        this.numberOfParentsToSave = numberOfParentsToSave;
         this.durationPenaltyRate = durationPenaltyRate;
         this.loadPenaltyRate = loadPenaltyRate;
         this.elitism = elitism;
-        this.incest = incest;
     }
 
     /**
@@ -118,22 +109,11 @@ public class Population {
                 }
             }
 
-            /*
-            Before: Remove parents, add children, sort, cut to populationSize
-            individuals.removeAll(parentsToRemove);
-            individuals.addAll(childrenToAdd);
-            individuals.sort(Comparator.comparingDouble(Solution::getFitness)); // Sort by fitness
-            individuals = solutions.stream().limit(populationSize).collect(Collectors.toList()); // Cut population to population size
-             */
-            /*
-            Now: Decide that the populationSize/20 best solutions from the previous generation get to survive
-            if they have better fitness than the populationSize/20 worst children
-            */
             if (!elitism) {
                 individuals.removeAll(parentsToRemove);
             }
             individuals.sort(Comparator.comparingDouble(Individual::calculateFitness)); // Sort by fitness
-            List<Individual> parentsToSave = new ArrayList<>(individuals.subList(0, populationSize/20));
+            List<Individual> parentsToSave = new ArrayList<>(individuals.subList(0, numberOfParentsToSave));
             individuals = childrenToAdd;
             individuals.addAll(parentsToSave);
             individuals.sort(Comparator.comparingDouble(Individual::calculateFitness)); // Sort by fitness
