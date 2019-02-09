@@ -295,8 +295,10 @@ public class Controller {
 
         xAxis.setLowerBound(0);
         xAxis.setUpperBound(ga.getGeneration());
+        xAxis.setTickUnit(ga.getGeneration()/10);
         yAxis.setLowerBound(map.getBenchmark());
         yAxis.setUpperBound(initialFitness);
+        yAxis.setTickUnit(initialFitness/10);
         lineChart.getData().removeAll(seriesAlphaSolution);
         lineChart.getData().addAll(seriesAlphaSolution);
     }

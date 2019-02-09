@@ -92,7 +92,11 @@ public class Population {
             for (Solution child : children) {
                 double random = Utils.randomDouble();
                 if (random < mutationRate) {
-                    Solution mutatedChild = new Solution(depots, child.mutation2());
+                    Solution mutatedChild;
+                    if (Utils.randomDouble() < 0.5)
+                        mutatedChild = new Solution(depots, child.mutation2());
+                    else
+                        mutatedChild = new Solution(depots, child.mutation());
                     childrenToAdd.add(mutatedChild);
                 } else {
                     childrenToAdd.add(child);

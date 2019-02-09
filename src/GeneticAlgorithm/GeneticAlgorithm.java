@@ -20,7 +20,7 @@ public class GeneticAlgorithm {
     private double crossOverRate = 0.95; // 80%-95%
     private double mutationRate = 0.01; // 0.5%-1%.
     private double selectionRate = 0.2;
-    private int tournamentSize = 3;
+    private int tournamentSize = 2;
     private int numberOfChildren = populationSize/2;
 
     private Population population;
