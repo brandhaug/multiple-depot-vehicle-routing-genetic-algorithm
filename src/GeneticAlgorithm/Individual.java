@@ -23,6 +23,7 @@ public class Individual {
     private List<Vehicle> vehicles;
     private int durationPenaltyRate;
     private int loadPenaltyRate;
+    private double fitness;
     private boolean isValid;
 
     /**
@@ -37,6 +38,7 @@ public class Individual {
         this.durationPenaltyRate = durationPenaltyRate;
         this.loadPenaltyRate = loadPenaltyRate;
         vehicles = new ArrayList<>();
+        calculateFitness();
     }
 
     public Individual(List<Depot> depots, int durationPenaltyRate, int loadPenaltyRate, List<Vehicle> vehicles) {
@@ -44,6 +46,7 @@ public class Individual {
         this.durationPenaltyRate = durationPenaltyRate;
         this.loadPenaltyRate = loadPenaltyRate;
         this.vehicles = new ArrayList<>(vehicles);
+        calculateFitness();
     }
 
     public boolean generateOptimizedIndividual(boolean force) {
@@ -200,17 +203,11 @@ public class Individual {
 
     public List<Vehicle> crossMutation() {
         // Copy of vehicles
-        List<Vehicle> newVehicles = new ArrayList<>();
-        for (Vehicle vehicle : vehicles) {
-            newVehicles.add(vehicle.clone());
-        }
+        List<Vehicle> newVehicles = deepCopyVehicles();
 
         // Pick two random vehicles
         int randomIndex1 = Utils.randomIndex(vehicles.size());
-        int randomIndex2 = randomIndex1;
-//        while (randomIndex1 == randomIndex2) { //TODO: Should this be possible or not?
-        randomIndex2 = Utils.randomIndex(vehicles.size());
-//        }
+        int randomIndex2 = Utils.randomIndex(vehicles.size());
 
         Vehicle randomVehicle1 = vehicles.get(randomIndex1).clone();
         Vehicle randomVehicle2 = vehicles.get(randomIndex2).clone();
@@ -236,8 +233,8 @@ public class Individual {
         return vehicles;
     }
 
-    public double calculateFitness() {
-        double fitness = 0.0;
+    public void calculateFitness() {
+        double calculatedFitness = 0.0;
         isValid = true;
 
         for (Vehicle vehicle : vehicles) {
@@ -259,9 +256,13 @@ public class Individual {
                 isValid = false;
             }
 
-            fitness += (duration + penalty);
+            calculatedFitness += (duration + penalty);
         }
 
+        this.fitness = calculatedFitness;
+    }
+
+    public double getFitness() {
         return fitness;
     }
 
@@ -334,96 +335,96 @@ public class Individual {
         return newVehicles;
     }
 
-    public List<Vehicle> distanceCrossOver(List<Customer> otherRoute) {
-        if (vehicles == null) {
-            throw new NullPointerException("No vehicles in solution");
-        } else if (otherRoute.size() == 0) {
-            return vehicles;
-        }
-
-        // Creating a deep copy of vehicles
-        List<Vehicle> newVehicles = new ArrayList<>();
-        for (Vehicle vehicle : vehicles) {
-            newVehicles.add(vehicle.clone());
-        }
-
-        // Remove route from routeFromPartner
-        removeRouteFromVehicles(newVehicles, otherRoute);
-
-        // Rull gjennom alle ruter og regn ut diff i fitness på alle mulige steder
-        double minDistance = Double.MAX_VALUE;
-        Vehicle minVehicle = null;
-        int minIndex = -1;
-
-        for (Vehicle vehicle : newVehicles) {
-            if (vehicle.getRoute().size() == 0) {
-                double distance = 0.0;
-                distance += Utils.euclideanDistance(otherRoute.get(0).getX(), vehicle.getStartDepot().getX(), otherRoute.get(0).getY(), vehicle.getStartDepot().getY());
-                distance += Utils.euclideanDistance(vehicle.getEndDepot().getX(), otherRoute.get(otherRoute.size() - 1).getX(), vehicle.getEndDepot().getY(), otherRoute.get(otherRoute.size() - 1).getY());
-
-                if (distance < minDistance) {
-                    int loadIfAdded = vehicle.getCurrentLoad();
-                    for (Customer c : otherRoute) {
-                        loadIfAdded += c.getLoadDemand();
-                    }
-
-                    // Checking constraints
-                    if (loadIfAdded <= vehicle.getStartDepot().getMaxLoad()) {
-                        minDistance = distance;
-                        minVehicle = vehicle;
-                        minIndex = 0;
-                    }
-                }
-            } else {
-                for (int i = 0; i < vehicle.getRoute().size(); i++) {
-                    Customer customer = vehicle.getRoute().get(i);
-
-                    double distance = 0.0;
-
-                    if (i == 0) { // Check between depot and first customer
-                        distance += Utils.euclideanDistance(otherRoute.get(0).getX(), vehicle.getStartDepot().getX(), otherRoute.get(0).getY(), vehicle.getStartDepot().getY());
-                        distance += Utils.euclideanDistance(otherRoute.get(otherRoute.size() - 1).getX(), customer.getX(), otherRoute.get(otherRoute.size() - 1).getY(), customer.getY());
-                    } else if (i == newVehicles.size() - 1) { // Check between last customer and depot
-                        distance += Utils.euclideanDistance(customer.getX(), otherRoute.get(0).getX(), customer.getY(), otherRoute.get(0).getY());
-                        distance += Utils.euclideanDistance(vehicle.getEndDepot().getX(), otherRoute.get(otherRoute.size() - 1).getX(), vehicle.getEndDepot().getY(), otherRoute.get(otherRoute.size() - 1).getY());
-                    } else { // Check between customers
-                        Customer lastCustomer = vehicle.getRoute().get(i - 1);
-                        distance += Utils.euclideanDistance(otherRoute.get(0).getX(), lastCustomer.getX(), otherRoute.get(0).getY(), lastCustomer.getY());
-                        distance += Utils.euclideanDistance(otherRoute.get(otherRoute.size() - 1).getX(), customer.getX(), otherRoute.get(otherRoute.size() - 1).getY(), customer.getY());
-                    }
-
-                    if (distance < minDistance) {
-                        int loadIfAdded = vehicle.getCurrentLoad();
-                        for (Customer c : otherRoute) {
-                            loadIfAdded += c.getLoadDemand();
-                        }
-
-                        // Checking constraints
-                        if (loadIfAdded <= vehicle.getStartDepot().getMaxLoad()) {
-                            minDistance = distance;
-                            minVehicle = vehicle;
-                            minIndex = i;
-                        }
-                    }
-                }
-            }
-
-            if (minVehicle == null) {
-                return vehicles;
-            }
-
-            // Find best ending point for route
-            setBestEndDepot(vehicle);
-        }
-
-        minVehicle.addOtherRouteToRoute(minIndex, otherRoute);
-
-        if (Controller.verbose) {
-            System.out.println("CrossOver finished, returning new list of Vehicles");
-        }
-
-        return newVehicles;
-    }
+//    public List<Vehicle> distanceCrossOver(List<Customer> otherRoute) {
+//        if (vehicles == null) {
+//            throw new NullPointerException("No vehicles in solution");
+//        } else if (otherRoute.size() == 0) {
+//            return vehicles;
+//        }
+//
+//        // Creating a deep copy of vehicles
+//        List<Vehicle> newVehicles = new ArrayList<>();
+//        for (Vehicle vehicle : vehicles) {
+//            newVehicles.add(vehicle.clone());
+//        }
+//
+//        // Remove route from routeFromPartner
+//        removeRouteFromVehicles(newVehicles, otherRoute);
+//
+//        // Rull gjennom alle ruter og regn ut diff i fitness på alle mulige steder
+//        double minDistance = Double.MAX_VALUE;
+//        Vehicle minVehicle = null;
+//        int minIndex = -1;
+//
+//        for (Vehicle vehicle : newVehicles) {
+//            if (vehicle.getRoute().size() == 0) {
+//                double distance = 0.0;
+//                distance += Utils.euclideanDistance(otherRoute.get(0).getX(), vehicle.getStartDepot().getX(), otherRoute.get(0).getY(), vehicle.getStartDepot().getY());
+//                distance += Utils.euclideanDistance(vehicle.getEndDepot().getX(), otherRoute.get(otherRoute.size() - 1).getX(), vehicle.getEndDepot().getY(), otherRoute.get(otherRoute.size() - 1).getY());
+//
+//                if (distance < minDistance) {
+//                    int loadIfAdded = vehicle.getCurrentLoad();
+//                    for (Customer c : otherRoute) {
+//                        loadIfAdded += c.getLoadDemand();
+//                    }
+//
+//                    // Checking constraints
+//                    if (loadIfAdded <= vehicle.getStartDepot().getMaxLoad()) {
+//                        minDistance = distance;
+//                        minVehicle = vehicle;
+//                        minIndex = 0;
+//                    }
+//                }
+//            } else {
+//                for (int i = 0; i < vehicle.getRoute().size(); i++) {
+//                    Customer customer = vehicle.getRoute().get(i);
+//
+//                    double distance = 0.0;
+//
+//                    if (i == 0) { // Check between depot and first customer
+//                        distance += Utils.euclideanDistance(otherRoute.get(0).getX(), vehicle.getStartDepot().getX(), otherRoute.get(0).getY(), vehicle.getStartDepot().getY());
+//                        distance += Utils.euclideanDistance(otherRoute.get(otherRoute.size() - 1).getX(), customer.getX(), otherRoute.get(otherRoute.size() - 1).getY(), customer.getY());
+//                    } else if (i == newVehicles.size() - 1) { // Check between last customer and depot
+//                        distance += Utils.euclideanDistance(customer.getX(), otherRoute.get(0).getX(), customer.getY(), otherRoute.get(0).getY());
+//                        distance += Utils.euclideanDistance(vehicle.getEndDepot().getX(), otherRoute.get(otherRoute.size() - 1).getX(), vehicle.getEndDepot().getY(), otherRoute.get(otherRoute.size() - 1).getY());
+//                    } else { // Check between customers
+//                        Customer lastCustomer = vehicle.getRoute().get(i - 1);
+//                        distance += Utils.euclideanDistance(otherRoute.get(0).getX(), lastCustomer.getX(), otherRoute.get(0).getY(), lastCustomer.getY());
+//                        distance += Utils.euclideanDistance(otherRoute.get(otherRoute.size() - 1).getX(), customer.getX(), otherRoute.get(otherRoute.size() - 1).getY(), customer.getY());
+//                    }
+//
+//                    if (distance < minDistance) {
+//                        int loadIfAdded = vehicle.getCurrentLoad();
+//                        for (Customer c : otherRoute) {
+//                            loadIfAdded += c.getLoadDemand();
+//                        }
+//
+//                        // Checking constraints
+//                        if (loadIfAdded <= vehicle.getStartDepot().getMaxLoad()) {
+//                            minDistance = distance;
+//                            minVehicle = vehicle;
+//                            minIndex = i;
+//                        }
+//                    }
+//                }
+//            }
+//
+//            if (minVehicle == null) {
+//                return vehicles;
+//            }
+//
+//            // Find best ending point for route
+//            setBestEndDepot(vehicle);
+//        }
+//
+//        minVehicle.addOtherRouteToRoute(minIndex, otherRoute);
+//
+//        if (Controller.verbose) {
+//            System.out.println("CrossOver finished, returning new list of Vehicles");
+//        }
+//
+//        return newVehicles;
+//    }
 
     private List<Vehicle> deepCopyVehicles() {
         // Creating a deep copy of vehicles
@@ -464,20 +465,26 @@ public class Individual {
         List<Vehicle> originalVehiclesCopy = this.vehicles;
         this.vehicles = vehicles;
         vehicle.addOtherRouteToRoute(addIndex, routeToAdd);
-        double fitness = calculateFitness();
+        double originalFitness = fitness;
+        calculateFitness();
+        double newFitness = fitness;
         vehicle.removeRouteFromRoute(routeToAdd);
+        this.fitness = originalFitness;
         this.vehicles = originalVehiclesCopy;
-        return fitness;
+        return newFitness;
     }
 
     private double calculateFitnessIfCustomerAdded(List<Vehicle> vehicles, Vehicle vehicle, int addIndex, Customer customerToAdd) {
         List<Vehicle> originalVehiclesCopy = this.vehicles;
         this.vehicles = vehicles;
         vehicle.addCustomerToRoute(addIndex, customerToAdd);
-        double fitness = calculateFitness();
+        double originalFitness = fitness;
+        calculateFitness();
+        double newFitness = fitness;
         vehicle.removeCustomerFromRoute(customerToAdd);
+        this.fitness = originalFitness;
         this.vehicles = originalVehiclesCopy;
-        return fitness;
+        return newFitness;
     }
 
     public boolean isValid() {

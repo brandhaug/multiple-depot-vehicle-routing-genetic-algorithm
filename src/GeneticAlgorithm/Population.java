@@ -77,7 +77,6 @@ public class Population {
         } else {
             List<Individual> children = new ArrayList<>();
             List<Individual> parentsToRemove = new ArrayList<>();
-
             for (int i = 0; i < numberOfChildren; i++) { // Would this actually make 2*numberOfChildren?
                 Individual[] parents = selection();
                 Individual[] crossOverChildren;
@@ -112,11 +111,12 @@ public class Population {
             if (!elitism) {
                 individuals.removeAll(parentsToRemove);
             }
-            individuals.sort(Comparator.comparingDouble(Individual::calculateFitness)); // Sort by fitness
+
+            individuals.sort(Comparator.comparingDouble(Individual::getFitness)); // Sort by fitness
             List<Individual> parentsToSave = new ArrayList<>(individuals.subList(0, numberOfParentsToSave));
             individuals = childrenToAdd;
             individuals.addAll(parentsToSave);
-            individuals.sort(Comparator.comparingDouble(Individual::calculateFitness)); // Sort by fitness
+            individuals.sort(Comparator.comparingDouble(Individual::getFitness)); // Sort by fitness
             individuals = individuals.stream().limit(populationSize).collect(Collectors.toList()); // Cut population to population size
         }
         generation++;
@@ -142,6 +142,7 @@ public class Population {
 //            boolean successful = individual.generateRandomIndividual();
 
             if (successful || force) {
+                individual.calculateFitness();
                 individuals.add(individual);
             } else {
                 triesLeft--;
@@ -157,9 +158,9 @@ public class Population {
     }
 
     private Individual[] crossOver(Individual[] parents) {
-        int triesLeft = 1000;
-
-        while (triesLeft > 0) {
+//        int triesLeft = 1000;
+//
+//        while (triesLeft > 0) {
             List<Vehicle> solutionVehicles = parents[0].getVehicles();
             if (solutionVehicles == null) throw new NullPointerException("SolutionRoutes is null, you suck");
             int randIndex = Utils.randomIndex(solutionVehicles.size());
@@ -179,35 +180,14 @@ public class Population {
             List<Vehicle> child3Vehicles = parents[1].singlePointCrossOver(routesFromS1[0]);
             List<Vehicle> child4Vehicles = parents[1].singlePointCrossOver(routesFromS1[1]);
 
-                        /*
-            //TODO: Check if this is right? Should both child1 and child2 be created if the other is null?
-            if (child1Vehicles != null || child2Vehicles != null) {
-                // TODO: Check if solution is valid
-                Solution child1 = new Solution(depots, child1Vehicles);
-                Solution child2 = new Solution(depots, child2Vehicles);
-                Solution child3 = new Solution(depots, child3Vehicles);
-                Solution child4 = new Solution(depots, child4Vehicles);
-                if (child1.isValid() && child2.isValid() && child3.isValid() && child4.isValid())
-                    return new Solution[]{child1, child2, child3, child4};
-                else
-                    triesLeft--;
-            } else {
-                triesLeft--;
-            }
-             */
-
-            if (child1Vehicles != null || child2Vehicles != null) {
-                Individual child1 = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child1Vehicles);
-                Individual child2 = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child2Vehicles);
-                Individual child3 = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child3Vehicles);
-                Individual child4 = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child4Vehicles);
-                return new Individual[]{child1, child2, child3, child4};
+            Individual child1 = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child1Vehicles);
+            Individual child2 = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child2Vehicles);
+            Individual child3 = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child3Vehicles);
+            Individual child4 = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child4Vehicles);
+            return new Individual[]{child1, child2, child3, child4};
 //                return new Individual[]{child1, child2};
-            } else {
-                triesLeft--;
-            }
-        }
-        return null;
+//        }
+//        return null;
     }
 
     private Individual[] selection() {
@@ -225,17 +205,13 @@ public class Population {
     }
 
     private Individual rouletteWheel() {
-        double totalFitness = 0.0;
-
-        for (Individual individual : individuals) {
-            totalFitness += individual.calculateFitness();
-        }
+        double totalFitness = getTotalFitness();
 
         int threshold = Utils.randomIndex((int) totalFitness);
         totalFitness = 0.0;
 
         for (Individual individual : individuals) {
-            totalFitness += individual.calculateFitness();
+            totalFitness += individual.getFitness();
 
             if ((int) totalFitness > threshold) {
                 return individual;
@@ -258,8 +234,18 @@ public class Population {
             }
             tournamentMembers.add(member);
         }
-        tournamentMembers.sort(Comparator.comparingDouble(Individual::calculateFitness));
+        tournamentMembers.sort(Comparator.comparingDouble(Individual::getFitness));
         return tournamentMembers.get(0);
+    }
+
+    private double getTotalFitness() {
+        double totalFitness = 0.0;
+
+        for (Individual individual : individuals) {
+            totalFitness += individual.getFitness();
+        }
+
+        return totalFitness;
     }
 
     public double getAlphaDuration() {
@@ -267,7 +253,7 @@ public class Population {
     }
 
     public double getAlphaFitness() {
-        return alphaIndividual.calculateFitness();
+        return alphaIndividual.getFitness();
     }
 
     public Individual getAlphaIndividual() {
@@ -275,15 +261,15 @@ public class Population {
             return null;
         }
 
-        individuals.sort(Comparator.comparingDouble(Individual::calculateFitness)); // Sorts based on fitness
+        individuals.sort(Comparator.comparingDouble(Individual::getFitness)); // Sorts based on fitness
         alphaIndividual = individuals.get(0); // Best Individual
         return alphaIndividual;
     }
 
     public double getAverageFitness() {
         double fitness = 0.0;
-        for (Individual s : individuals) {
-            fitness += s.calculateFitness();
+        for (Individual i : individuals) {
+            fitness += i.getFitness();
         }
         return fitness / individuals.size();
     }
