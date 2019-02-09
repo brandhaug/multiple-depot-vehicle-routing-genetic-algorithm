@@ -237,13 +237,6 @@ public class Vehicle extends MapObject {
         currentLoad -= customer.getLoadDemand();
     }
 
-    public void shuffleRoute() {
-        Collections.shuffle(route);
-        if (Controller.verbose) {
-            System.out.println("Shuffled route: " + route.toString());
-        }
-    }
-
     /**
      * Finds the nearest point for each
      */

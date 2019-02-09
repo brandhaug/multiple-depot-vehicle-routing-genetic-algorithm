@@ -142,11 +142,6 @@ public class Controller {
                     startButton.setText("Start");
                     saveButton.setVisible(true);
                     mapSelector.setVisible(true);
-
-                    System.out.println("Solution is valid: " + ga.getAlphaSolution().isValid());
-                    for (Vehicle v : ga.getAlphaSolution().getVehicles()) {
-                        System.out.println("Depot max load: " + v.getStartDepot().getMaxLoad() + ", vehicle max load: " + v.getCurrentLoad());
-                    }
                 }
             }
         }.start();
@@ -160,10 +155,6 @@ public class Controller {
      * @param currentNanoTime the nano time of the current game loop.
      */
     private void tick(long startNanoTime, long currentNanoTime) {
-        if (verbose) {
-            System.out.println("Generation: " + ga.getGeneration());
-        }
-
         ga.tick(); // Takes Population in GeneticAlgorithm to next generation
         updateGUI(startNanoTime, currentNanoTime); // Updates labels
     }

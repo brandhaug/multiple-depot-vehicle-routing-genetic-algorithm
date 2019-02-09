@@ -117,10 +117,6 @@ public class Individual {
     }
 
     public boolean generateOptimizedIndividual2(boolean force) {
-        if (Controller.verbose) {
-            System.out.println("========= Creating random initial vehicles =========");
-        }
-
         for (Depot depot : depots) {
             List<Vehicle> depotVehicles = createDepotVehicles(depot);
             List<Customer> depotCustomers = depot.getCustomers(); // Current depot's customers
@@ -177,10 +173,6 @@ public class Individual {
      * Mutation is only executed if random < crossOverRate
      */
     public List<Vehicle> swapMutation() {
-        if (Controller.verbose) {
-            System.out.println("========= Performing swapMutation on vehicles =========");
-        }
-
         // Copy of vehicles
         List<Vehicle> newVehicles = new ArrayList<>();
         for (Vehicle vehicle : vehicles) {
@@ -415,10 +407,6 @@ public class Individual {
 //        }
 //
 //        minVehicle.addOtherRouteToRoute(minIndex, otherRoute);
-//
-//        if (Controller.verbose) {
-//            System.out.println("CrossOver finished, returning new list of Vehicles");
-//        }
 //
 //        return newVehicles;
 //    }

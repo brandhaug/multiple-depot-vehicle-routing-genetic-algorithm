@@ -133,7 +133,6 @@ public class Population {
             if (triesLeft == 0) {
                 force = true;
             }
-            System.out.println(triesLeft);
 
             Individual individual = new Individual(depots, durationPenaltyRate, loadPenaltyRate);
 
