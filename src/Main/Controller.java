@@ -15,6 +15,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.layout.AnchorPane;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,8 +33,8 @@ import java.util.*;
 public class Controller {
 
     // GUI
-    @FXML
-    private Button startButton; // Toggles between "Start" and "Pause", depending on state
+    @FXML private AnchorPane anchorPane;
+    @FXML private Button startButton; // Toggles between "Start" and "Pause", depending on state
     @FXML private Button resetButton;
     @FXML private Button saveButton;
     @FXML private Label timeLabel; // Shows current time
@@ -77,6 +78,7 @@ public class Controller {
 
     // Settings
     public static boolean verbose = false; // Used to enable logging with System.out.println()
+    private boolean viewGraph = true; // Used to enable/disable viewGraph
 
     /**
      * Initializes GUI
@@ -92,7 +94,17 @@ public class Controller {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        initializeLineChart();
+
+        if (viewGraph) {
+            initializeLineChart();
+            anchorPane.setPrefHeight(750);
+            lineChart.setLayoutY(500);
+            lineChart.setPrefHeight(250);
+            lineChart.setPrefWidth(650);
+        } else {
+            anchorPane.setPrefHeight(CANVAS_HEIGHT);
+            lineChart.setVisible(false);
+        }
 
 
         gc = canvas.getGraphicsContext2D(); // Used to draw in canvas
@@ -107,13 +119,17 @@ public class Controller {
                         initialFitness = ga.getAverageFitness();
 
                     tick(startNanoTime, currentNanoTime);
-                    alphaSolutionFitnessData.put(ga.getGeneration(), ga.getAlphaFitness());
-                    populationFitnessData.put(ga.getGeneration(), ga.getAverageFitness());
-                    shouldUpdate = true;
+
+                    if (viewGraph) {
+                        alphaSolutionFitnessData.put(ga.getGeneration(), ga.getAlphaFitness());
+                        populationFitnessData.put(ga.getGeneration(), ga.getAverageFitness());
+                        shouldUpdate = true;
+                    }
+
                     render();
                 }
 
-                if (paused && ga.getAlphaSolution() != null) {
+                if (paused && ga.getAlphaSolution() != null && viewGraph) {
                     updateLinechart();
                 }
 
@@ -282,10 +298,10 @@ public class Controller {
 
         xAxis.setLowerBound(0);
         xAxis.setUpperBound(ga.getGeneration());
-        xAxis.setTickUnit(ga.getGeneration()/10);
+        xAxis.setTickUnit(ga.getGeneration() / 10);
         yAxis.setLowerBound(map.getBenchmark());
-        yAxis.setUpperBound(initialFitness);
-        yAxis.setTickUnit(initialFitness/10);
+        yAxis.setUpperBound(map.getBenchmark() * 1.50);
+        yAxis.setTickUnit(initialFitness / 10);
         lineChart.getData().removeAll(seriesAlphaSolution);
         lineChart.getData().addAll(seriesAlphaSolution);
     }

@@ -267,11 +267,8 @@ public class Population {
     }
 
     public double getAverageFitness() {
-        double fitness = 0.0;
-        for (Individual i : individuals) {
-            fitness += i.getFitness();
-        }
-        return fitness / individuals.size();
+        double totalFitness = getTotalFitness();
+        return totalFitness / individuals.size();
     }
 
     public int getGeneration() {
