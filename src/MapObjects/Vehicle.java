@@ -35,7 +35,7 @@ public class Vehicle extends MapObject {
         this.startDepot = startDepot;
         this.endDepot = endDepot;
         this.route = route;
-        for (Customer customer: route) {
+        for (Customer customer : route) {
             this.currentLoad += customer.getLoadDemand();
         }
     }
@@ -288,23 +288,18 @@ public class Vehicle extends MapObject {
         route.addAll(index, otherRoute);
     }
 
-    public boolean smartAddCustomerToRoute(Customer customerToAdd, boolean fitness) {
+    public boolean smartAddCustomerToRoute(Customer customerToAdd, boolean force) {
         double minDuration = Double.MAX_VALUE;
         int minIndex = -1;
 
-        if (currentLoad + customerToAdd.getLoadDemand() > startDepot.getMaxLoad()) {
+        if (currentLoad + customerToAdd.getLoadDemand() > startDepot.getMaxLoad() && !force) {
             return false;
         } else if (route.size() == 0) {
             addCustomerToRoute(customerToAdd);
             return true;
         } else {
             for (int i = 0; i < route.size(); i++) {
-                double duration;
-//                if (fitness) {
-//                     duration = calculateFitnessIfAdded(i, customerToAdd); // TODO Calculate fitnessIfAdded
-//                } else {
-                duration = calculateRouteDurationIfCustomerAdded(i, customerToAdd);
-//                }
+                double duration = calculateRouteDurationIfCustomerAdded(i, customerToAdd);
 
                 if (duration < minDuration) {
                     minDuration = duration;
@@ -315,10 +310,6 @@ public class Vehicle extends MapObject {
             addCustomerToRoute(minIndex, customerToAdd);
             return true;
         }
-    }
-
-    private double calculateFitnessIfAdded(int i, Customer customerToAdd) {
-        return 0.0;
     }
 
     public void removeRouteFromRoute(List<Customer> otherRoute) {

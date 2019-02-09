@@ -116,7 +116,7 @@ public class Individual {
         return true;
     }
 
-    public boolean generateOptimizedIndividual2() {
+    public boolean generateOptimizedIndividual2(boolean force) {
         if (Controller.verbose) {
             System.out.println("========= Creating random initial vehicles =========");
         }
@@ -133,10 +133,7 @@ public class Individual {
                     int randomIndex = Utils.randomIndex(depotVehicles.size()); // Random vehicle index
                     Vehicle randomVehicle = depotVehicles.get(randomIndex);
 
-                    // Check load constraint
-                    if (randomVehicle.getCurrentLoad() + customer.getLoadDemand() <= depot.getMaxLoad()) {
-                        customerAdded = randomVehicle.smartAddCustomerToRoute(customer, true);
-                    }
+                    customerAdded = randomVehicle.smartAddCustomerToRoute(customer, force);
 
                     if (!customerAdded) {
                         triesLeft--;
