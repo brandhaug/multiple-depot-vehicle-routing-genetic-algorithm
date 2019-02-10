@@ -182,8 +182,9 @@ public class MapParser {
      */
     private double calculcateScaling(int maximum, int minimum, int canvasSize) {
         int variance = maximum - minimum;
-        double scaleMargin = (double) Controller.CANVAS_MARGIN / variance;
-        return (double) (canvasSize / variance) - scaleMargin;
+//        double scaleMargin = (double) Controller.CANVAS_MARGIN / variance;
+//        return (double) (canvasSize / variance) - scaleMargin;
+        return (double) canvasSize / (maximum + variance);
     }
 
     public List<Depot> getDepots() {
