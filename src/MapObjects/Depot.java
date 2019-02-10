@@ -19,7 +19,7 @@ public class Depot extends MapObject {
 
     private static int colorIndex;
 
-    private Color[] colors = {Color.RED, Color.ORANGE, Color.GOLD, Color.GREEN, Color.BLUE, Color.INDIGO, Color.VIOLET}; // Possible depot colors
+    private Color[] colors = {Color.RED, Color.ORANGE, Color.GOLD, Color.GREENYELLOW, Color.GREEN, Color.AQUA, Color.BLUE, Color.INDIGO, Color.VIOLET}; // Possible depot colors
     private Color color; // Depot color on canvas
 
     private List<Customer> customers;

@@ -36,6 +36,7 @@
                </VBox.margin></Button>
             <Button fx:id="resetButton" mnemonicParsing="false" onAction="#reset" styleClass="button" text="Reset" />
             <Button fx:id="saveButton" mnemonicParsing="false" onAction="#save" styleClass="button" text="Save" />
+            <Button fx:id="appendButton" mnemonicParsing="false" onAction="#appendToCsv" styleClass="button" text="Append" />
          </children>
       </VBox>
       <LineChart fx:id="lineChart">

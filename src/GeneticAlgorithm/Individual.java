@@ -7,6 +7,7 @@ import MapObjects.Customer;
 import MapObjects.Depot;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -174,10 +175,7 @@ public class Individual {
      */
     public List<Vehicle> swapMutation() {
         // Copy of vehicles
-        List<Vehicle> newVehicles = new ArrayList<>();
-        for (Vehicle vehicle : vehicles) {
-            newVehicles.add(vehicle.clone());
-        }
+        List<Vehicle> newVehicles = deepCopyVehicles();
 
         int randomIndex = Utils.randomIndex(vehicles.size());
         Vehicle vehicle = vehicles.get(randomIndex);
@@ -324,93 +322,6 @@ public class Individual {
         return newVehicles;
     }
 
-//    public List<Vehicle> distanceCrossOver(List<Customer> otherRoute) {
-//        if (vehicles == null) {
-//            throw new NullPointerException("No vehicles in solution");
-//        } else if (otherRoute.size() == 0) {
-//            return vehicles;
-//        }
-//
-//        // Creating a deep copy of vehicles
-//        List<Vehicle> newVehicles = new ArrayList<>();
-//        for (Vehicle vehicle : vehicles) {
-//            newVehicles.add(vehicle.clone());
-//        }
-//
-//        // Remove route from routeFromPartner
-//        removeRouteFromVehicles(newVehicles, otherRoute);
-//
-//        // Rull gjennom alle ruter og regn ut diff i fitness på alle mulige steder
-//        double minDistance = Double.MAX_VALUE;
-//        Vehicle minVehicle = null;
-//        int minIndex = -1;
-//
-//        for (Vehicle vehicle : newVehicles) {
-//            if (vehicle.getRoute().size() == 0) {
-//                double distance = 0.0;
-//                distance += Utils.euclideanDistance(otherRoute.get(0).getX(), vehicle.getStartDepot().getX(), otherRoute.get(0).getY(), vehicle.getStartDepot().getY());
-//                distance += Utils.euclideanDistance(vehicle.getEndDepot().getX(), otherRoute.get(otherRoute.size() - 1).getX(), vehicle.getEndDepot().getY(), otherRoute.get(otherRoute.size() - 1).getY());
-//
-//                if (distance < minDistance) {
-//                    int loadIfAdded = vehicle.getCurrentLoad();
-//                    for (Customer c : otherRoute) {
-//                        loadIfAdded += c.getLoadDemand();
-//                    }
-//
-//                    // Checking constraints
-//                    if (loadIfAdded <= vehicle.getStartDepot().getMaxLoad()) {
-//                        minDistance = distance;
-//                        minVehicle = vehicle;
-//                        minIndex = 0;
-//                    }
-//                }
-//            } else {
-//                for (int i = 0; i < vehicle.getRoute().size(); i++) {
-//                    Customer customer = vehicle.getRoute().get(i);
-//
-//                    double distance = 0.0;
-//
-//                    if (i == 0) { // Check between depot and first customer
-//                        distance += Utils.euclideanDistance(otherRoute.get(0).getX(), vehicle.getStartDepot().getX(), otherRoute.get(0).getY(), vehicle.getStartDepot().getY());
-//                        distance += Utils.euclideanDistance(otherRoute.get(otherRoute.size() - 1).getX(), customer.getX(), otherRoute.get(otherRoute.size() - 1).getY(), customer.getY());
-//                    } else if (i == newVehicles.size() - 1) { // Check between last customer and depot
-//                        distance += Utils.euclideanDistance(customer.getX(), otherRoute.get(0).getX(), customer.getY(), otherRoute.get(0).getY());
-//                        distance += Utils.euclideanDistance(vehicle.getEndDepot().getX(), otherRoute.get(otherRoute.size() - 1).getX(), vehicle.getEndDepot().getY(), otherRoute.get(otherRoute.size() - 1).getY());
-//                    } else { // Check between customers
-//                        Customer lastCustomer = vehicle.getRoute().get(i - 1);
-//                        distance += Utils.euclideanDistance(otherRoute.get(0).getX(), lastCustomer.getX(), otherRoute.get(0).getY(), lastCustomer.getY());
-//                        distance += Utils.euclideanDistance(otherRoute.get(otherRoute.size() - 1).getX(), customer.getX(), otherRoute.get(otherRoute.size() - 1).getY(), customer.getY());
-//                    }
-//
-//                    if (distance < minDistance) {
-//                        int loadIfAdded = vehicle.getCurrentLoad();
-//                        for (Customer c : otherRoute) {
-//                            loadIfAdded += c.getLoadDemand();
-//                        }
-//
-//                        // Checking constraints
-//                        if (loadIfAdded <= vehicle.getStartDepot().getMaxLoad()) {
-//                            minDistance = distance;
-//                            minVehicle = vehicle;
-//                            minIndex = i;
-//                        }
-//                    }
-//                }
-//            }
-//
-//            if (minVehicle == null) {
-//                return vehicles;
-//            }
-//
-//            // Find best ending point for route
-//            setBestEndDepot(vehicle);
-//        }
-//
-//        minVehicle.addOtherRouteToRoute(minIndex, otherRoute);
-//
-//        return newVehicles;
-//    }
-
     private List<Vehicle> deepCopyVehicles() {
         // Creating a deep copy of vehicles
         List<Vehicle> newVehicles = new ArrayList<>();
@@ -497,4 +408,46 @@ public class Individual {
         }
         writer.close();
     }
+
+    public void appendToCSV(int populationSize, double crossOverRate, double mutationRate, int k, List<Double> generations) throws IOException {
+        File file = new File("results.csv");
+
+        if (!file.exists()) {
+            file.createNewFile();
+            createCsv();
+        }
+
+        FileWriter csvWriter = new FileWriter("results.csv", true);
+        csvWriter.append("\n")
+                .append(Controller.fileName)
+                .append(", ")
+                .append(String.valueOf(populationSize))
+                .append(", ")
+                .append(String.valueOf(crossOverRate))
+                .append(", ")
+                .append(String.valueOf(mutationRate))
+                .append(", ")
+                .append(String.valueOf(k));
+
+        for (int i = 0; i < 10000; i++) {
+            if (i > generations.size() - 1) {
+                csvWriter.append(", ").append(String.valueOf(generations.get(generations.size() - 1)));
+            } else {
+                csvWriter.append(", ").append(String.valueOf(generations.get(i)));
+            }
+        }
+        csvWriter.close();
+    }
+
+    private void createCsv() throws IOException {
+
+        FileWriter csvWriter = new FileWriter("results.csv");
+        csvWriter.append("Map, Population size, Crossover rate, Mutation rate, k");
+
+        for (int i = 1; i <= 10000; i++) {
+            csvWriter.append(", ").append(String.valueOf(i));
+        }
+        csvWriter.close();
+    }
+
 }

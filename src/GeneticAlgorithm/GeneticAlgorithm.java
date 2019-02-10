@@ -16,16 +16,17 @@ import java.util.List;
 public class GeneticAlgorithm {
 
     // Parameters
-    private int populationSize = 200; // 20-100 dependent on problem
-    private double crossOverRate = 0.95; // 80%-95%
-    private double mutationRate = 0.01; // 0.5%-1%.
-    private double selectionRate = 0.2;
-    private int tournamentSize = 3;
-    private int numberOfChildren = populationSize/3;
-    private int numberOfParentsToSave = populationSize/20;
-    private int durationPenaltyRate = 100;
-    private int loadPenaltyRate = 100;
-    private boolean elitism = true;
+    private final int populationSize = 70; // 20-100 dependent on problem
+    private final double crossOverRate = 1.0; // 80%-95%
+    private final double mutationRate = 0.01; // 0.5%-1%.
+    private final double selectionRate = 0.2;
+    private final int tournamentSize = 3; // Number of members in tournament selection
+    private final int numberOfChildren = populationSize/3; // Rate of children to produce each generation
+    private final int numberOfParentsToSave = populationSize/20; // Number of parents to save in filtering
+    private final int durationPenaltyRate = 20; // Penalty for over duration
+    private final int loadPenaltyRate = 20; // Penalty for over load
+    private final boolean elitism = true; // Elitism keeps the best parents from last generation
+    private final int k = 3; // Number of splits in parents before doing crossOver
 
     private Population population;
 
@@ -44,7 +45,8 @@ public class GeneticAlgorithm {
                 numberOfParentsToSave,
                 durationPenaltyRate,
                 loadPenaltyRate,
-                elitism);
+                elitism,
+                k);
     }
 
     /**
@@ -108,5 +110,9 @@ public class GeneticAlgorithm {
 
     public void saveAlphaSolutionToFile() throws IOException {
         getAlphaSolution().saveToFile();
+    }
+
+    public void appendAlphaSolutionToCsv() throws IOException {
+        getAlphaSolution().appendToCSV(populationSize, crossOverRate, mutationRate, k, population.getGenerations());
     }
 }

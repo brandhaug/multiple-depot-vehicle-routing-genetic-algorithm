@@ -5,6 +5,7 @@ import MapObjects.Customer;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -40,6 +41,7 @@ public class Utils {
 
     /**
      * https://stackoverflow.com/questions/2808535/round-a-double-to-2-decimal-places
+     *
      * @param value
      * @param places
      * @return
@@ -69,5 +71,35 @@ public class Utils {
             }
         }
         return new List[]{first, second};
+    }
+
+    public static ArrayList<ArrayList<Customer>> splitRoute(List<Customer> route, int k) {
+        ArrayList<ArrayList<Customer>> parts = new ArrayList<>();
+
+        for (int i = 0; i < k; i++) {
+            parts.add(new ArrayList<>());
+        }
+
+        int[] partitionIndices = new int[k - 1];
+
+        for (int i = 0; i < k - 1; i++) {
+            partitionIndices[i] = Utils.randomIndex(route.size());
+        }
+
+        Arrays.sort(partitionIndices);
+
+        for (int i = 0; i < route.size(); i++) {
+            for (int j = 0; j < partitionIndices.length; j++) {
+                if (i < partitionIndices[j]) {
+                    parts.get(j).add(route.get(i));
+                    break;
+                } else if (i >= partitionIndices[partitionIndices.length - 1]) {
+                    parts.get(parts.size() - 1).add(route.get(i));
+                    break;
+                }
+            }
+        }
+
+        return parts;
     }
 }

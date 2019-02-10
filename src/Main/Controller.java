@@ -37,6 +37,7 @@ public class Controller {
     @FXML private Button startButton; // Toggles between "Start" and "Pause", depending on state
     @FXML private Button resetButton;
     @FXML private Button saveButton;
+    @FXML private Button appendButton;
     @FXML private Label timeLabel; // Shows current time
     @FXML private Label depotsLabel; // Shows number of depots in Map
     @FXML private Label vehiclesLabel; // Shows number of vehicles in Map
@@ -78,7 +79,7 @@ public class Controller {
 
     // Settings
     public static boolean verbose = false; // Used to enable logging with System.out.println()
-    private boolean viewGraph = true; // Used to enable/disable viewGraph
+    private boolean viewGraph = false; // Used to enable/disable viewGraph
 
     /**
      * Initializes GUI
@@ -141,6 +142,7 @@ public class Controller {
                     startButton.setVisible(false);
                     startButton.setText("Start");
                     saveButton.setVisible(true);
+                    appendButton.setVisible(true);
                     mapSelector.setVisible(true);
                 }
             }
@@ -174,6 +176,7 @@ public class Controller {
         customersLabel.setText("Customers: " + map.getCustomersSize()); // Number of customers
         benchmarkLabel.setText("Benchmark: " + map.getBenchmark());
         saveButton.setVisible(false);
+        appendButton.setVisible(false);
 
         if (!initialized) {
             initializeMapSelector();
@@ -228,10 +231,12 @@ public class Controller {
         if (paused) {
             startButton.setText("Start");
             saveButton.setVisible(true);
+            appendButton.setVisible(true);
             mapSelector.setVisible(true);
         } else {
             startButton.setText("Pause");
             saveButton.setVisible(false);
+            appendButton.setVisible(false);
             mapSelector.setVisible(false);
         }
     }
@@ -301,6 +306,15 @@ public class Controller {
     private void save() {
         try {
             ga.saveAlphaSolutionToFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void appendToCsv() {
+        try {
+            ga.appendAlphaSolutionToCsv();
         } catch (IOException e) {
             e.printStackTrace();
         }
