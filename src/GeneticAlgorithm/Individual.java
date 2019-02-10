@@ -97,7 +97,7 @@ public class Individual {
                     if (minVehicle == null) {
                         triesLeft--;
                     } else {
-                        minVehicle.addCustomerToRoute(minRouteIndex, customer); // TODO: Error
+                        minVehicle.addCustomerToRoute(minRouteIndex, customer);
 
                         if (depot.getMaxDuration() != 0.0 && minVehicle.calculateRouteDuration() > depot.getMaxDuration() && !force) {
                             minVehicle.removeCustomerFromRoute(customer);
@@ -184,6 +184,32 @@ public class Individual {
 
         newVehicles.remove(vehicle);
         newVehicles.add(newVehicle);
+
+        return newVehicles;
+    }
+
+    public List<Vehicle> swapMutation2() {
+        // Copy of vehicles
+        List<Vehicle> newVehicles = deepCopyVehicles();
+
+        int randomIndex1 = Utils.randomIndex(newVehicles.size());
+        int randomIndex2 = Utils.randomIndex(newVehicles.size());
+        Vehicle vehicle1 = newVehicles.get(randomIndex1);
+        Vehicle vehicle2 = newVehicles.get(randomIndex2);
+
+        if (vehicle1.getRoute().size() != 0) {
+            randomIndex1 = Utils.randomIndex(vehicle1.getRoute().size());
+            Customer customer1 = vehicle1.getRoute().get(randomIndex1);
+            vehicle1.removeCustomerFromRoute(customer1);
+            vehicle2.smartAddCustomerToRoute(customer1, true);
+        }
+
+        if (vehicle2.getRoute().size() != 0) {
+            randomIndex2 = Utils.randomIndex(vehicle2.getRoute().size());
+            Customer customer2 = vehicle2.getRoute().get(randomIndex2);
+            vehicle2.removeCustomerFromRoute(customer2);
+            vehicle1.smartAddCustomerToRoute(customer2, true);
+        }
 
         return newVehicles;
     }
@@ -359,9 +385,9 @@ public class Individual {
 
     private double calculateFitnessIfRouteAdded(List<Vehicle> vehicles, Vehicle vehicle, int addIndex, List<Customer> routeToAdd) {
         List<Vehicle> originalVehiclesCopy = this.vehicles;
+        double originalFitness = fitness;
         this.vehicles = vehicles;
         vehicle.addOtherRouteToRoute(addIndex, routeToAdd);
-        double originalFitness = fitness;
         calculateFitness();
         double newFitness = fitness;
         vehicle.removeRouteFromRoute(routeToAdd);
@@ -372,9 +398,9 @@ public class Individual {
 
     private double calculateFitnessIfCustomerAdded(List<Vehicle> vehicles, Vehicle vehicle, int addIndex, Customer customerToAdd) {
         List<Vehicle> originalVehiclesCopy = this.vehicles;
+        double originalFitness = fitness;
         this.vehicles = vehicles;
         vehicle.addCustomerToRoute(addIndex, customerToAdd);
-        double originalFitness = fitness;
         calculateFitness();
         double newFitness = fitness;
         vehicle.removeCustomerFromRoute(customerToAdd);

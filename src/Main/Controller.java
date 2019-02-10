@@ -2,7 +2,6 @@ package Main;
 
 import GeneticAlgorithm.GeneticAlgorithm;
 import Map.Map;
-import MapObjects.Vehicle;
 import Utils.Utils;
 import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
@@ -65,7 +64,6 @@ public class Controller {
     private HashMap<Integer, Double> alphaSolutionFitnessData;
     private HashMap<Integer, Double> populationFitnessData;
     private boolean shouldUpdate = false;
-    private double initialFitness;
 
     // Canvas
     public final static int CANVAS_WIDTH = 500; // Canvas width set in View.fxml
@@ -116,9 +114,6 @@ public class Controller {
         new AnimationTimer() { // Game loop
             public void handle(long currentNanoTime) {
                 if (!paused) {
-                    if (ga.getGeneration() == 1)
-                        initialFitness = ga.getAverageFitness();
-
                     tick(startNanoTime, currentNanoTime);
 
                     if (viewGraph) {
@@ -297,7 +292,7 @@ public class Controller {
         xAxis.setTickUnit(ga.getGeneration() / 10);
         yAxis.setLowerBound(map.getBenchmark());
         yAxis.setUpperBound(map.getBenchmark() * 1.50);
-        yAxis.setTickUnit(initialFitness / 10);
+        yAxis.setTickUnit(map.getBenchmark() / 10);
         lineChart.getData().removeAll(seriesAlphaSolution);
         lineChart.getData().addAll(seriesAlphaSolution);
     }

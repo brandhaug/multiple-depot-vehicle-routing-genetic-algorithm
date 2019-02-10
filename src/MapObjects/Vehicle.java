@@ -1,6 +1,5 @@
 package MapObjects;
 
-import Main.Controller;
 import Utils.Utils;
 import javafx.scene.canvas.GraphicsContext;
 
@@ -145,28 +144,6 @@ public class Vehicle extends MapObject {
         return duration;
     }
 
-//    public double calculateRouteDurationIfRouteAdded(int index, List<Customer> routeToCheck) {
-//        if (routeToCheck.size() == 0) {
-//            return calculateRouteDuration();
-//        } else if (route.size() == 0) {
-//            return startDepot.distance(routeToCheck.get(0)) + endDepot.distance(routeToCheck.get((routeToCheck.size() - 1)));
-//        }
-//
-//        double duration = 0.0;
-//        List<Customer> copy = new ArrayList<>(route);
-//        copy.addAll(index, routeToCheck);
-//
-//        duration += startDepot.distance(copy.get(0));
-//        duration += copy.get(0).getTimeDemand();
-//        for (int i = 0; i < copy.size() - 1; i++) {
-//            duration += copy.get(i).distance(copy.get(i + 1));
-//            duration += copy.get(i + 1).getTimeDemand();
-//        }
-//        duration += copy.get(copy.size() - 1).distance(endDepot);
-//
-//        return duration;
-//    }
-
     /**
      * Mixes n new routes by using route with a different route
      *
@@ -220,7 +197,6 @@ public class Vehicle extends MapObject {
         return newRoute;
     }
 
-
     public boolean addCustomerToRoute(Customer customer) {
         route.add(customer);
         currentLoad += customer.getLoadDemand();
@@ -235,36 +211,6 @@ public class Vehicle extends MapObject {
     public void removeCustomerFromRoute(Customer customer) {
         route.remove(customer);
         currentLoad -= customer.getLoadDemand();
-    }
-
-    /**
-     * Finds the nearest point for each
-     */
-    public void optimizeRoute() {
-        route = optimizeRoute(route);
-    }
-
-    private List<Customer> optimizeRoute(List<Customer> routeToOptimize) {
-        MapObject lastPoint = startDepot;
-        List<Customer> newRoute = new ArrayList<>();
-        Customer nearestGene = null;
-
-        while (newRoute.size() != routeToOptimize.size()) {
-            double minimumDistance = Double.MAX_VALUE;
-            for (Customer gene : routeToOptimize) {
-                double distance = Utils.euclideanDistance(lastPoint.getX(), gene.getX(), lastPoint.getY(), gene.getY());
-
-                if (!newRoute.contains(gene) && distance < minimumDistance) {
-                    minimumDistance = distance;
-                    nearestGene = gene;
-                }
-            }
-
-            newRoute.add(nearestGene);
-            lastPoint = nearestGene;
-        }
-
-        return newRoute;
     }
 
     @Override

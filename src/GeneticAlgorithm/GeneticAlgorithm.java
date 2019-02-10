@@ -17,9 +17,8 @@ public class GeneticAlgorithm {
 
     // Parameters
     private final int populationSize = 70; // 20-100 dependent on problem
-    private final double crossOverRate = 1.0; // 80%-95%
-    private final double mutationRate = 0.01; // 0.5%-1%.
-    private final double selectionRate = 0.2;
+    private final double crossOverRate = 0.8; // 80%-95%
+    private final double mutationRate = 0.03; // 0.5%-1%.
     private final int tournamentSize = 3; // Number of members in tournament selection
     private final int numberOfChildren = populationSize/3; // Rate of children to produce each generation
     private final int numberOfParentsToSave = populationSize/20; // Number of parents to save in filtering
@@ -39,7 +38,6 @@ public class GeneticAlgorithm {
                 populationSize,
                 crossOverRate,
                 mutationRate,
-                selectionRate,
                 tournamentSize,
                 numberOfChildren,
                 numberOfParentsToSave,

@@ -43,7 +43,6 @@ public class Population {
                       int populationSize,
                       double crossOverRate,
                       double mutationRate,
-                      double selectionRate,
                       int tournamentSize,
                       int numberOfChildren,
                       int numberOfParentsToSave,
@@ -71,7 +70,7 @@ public class Population {
      * 1. Selection
      * 2. Crossover
      * 3. Mutation
-     * 4. Calculate distance and fitness
+     * 4. Calculate fitness
      * 5. Filtering
      */
     public void tick() {
@@ -101,7 +100,8 @@ public class Population {
                 if (random < mutationRate) {
                     // TODO: Optimize parameters
 //                    Individual mutatedChild = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child.swapMutation());
-                    Individual mutatedChild = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child.crossMutation());
+                    Individual mutatedChild = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child.swapMutation2());
+//                    Individual mutatedChild = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child.crossMutation());
                     childrenToAdd.add(mutatedChild);
                 } else {
                     childrenToAdd.add(child);
@@ -258,12 +258,6 @@ public class Population {
 
     public int getGeneration() {
         return generation;
-    }
-
-    public void reset() {
-        alphaIndividual = null;
-        individuals = null;
-        generation = 0;
     }
 
     public boolean isAlphaValid() {
