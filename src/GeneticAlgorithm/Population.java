@@ -27,7 +27,6 @@ public class Population {
     private double crossOverRate;
     private double mutationRate;
     private int tournamentSize;
-    private double selectionRate;
     private int numberOfChildren;
     private int numberOfParentsToSave;
     private int durationPenaltyRate;
@@ -54,7 +53,6 @@ public class Population {
         this.populationSize = populationSize;
         this.crossOverRate = crossOverRate;
         this.mutationRate = mutationRate;
-        this.selectionRate = selectionRate;
         this.tournamentSize = tournamentSize;
         this.numberOfChildren = numberOfChildren;
         this.numberOfParentsToSave = numberOfParentsToSave;
