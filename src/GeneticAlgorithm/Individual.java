@@ -196,19 +196,30 @@ public class Individual {
         int randomIndex2 = Utils.randomIndex(newVehicles.size());
         Vehicle vehicle1 = newVehicles.get(randomIndex1);
         Vehicle vehicle2 = newVehicles.get(randomIndex2);
+        randomIndex1 = Utils.randomIndex(vehicle1.getRoute().size());
+        randomIndex2 = Utils.randomIndex(vehicle2.getRoute().size());
+
+        Customer customer1 = null;
+        Customer customer2 = null;
 
         if (vehicle1.getRoute().size() != 0) {
             randomIndex1 = Utils.randomIndex(vehicle1.getRoute().size());
-            Customer customer1 = vehicle1.getRoute().get(randomIndex1);
-            vehicle1.removeCustomerFromRoute(customer1);
-            vehicle2.smartAddCustomerToRoute(customer1, true);
+            customer1 = vehicle1.getRoute().get(randomIndex1);
         }
 
         if (vehicle2.getRoute().size() != 0) {
             randomIndex2 = Utils.randomIndex(vehicle2.getRoute().size());
-            Customer customer2 = vehicle2.getRoute().get(randomIndex2);
+            customer2 = vehicle2.getRoute().get(randomIndex2);
+        }
+
+        if (customer1 != null) {
+            vehicle1.removeCustomerFromRoute(customer1);
+            vehicle2.addCustomerToRoute(randomIndex2, customer1);
+        }
+
+        if (customer2 != null) {
             vehicle2.removeCustomerFromRoute(customer2);
-            vehicle1.smartAddCustomerToRoute(customer2, true);
+            vehicle1.addCustomerToRoute(randomIndex1, customer2);
         }
 
         return newVehicles;
