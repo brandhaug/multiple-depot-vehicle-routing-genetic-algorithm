@@ -141,12 +141,115 @@ public class Individual {
                     return false;
                 }
             }
-
             this.vehicles.addAll(depotVehicles);
+        }
+
+
+        // Optimize routes with swapping
+        int swappingTriesLeft = 1000;
+        int n = 1;
+        double fitness = Double.MAX_VALUE;
+        boolean swapped = true;
+
+        while (swappingTriesLeft > 0 && n != 5) {
+            System.out.println(swappingTriesLeft);
+            calculateFitness();
+            if (!swapped) {
+                n++;
+            }
+            swapped = initialSwapping(n);
+            swappingTriesLeft--;
+        }
+
+        if (isValid) {
+            System.out.println("Individual is valid");
+        } else {
+            System.out.println("Individual is not valid");
         }
 
         return true;
     }
+
+    /**
+     * Tries to find the optimal place for customer(s)
+     * n: Number of customers to find new place for
+     * n is added 1 each time there is no more optimizing left for n
+     */
+    private boolean initialSwapping(int n) {
+
+        // Copy vehicles to avoid concurrent error
+        List<Vehicle> vehiclesCopy = deepCopyVehicles();
+
+        // Vehicles where customers are
+        for (int vehicleIndex = 0; vehicleIndex < vehicles.size(); vehicleIndex++) {
+            // Customers to add from
+            for (int routeIndex = 0; routeIndex < vehicles.get(vehicleIndex).getRoute().size(); routeIndex++) {
+
+                // Makes sublist of customers based on n
+                if (routeIndex + n <= vehicles.get(vehicleIndex).getRoute().size() - 1) {
+                    List<Customer> customersToAdd = new ArrayList<>(vehicles.get(vehicleIndex).getRoute().subList(routeIndex, routeIndex + n));
+                    vehiclesCopy.get(vehicleIndex).removeRouteFromRoute(customersToAdd);
+
+                    // Set minFitness to currentFitness
+                    double minFitness = getFitness();
+                    int minVehicleIndex = vehicleIndex;
+                    int minRouteIndex = routeIndex;
+
+
+                    // Vehicles to put customer in
+                    for (int i = 0; i < vehiclesCopy.size(); i++) {
+                        // If route is size 0
+                        if (vehiclesCopy.get(i).getRoute().size() == 0) {
+                            double fitness = calculateFitnessIfRouteAdded(vehiclesCopy, vehiclesCopy.get(i), 0, customersToAdd);
+
+                            // Better fitness?
+                            if (fitness < minFitness) {
+                                minFitness = fitness;
+                                minVehicleIndex = i;
+                                minRouteIndex = 0;
+                            }
+                        }
+
+                        // Route indices to put customer in
+                        for (int j = 0; j < vehiclesCopy.get(i).getRoute().size(); j++) {
+                            double fitness = calculateFitnessIfRouteAdded(vehiclesCopy, vehiclesCopy.get(i), j, customersToAdd);
+
+                            // Better fitness?
+                            if (fitness < minFitness) {
+                                minFitness = fitness;
+                                minVehicleIndex = i;
+                                minRouteIndex = j;
+                            }
+                        }
+                    }
+
+                    // Check if a new place is found for customer(s)
+//                vehiclesCopy.get(vehicleIndex).removeRouteFromRoute(customersToAdd);
+                    vehiclesCopy.get(minVehicleIndex).addOtherRouteToRoute(minRouteIndex, customersToAdd);
+                    vehicles = vehiclesCopy;
+
+                    int copySize = 0;
+                    int orgSize = 0;
+                    for (int k = 0; k < vehicles.size(); k++) {
+                        copySize += vehiclesCopy.get(k).getRoute().size();
+                        orgSize += vehicles.get(k).getRoute().size();
+                    }
+
+                    if (copySize != orgSize) {
+                        System.out.println(copySize);
+                        System.out.println(orgSize);
+                        throw new Error("tabbe");
+                    }
+
+                    if (vehicleIndex != minVehicleIndex || routeIndex != minRouteIndex) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 
     public boolean generateRandomIndividual() {
         for (Depot depot : depots) {
@@ -360,8 +463,8 @@ public class Individual {
     private double calculateFitnessIfRouteAdded(List<Vehicle> vehicles, Vehicle vehicle, int addIndex, List<Customer> routeToAdd) {
         List<Vehicle> originalVehiclesCopy = this.vehicles;
         this.vehicles = vehicles;
-        vehicle.addOtherRouteToRoute(addIndex, routeToAdd);
         double originalFitness = fitness;
+        vehicle.addOtherRouteToRoute(addIndex, routeToAdd);
         calculateFitness();
         double newFitness = fitness;
         vehicle.removeRouteFromRoute(routeToAdd);
@@ -373,8 +476,8 @@ public class Individual {
     private double calculateFitnessIfCustomerAdded(List<Vehicle> vehicles, Vehicle vehicle, int addIndex, Customer customerToAdd) {
         List<Vehicle> originalVehiclesCopy = this.vehicles;
         this.vehicles = vehicles;
-        vehicle.addCustomerToRoute(addIndex, customerToAdd);
         double originalFitness = fitness;
+        vehicle.addCustomerToRoute(addIndex, customerToAdd);
         calculateFitness();
         double newFitness = fitness;
         vehicle.removeCustomerFromRoute(customerToAdd);
