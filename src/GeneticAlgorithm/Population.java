@@ -97,9 +97,17 @@ public class Population {
                 double random = Utils.randomDouble();
                 if (random < mutationRate) {
                     // TODO: Optimize parameters
-//                    Individual mutatedChild = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child.swapMutation());
-                    Individual mutatedChild = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child.swapMutation2());
-//                    Individual mutatedChild = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child.crossMutation());
+                    random = Utils.randomDouble();
+
+                    Individual mutatedChild;
+
+                    if (random <= 0.33) {
+                        mutatedChild = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child.swapMutation());
+                    } else if (random <= 0.66) {
+                        mutatedChild = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child.swapMutation2());
+                    } else {
+                        mutatedChild = new Individual(depots, durationPenaltyRate, loadPenaltyRate, child.crossMutation());
+                    }
                     childrenToAdd.add(mutatedChild);
                 } else {
                     childrenToAdd.add(child);

@@ -430,19 +430,40 @@ public class Individual {
 
         writer.write(Double.toString(Utils.round(getDuration(), 2)));
 
+        int vehicleId = 0;
+        String lastDepotId = vehicles.get(0).getStartDepot().getId();
+
         for (Vehicle vehicle : vehicles) {
-            writer.newLine();
-            writer.write(vehicle.getStartDepot().getId() + "\t" // s: number of the start depot
-                    + vehicle.getStartDepot().getMaxVehicles() + "\t" // k: number of the vehicle (for above depot)
-                    + Utils.round(vehicle.calculateRouteDuration(), 2) + "   " // d: duration of the route for a particular vehicle from a particular depot
-                    + vehicle.getCurrentLoad() + "\t" // q: carried load of the vehicle
-                    + vehicle.getEndDepot().getId() + "\t" // e: number of the end depot
-                    + vehicle.getRoute().toString() // list: ordered sequence of customers (served by a particular vehicle)
-                    .replace(",", "")  // remove the commas
-                    .replace("[", "")  // remove the right bracket
-                    .replace("]", "")  // remove the left bracket
-            );
+            if (vehicle.getStartDepot().getId() == lastDepotId) {
+                vehicleId++;
+                writer.newLine();
+                writer.write(vehicle.getStartDepot().getId() + "\t" // s: number of the start depot
+                        + vehicleId + "\t" // k: number of the vehicle (for above depot)
+                        + Utils.round(vehicle.calculateRouteDuration(), 2) + "   " // d: duration of the route for a particular vehicle from a particular depot
+                        + vehicle.getCurrentLoad() + "\t" // q: carried load of the vehicle
+                        + vehicle.getEndDepot().getId() + "\t" // e: number of the end depot
+                        + vehicle.getRoute().toString() // list: ordered sequence of customers (served by a particular vehicle)
+                        .replace(",", "")  // remove the commas
+                        .replace("[", "")  // remove the right bracket
+                        .replace("]", "")  // remove the left bracket
+                );
+            } else {
+                vehicleId = 1;
+                writer.newLine();
+                writer.write(vehicle.getStartDepot().getId() + "\t" // s: number of the start depot
+                        + vehicleId + "\t" // k: number of the vehicle (for above depot)
+                        + Utils.round(vehicle.calculateRouteDuration(), 2) + "   " // d: duration of the route for a particular vehicle from a particular depot
+                        + vehicle.getCurrentLoad() + "\t" // q: carried load of the vehicle
+                        + vehicle.getEndDepot().getId() + "\t" // e: number of the end depot
+                        + vehicle.getRoute().toString() // list: ordered sequence of customers (served by a particular vehicle)
+                        .replace(",", "")  // remove the commas
+                        .replace("[", "")  // remove the right bracket
+                        .replace("]", "")  // remove the left bracket
+                );
+            }
+            lastDepotId = vehicle.getStartDepot().getId();
         }
+
         writer.close();
     }
 
@@ -477,7 +498,6 @@ public class Individual {
     }
 
     private void createCsv() throws IOException {
-
         FileWriter csvWriter = new FileWriter("results.csv");
         csvWriter.append("Map, Population size, Crossover rate, Mutation rate, k");
 
